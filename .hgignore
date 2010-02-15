@@ -1,0 +1,7 @@
+syntax:glob
+
+*.pyc
+.DS_Store
+cov
+.coverage
+applet
