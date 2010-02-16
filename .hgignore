@@ -5,3 +5,4 @@ syntax:glob
 cov
 .coverage
 applet
+Firmata-*
