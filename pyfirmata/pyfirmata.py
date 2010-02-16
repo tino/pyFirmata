@@ -1,9 +1,7 @@
-import time
-import serial
-import os
 from serial import SerialException
 import threading
 import util
+from board import BOARDS
 
 # Message command bytes - straight from Firmata.h
 COMMANDS = dict(
@@ -22,13 +20,6 @@ COMMANDS = dict(
     SYSTEM_RESET = 0xFF,         # reset from MIDI
 )
 
-# Setup a helper class to deal with commands
-CMDS = util.Commands(COMMANDS)
-
-# Pin types
-DIGITAL = 1         # same as OUTPUT below
-ANALOG = 2          # same as below
-
 # Pin modes.
 # except from UNAVAILABLE taken from Firmata.h
 UNAVAILABLE = -1 
@@ -37,10 +28,11 @@ OUTPUT = 1         # as defined in wiring.h
 ANALOG = 2         # analog pin in analogInput mode
 PWM = 3            # digital pin in PWM output mode
 
+# Pin types
+DIGITAL = OUTPUT   # same as OUTPUT below
+# ANALOG is already defined above
+
 class PinAlreadyTakenError(Exception):
-    pass
-    
-class UnknownArduinoError(KeyError):
     pass
 
 class InvalidPinDefError(Exception):
@@ -48,127 +40,29 @@ class InvalidPinDefError(Exception):
     
 class NoInputWarning(RuntimeWarning):
     pass
-
-# Command handlers
-def update_analog(board, data):
-    if len(data) < 3:
-        return False
-    pin_number, lsb, msb = data
-    value = float(msb << 7 | lsb) / 1023
-    board.analog[pin_number].value = value
-    return True
     
-CMDS.add_handler('ANALOG_MESSAGE', update_analog)
-
-def update_digital(board, data):
-    if len(data) < 3:
-        return False
-    pin_number, lsb, msb = data
-    value = msb << 7 | lsb
-    board.digital[pin_number].value = value
-    return True
-    
-CMDS.add_handler('DIGITAL_MESSAGE', update_digital)
-
-def update_version(board, data):
-    if len(data) < 3:
-        return False
-    major, minor = data
-    board.firmata_version = (major, minor)
-    
-CMDS.add_handler('REPORT_VERSION', update_version)
-
-class Arduinos(dict):
+class Board(object):
     """
-    A dictonary to manage multiple Arduinos on the same machine. Tries to
-    connect to all defined usb ports, and then tries to fetch the arduino's
-    name. Result is a dictionary of pyduino.Arduino classes mapped to their
-    names.
+    Base class for any board
     """
-    def __init__(self, base_dir='/dev/', identifier='tty.usbserial', arduinos_map=None):
-        """
-        Searches all possible USB devices in ``base_dir`` that start with
-        ``identifier``. If given an ``arduinos_map`` dictionary it will setup
-        the arduinos in the map according to their type. Finding an arduino
-        that does not identify itself at all, that are not in the map, or
-        arduinos that are missing fail silenly. Use the ``verify_found_arduinos``
-        method to check this.
-        
-        :base_dir arg: A absolute path for the base directory to search for USB connections
-        :identifier arg: A string a USB connection startswith and should be tried
-        :arduinos_map arg: A dictionary in the form of::
-            arduinos_map = { 1 : {'name' : 'myduino', 'board' : 'normal'},
-                             2 : {'name' : 'mymega', 'board' : 'mega'} }
-        """
-        for device in os.listdir(base_dir):
-            if device.startswith(identifier):
-                try:
-                    arduino = Arduino(os.path.join(base_dir, device))
-                except SerialException:
-                    pass
-                else:
-                    if arduino.id:
-                        try:
-                            arduino.name = arduinos_map[arduino.id]['name']
-                            arduino.setup_layout(BOARDS[arduinos_map[arduino.id]['board']])
-                        except (KeyError, TypeError): # FIXME Possible KeyErrors from setup_layout are caught here...
-                            # FIXME Better to check if arduinos_map is valid if given, otherwise raise error
-                            pass
-                    if not arduino.name:
-                        arduino.name = 'unknown-%s' % device[-5:-1]
-                    self[arduino.name] = arduino
-                            
-    def verify_found_arduinos(self, arduinos_map):
-        """
-        Returns True if all and only arduinos in the map are found. Returns
-        False otherwise
-        """
-        names = set()
-        for arduino in arduinos_map:
-            names.add(arduino['name'])
-        return names is set(self.keys())
-        
-    def get_pin(self, pin_def):
-        parts = pin_def.split(':')
-        try:
-            return self[parts[0]].get_pin([parts[1], parts[2], parts[3]])
-        except KeyError:
-            raise UnknownArduinoError("Arduino named %s not found" % parts[0])
-        except IndexError:
-            raise InvalidPinDefError("%s is not a valid pin definition" % pin_def)
-            
-    def exit(self):
-        for arduino in self.values():
-            arduino.exit()
-            
-    def __del__(self):
-        ''' 
-        The connection with the arduino can get messed up when a script is
-        closed without calling arduino.exit() (which closes the serial
-        connection). Therefore do it here and hope it helps.
-        '''
-        self.exit()
-
-class Arduino(object):
-    """Base class for the arduino board"""
-    name = None
     
-    def __init__(self, port, type="normal"):
-        self.sp = serial.Serial(port, 4800, timeout=0)
-        # Allow 2 secs for Diecimila auto-reset to happen
-        self.pass_time(2)
-        # setup as a 'normal' arduino so we can at least get an id
+    def __init__(self, port, type="arduino", baudrate=57600):
+        # Setup a helper class to deal with commands
+        self.cmds = util.Commands(COMMANDS)
+        self.type = type
         self.setup_layout(BOARDS[type])
-        # Try to get the id
-        self.id = None
-        self.refresh_id()
-        self.refresh_id() # Mega needs it... # FIXME Mega sends string first, why?
-    
+        self.sp = serial.Serial(port, baudrate)
+        # Allow 2 secs for Arduino's auto-reset to happen
+        self.pass_time(2)
+        
+    def __str__(self):
+        return "Board (%s) on %s" % (self.type, self.sp.port)
+        
     def __del__(self):
         ''' 
-        The connection with the arduino can get messed up when a script is
-        closed without calling arduino.exit() (which closes the serial
-        connection). Therefore do it here and hope it helps.
+        The connection with the a board can get messed up when a script is
+        closed without calling board.exit() (which closes the serial
+        connection). Therefore also do it here and hope it helps.
         '''
         self.exit()
         
@@ -188,7 +82,7 @@ class Arduino(object):
         # Create pin instances based on board layout
         self.analog = []
         for i in board_layout['analog']:
-            self.analog.append(Pin(self.sp, i, arduino_name=self.name))
+            self.analog.append(Pin(self.sp, i, board_name=self.name))
         # Only create digital ports if the Firmata can use them (ie. not on the Mega...)
         # TODO Why is (TOTAL_FIRMATA_PINS + 7) / 8 used in Firmata?
         if board_layout['use_ports']:
@@ -204,29 +98,18 @@ class Arduino(object):
         else:
             self.digital = []
             for i in board_layout['digital']:
-                self.digital.append(Pin(self.sp, i, type=DIGITAL, arduino_name=self.name))
+                self.digital.append(Pin(self.sp, i, type=DIGITAL, board_name=self.name))
         # Disable certain ports like Rx/Tx and crystal ports
         for i in board_layout['disabled']:
             self.digital[i].mode = UNAVAILABLE
         # Create a dictionary of 'taken' pins. Used by the get_pin method
         self.taken = { 'analog' : dict(map(lambda p: (p.pin_number, False), self.analog)),
                        'digital' : dict(map(lambda p: (p.pin_number, False), self.digital)) }
+        # Setup default handlers for standard incoming commands
+        self.cmds.add_handler('ANALOG_MESSAGE', self._update_analog)
+        self.cmds.add_handler('DIGITAL_MESSAGE', self._update_digital)
+        self.cmds.add_handler('REPORT_VERSION', self._update_version)
         
-    def refresh_id(self):
-        # Obtain id
-        self.send_sysex(REPORT_ARDUINO_ID)
-        # Trying to make sure identifier gets set before the end of the function
-        # But stop the script if it takes longer than 5 seconds
-        count = 0
-        while self.id is None and count < 5:
-            count += 1
-            self.pass_time(1)
-            res = True
-            while res:
-                res = self.iterate()
-                
-    def __str__(self):
-        return "Arduino: %s"% self.sp.port
         
     def get_pin(self, pin_def):
         """
@@ -263,8 +146,7 @@ class Arduino(object):
         
     def pass_time(self, t):
         """ 
-        Non-blocking time-out for ``t`` seconds with a resolution of 1/10 of a
-        second
+        Non-blocking time-out for ``t`` seconds.
         """
         cont = time.time() + t
         while time.time() < cont:
@@ -309,7 +191,7 @@ class Arduino(object):
             else:
                 self._stored_data.append(byte)
         elif not self._command:
-            if byte not in CMDS:
+            if byte not in self.cmds:
                 # We received a byte not denoting a known command while we
                 # are not processing any commands data. Nothing we can do
                 # about it so discard and we'll see what comes next.
@@ -331,37 +213,60 @@ class Arduino(object):
     
     def _process_command(command, data):
         """
-        Tries to get a handler for this command from the CMDS helper and will
+        Tries to get a handler for this command from the self.cmds helper and will
         return its return status.
         """
         try:
-             handle_cmd = CMDS.get_handler(command)
+             handle_cmd = self.self.cmds.get_handler(command)
              return handle_cmd(self, data)
         except (KeyError, ValueError):
             # something got corrupted
             raise ValueError
             
+    def _process_sysex_message(self, data):
+        # TODO implement or make _process_command deal with it
+        pass
+            
     def get_firmata_version(self):
         """
-        Returns a version tuple (major, mino)  for the firmata firmware 
+        Returns a version tuple (major, mino) for the firmata firmware on the
+        board.
         """
         return self.firmata_version
         
-    def reset_taken(self):
-        for key in self.taken['analog'].keys():
-            self.taken['analog'][key] = False
-        for key in self.taken['digital'].keys():
-            self.taken['digital'][key] = False
-        
     def exit(self):
-        """ Cleanly exits """
+        """ Call this to exit cleanly. """
         self.sp.close()
+        
+    # Command handlers
+    def _update_analog(self, data):
+        if len(data) < 3:
+            return False
+        pin_number, lsb, msb = data
+        value = float(msb << 7 | lsb) / 1023
+        self.analog[pin_number].value = value
+        return True
+
+    def _update_digital(self, data):
+        if len(data) < 3:
+            return False
+        pin_number, lsb, msb = data
+        value = msb << 7 | lsb
+        self.digital[pin_number].value = value
+        return True
+
+    def _update_version(self, data):
+        if len(data) < 3:
+            return False
+        major, minor = data
+        self.firmata_version = (major, minor)
+
         
 
 class Port(object):
-    """Port on the arduino board"""
-    def __init__(self, sp, port_number, arduino):
-        self.arduino = arduino
+    """ An 8-bit port on the board """
+    def __init__(self, sp, port_number, board):
+        self.board = board
         self.sp = sp
         self.port_number = port_number
         self.reporting = False
@@ -369,13 +274,13 @@ class Port(object):
         self.pins = []
         for i in range(8):
             pin_nr = i + self.port_number * 8
-            self.pins.append(Pin(sp, pin_nr, type=DIGITAL, port=self, arduino_name=self.arduino.name))
+            self.pins.append(Pin(sp, pin_nr, type=DIGITAL, port=self, board_name=self.board.name))
             
     def __str__(self):
-        return "Digital Port %i on %s" % (self.port_number, self.arduino)
+        return "Digital Port %i on %s" % (self.port_number, self.board)
         
     def enable_reporting(self):
-        """ Set the port to report values """
+        """ Enable reporting of values for the whole port """
         self.reporting = True
         msg = chr(REPORT_DIGITAL + self.port_number + 1)
         self.sp.write(msg)
@@ -408,11 +313,11 @@ class Port(object):
 
 class Pin(object):
     """ A Pin representation """
-    def __init__(self, sp, pin_number, type=ANALOG, arduino_name=None, port=None):
+    def __init__(self, sp, pin_number, type=ANALOG, board_name=None, port=None):
         self.sp = sp
         self.pin_number = pin_number
         self.type = type
-        self.arduino_name = arduino_name
+        self.board_name = board_name
         self.port = port
         self.PWM_CAPABLE = False
         self._mode = (type == DIGITAL and OUTPUT or INPUT)
@@ -421,8 +326,8 @@ class Pin(object):
         
     def __str__(self):
         type = {ANALOG : 'Analog', DIGITAL : 'Digital'}[self.type]
-        if self.arduino_name:
-            return "%s pin %d on %s" % (type, self.pin_number, self.arduino_name)
+        if self.board_name:
+            return "%s pin %d on %s" % (type, self.pin_number, self.board_name)
         return "%s pin %d" % (type, self.pin_number)
 
     def _set_mode(self, mode):
@@ -509,7 +414,7 @@ class Pin(object):
         :arg sysex_cmd: A sysex command byte
         :arg data: A list of data values
         """
-        # TODO make the arduios send_sysex available to the pin
+        # TODO make the boards send_sysex available to the pin
         self.sp.write(chr(START_SYSEX))
         self.sp.write(chr(sysex_cmd))
         for byte in data:
@@ -519,37 +424,3 @@ class Pin(object):
                 byte = chr(byte >> 7) # TODO send multiple bytes
             self.sp.write(byte)
         self.sp.write(chr(END_SYSEX))
-                
-    def send_pulse(self, pulse_width):
-        data = [self.pin_number]
-        data += list(util.break_to_bytes(pulse_width))
-        self.send_sysex(DIGITAL_PULSE, data)
-
-        
-class Iterator(threading.Thread):
-    def __init__(self, arduino):
-        super(Iterator, self).__init__()
-        self.arduino = arduino
-        
-    def run(self):
-        while 1:
-            try:
-                while self.arduino.iterate():
-                    self.arduino.iterate()
-                time.sleep(0.001)
-            except (AttributeError, SerialException, OSError), e:
-                # this way we can kill the thread by setting the arduino object
-                # to None, or when the serial port is closed by arduino.exit()
-                break
-            except Exception, e:
-                # catch 'error: Bad file descriptor'
-                # iterate may be called while the serial port is being closed,
-                # causing an "error: (9, 'Bad file descriptor')"
-                if getattr(e, 'errno', None) == 9:
-                    break
-                try:
-                    if e[0] == 9:
-                        break
-                except (TypeError, IndexError):
-                    pass
-                raise

@@ -28,7 +28,35 @@ class Commands(dict):
             return self._handlers[command]
         except IndexError:
             raise NotImplementedError, "A handler for %s has not been defined yet." % chr(command)
-    
+
+class Iterator(threading.Thread):
+    def __init__(self, arduino):
+        super(Iterator, self).__init__()
+        self.arduino = arduino
+        
+    def run(self):
+        while 1:
+            try:
+                while self.arduino.iterate():
+                    self.arduino.iterate()
+                time.sleep(0.001)
+            except (AttributeError, SerialException, OSError), e:
+                # this way we can kill the thread by setting the arduino object
+                # to None, or when the serial port is closed by arduino.exit()
+                break
+            except Exception, e:
+                # catch 'error: Bad file descriptor'
+                # iterate may be called while the serial port is being closed,
+                # causing an "error: (9, 'Bad file descriptor')"
+                if getattr(e, 'errno', None) == 9:
+                    break
+                try:
+                    if e[0] == 9:
+                        break
+                except (TypeError, IndexError):
+                    pass
+                raise
+
 def break_to_bytes(value):
     """
     Breaks a value into values of less than 255 that form value when multiplied.
