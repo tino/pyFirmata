@@ -4,21 +4,19 @@ import util
 from boards import BOARDS
 
 # Message command bytes - straight from Firmata.h
-COMMANDS = dict(
-    DIGITAL_MESSAGE = 0x90,      # send data for a digital pin
-    ANALOG_MESSAGE = 0xE0,       # send data for an analog pin (or PWM)
-    DIGITAL_PULSE = 0x91,        # SysEx command to send a digital pulse
+DIGITAL_MESSAGE = 0x90,      # send data for a digital pin
+ANALOG_MESSAGE = 0xE0,       # send data for an analog pin (or PWM)
+DIGITAL_PULSE = 0x91,        # SysEx command to send a digital pulse
 
-    # PULSE_MESSAGE = 0xA0,      # proposed pulseIn/Out msg (SysEx)
-    # SHIFTOUT_MESSAGE = 0xB0,   # proposed shiftOut msg (SysEx)
-    REPORT_ANALOG = 0xC0,        # enable analog input by pin #
-    REPORT_DIGITAL = 0xD0,       # enable digital input by port pair
-    START_SYSEX = 0xF0,          # start a MIDI SysEx msg
-    SET_PIN_MODE = 0xF4,         # set a pin to INPUT/OUTPUT/PWM/etc
-    END_SYSEX = 0xF7,            # end a MIDI SysEx msg
-    REPORT_VERSION = 0xF9,       # report firmware version
-    SYSTEM_RESET = 0xFF,         # reset from MIDI
-)
+# PULSE_MESSAGE = 0xA0,      # proposed pulseIn/Out msg (SysEx)
+# SHIFTOUT_MESSAGE = 0xB0,   # proposed shiftOut msg (SysEx)
+REPORT_ANALOG = 0xC0,        # enable analog input by pin #
+REPORT_DIGITAL = 0xD0,       # enable digital input by port pair
+START_SYSEX = 0xF0,          # start a MIDI SysEx msg
+SET_PIN_MODE = 0xF4,         # set a pin to INPUT/OUTPUT/PWM/etc
+END_SYSEX = 0xF7,            # end a MIDI SysEx msg
+REPORT_VERSION = 0xF9,       # report firmware version
+SYSTEM_RESET = 0xFF,         # reset from MIDI
 
 # Pin modes.
 # except from UNAVAILABLE taken from Firmata.h
@@ -47,10 +45,9 @@ class Board(object):
     """
     
     def __init__(self, port, type="arduino", baudrate=57600):
-        # Setup a helper class to deal with commands
-        self.cmds = util.Commands(COMMANDS)
         self.type = type
         self.setup_layout(BOARDS[type])
+        self.command_handlers = dict()
         self.sp = serial.Serial(port, baudrate)
         # Allow 2 secs for Arduino's auto-reset to happen
         self.pass_time(2)
@@ -106,9 +103,9 @@ class Board(object):
         self.taken = { 'analog' : dict(map(lambda p: (p.pin_number, False), self.analog)),
                        'digital' : dict(map(lambda p: (p.pin_number, False), self.digital)) }
         # Setup default handlers for standard incoming commands
-        self.cmds.add_handler('ANALOG_MESSAGE', self._update_analog)
-        self.cmds.add_handler('DIGITAL_MESSAGE', self._update_digital)
-        self.cmds.add_handler('REPORT_VERSION', self._update_version)
+        self.command_handlers[ANALOG_MESSAGE] = self._handle_analog_message
+        self.command_handlers[DIGITAL_MESSAGE] =  self._handle_digital_message
+        self.command_handlers[REPORT_VERSION] = self._handle_report_version
         
         
     def get_pin(self, pin_def):
@@ -194,10 +191,10 @@ class Board(object):
             else:
                 self._stored_data.append(byte)
         elif not self._command:
-            if byte not in self.cmds:
-                # We received a byte not denoting a known command while we
-                # are not processing any commands data. Nothing we can do
-                # about it so discard and we'll see what comes next.
+            if byte not in self.command_handlers:
+                # We received a byte not denoting a command with handler 
+                # while we are not processing any commands data. Nothing we
+                # can do about it so discard and we'll see what comes next.
                 return
             self._command = byte
         else:
@@ -220,7 +217,7 @@ class Board(object):
         return its return status.
         """
         try:
-             handle_cmd = self.self.cmds.get_handler(command)
+             handle_cmd = self.command_handlers[command]
              return handle_cmd(self, data)
         except (KeyError, ValueError):
             # something got corrupted
@@ -242,7 +239,7 @@ class Board(object):
         self.sp.close()
         
     # Command handlers
-    def _update_analog(self, data):
+    def _handle_analog_message(self, data):
         if len(data) < 3:
             return False
         pin_number, lsb, msb = data
@@ -250,7 +247,7 @@ class Board(object):
         self.analog[pin_number].value = value
         return True
 
-    def _update_digital(self, data):
+    def _handle_digital_message(self, data):
         if len(data) < 3:
             return False
         pin_number, lsb, msb = data
@@ -258,7 +255,7 @@ class Board(object):
         self.digital[pin_number].value = value
         return True
 
-    def _update_version(self, data):
+    def _handle_report_version(self, data):
         if len(data) < 3:
             return False
         major, minor = data

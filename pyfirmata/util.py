@@ -1,33 +1,3 @@
-class Commands(dict):
-    """
-    A helper class to deal with firmata command bytes. Set it up with a
-    dictionary of commandnames and there bytes. Then add handlers for certain
-    commands with ``add_handler``. Allows for accessing the commands as
-    attributes.
-    """
-    _handlers = {}
-    def __init__(self, bytes_dict):
-        if not type(bytes_dict):
-            bytes_dicts = dict(bytes_dict)
-        self = bytes_dict
-        
-    def __getattr__(self, name):
-        return self[name]
-    
-    def add_handler(self, command, handler):
-        if not command in self:
-            raise ValueError, "This command does not exist yet. Add it first with add_command"
-        self._handlers[command] = handler
-
-    def add_command(self, command, byte):
-        self[command] = byte
-    
-    def get_handler(self, command):
-        try:
-            return self._handlers[command]
-        except IndexError:
-            raise NotImplementedError, "A handler for %s has not been defined yet." % chr(command)
-
 import threading
 import serial
 
