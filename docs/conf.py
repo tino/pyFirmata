@@ -192,3 +192,6 @@ latex_documents = [
 
 # If false, no module index is generated.
 #latex_use_modindex = True
+
+import sys, os
+sys.path.append(os.path.abspath('../'))

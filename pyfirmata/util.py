@@ -1,4 +1,3 @@
-
 class Commands(dict):
     """
     A helper class to deal with firmata command bytes. Set it up with a
@@ -29,18 +28,21 @@ class Commands(dict):
         except IndexError:
             raise NotImplementedError, "A handler for %s has not been defined yet." % chr(command)
 
+import threading
+import serial
+
 class Iterator(threading.Thread):
-    def __init__(self, arduino):
+    def __init__(self, board):
         super(Iterator, self).__init__()
-        self.arduino = arduino
+        self.board = board
         
     def run(self):
         while 1:
             try:
-                while self.arduino.iterate():
-                    self.arduino.iterate()
+                while self.board.iterate():
+                    self.board.iterate()
                 time.sleep(0.001)
-            except (AttributeError, SerialException, OSError), e:
+            except (AttributeError, serial.SerialException, OSError), e:
                 # this way we can kill the thread by setting the arduino object
                 # to None, or when the serial port is closed by arduino.exit()
                 break

@@ -6,3 +6,4 @@ cov
 .coverage
 applet
 Firmata-*
+docs/_build

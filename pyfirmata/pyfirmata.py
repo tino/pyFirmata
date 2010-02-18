@@ -1,7 +1,7 @@
 from serial import SerialException
 import threading
 import util
-from board import BOARDS
+from boards import BOARDS
 
 # Message command bytes - straight from Firmata.h
 COMMANDS = dict(
@@ -74,11 +74,11 @@ class Board(object):
         return msb << 7 | lsb
         
     def setup_layout(self, board_layout):
-        """ 
+        """
         Setup the Pin instances based on the given board-layout. Maybe it will
         be possible to do this automatically in the future, by polling the
         board for its type.
-        """        
+        """
         # Create pin instances based on board layout
         self.analog = []
         for i in board_layout['analog']:
@@ -116,8 +116,9 @@ class Board(object):
         Returns the activated pin given by the pin definition.
         May raise an ``InvalidPinDefError`` or a ``PinAlreadyTakenError``.
         
-        :arg pin_def: Pin definition as described in :ref:`arduino-pin-definitions`,
-        but without the arduino name. So for example ``a:1:i``.
+        :arg pin_def: Pin definition as described in TODO,
+            but without the arduino name. So for example ``a:1:i``.
+        
         """
         if type(pin_def) == list:
             bits = pin_def
@@ -172,13 +173,15 @@ class Board(object):
     def iterate(self):
         """ 
         Reads and handles data from the microcontroller over the serial port.
+        This method should be called in a main loop, or in an
+        :class:`Iterator` instance to keep this boards pin values up to date
         """
         self._process_data(self.sp.read())
         
     def _process_data(self, byte):
         """
         Does the actual processing of the data from the microcontroller and
-        delegates the command processing to _process_command
+        delegates the command processing to :method:`_process_command`
         """
         if not byte:
             return
@@ -333,7 +336,8 @@ class Pin(object):
     def _set_mode(self, mode):
         """
         Set the mode of operation for the pin
-        :mode arg: Can be one of the pin modes: INPUT, OUTPUT, ANALOG or PWM
+        :arg mode: Can be one of the pin modes: INPUT, OUTPUT, ANALOG or PWM
+        
         """
         if mode is UNAVAILABLE:
             self._mode = UNAVAILABLE
@@ -372,7 +376,7 @@ class Pin(object):
     def read(self):
         """
         Returns the output value of the pin. This value is updated by the
-        arduios' ``iterate`` method. Value is alway in the range 0.0 - 1.0
+        boards :meth:`Board.iterate` method. Value is alway in the range 0.0 - 1.0
         """
         if self.mode == UNAVAILABLE:
             raise IOError, "Cannot read pin %s"% self.__str__()
@@ -382,9 +386,9 @@ class Pin(object):
         """
         Output a voltage from the pin
 
-        :value arg:
-        Uses value as a boolean if the pin is in output mode, or expects a
-        float from 0 to 1 if the pin is in PWM mode.
+        :arg value: Uses value as a boolean if the pin is in output mode, or 
+            expects a float from 0 to 1 if the pin is in PWM mode.
+        
         """
         if self.mode is UNAVAILABLE:
             raise IOError, "%s can not be used through Firmata" % self
