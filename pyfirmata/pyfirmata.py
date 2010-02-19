@@ -274,7 +274,7 @@ class Port(object):
         self.pins = []
         for i in range(8):
             pin_nr = i + self.port_number * 8
-            self.pins.append(Pin(sp, pin_nr, type=DIGITAL, port=self, board_name=self.board.name))
+            self.pins.append(Pin(self.board, pin_nr, type=DIGITAL, port=self))
             
     def __str__(self):
         return "Digital Port %i on %s" % (self.port_number, self.board)

@@ -1,33 +1,55 @@
+from collections import deque
 import pyfirmata
 
-class MockupSerial(object):
-    """ A Mockup object for python's Serial. Can only return Firmata version. """
-    def __init__(self, port, baudrate, timeout=1):
-        self.return_id = False
-        self.echoed = False
+class MockupSerial(deque):
+    """ 
+    A Mockup object for python's Serial. Functions as a fifo-stack. Push to
+    it with ``write``, read from it with ``read``.
+    
+    >>> s = MockupSerial('someport', 4800)
+    >>> s.read()
+    ''
+    >>> s.write(chr(100))
+    >>> s.write('blaat')
+    >>> s.write(100000)
+    >>> s.read(2)
+    ['d', 'blaat']
+    >>> s.read()
+    100000
+    >>> s.read()
+    ''
+    >>> s.read(2)
+    ['', '']
+    >>> s.close()
+    """
+    def __init__(self, port, baudrate, timeout=0.02):
+        pass
         
-    def read(self, len=1):
-        if self.return_id:
-            if self.echoed:
-                self.return_id = False
-                return chr(1)
-            else:
-                self.echoed = True
-                return chr(pyfirmata.REPORT_ARDUINO_ID)
+    def read(self, count=1):
+        if count > 1:
+            val = []
+            for i in range(count):
+                try:
+                    val.append(self.popleft())
+                except IndexError:
+                    val.append('')
         else:
-            return ''
+            try:
+                val = self.popleft()
+            except IndexError:
+                val = ''
+        return val
             
     def write(self, value):
-        pass
+        self.append(value)
             
     def close(self):
-        pass
+        self.clear()
         
 class MockupBoard(pyfirmata.Board):
 
-    def __init__(self, port='', type="normal", values_dict={}, name=''):
-        self.name = name
-        self.sp = MockupSerial(port, 57600, timeout=0)
+    def __init__(self, port='', type="arduino", values_dict={}):
+        self.sp = MockupSerial(port, 57600)
         self.setup_layout(pyfirmata.BOARDS[type])
         self.values_dict = values_dict
         self.id = 1
@@ -111,7 +133,6 @@ class Iterator(object):
     def stop(self):
         pass
 
-pyfirmata.Port = MockupPort
-pyfirmata.Pin = MockupPin
-
-Board = MockupBoard
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

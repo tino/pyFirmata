@@ -5,6 +5,7 @@ from optparse import OptionParser
 
 import pyfirmata
 from pyfirmata import mockup
+from pyfirmata.boards import BOARDS
 from pyfirmata.util import to_7_bits
 
 # This should be covered:
@@ -30,9 +31,18 @@ from pyfirmata.util import to_7_bits
 # sysex end             0xF7   
 # protocol version      0xF9              major version         minor version
 # system reset          0xFF
+#
+# SysEx-based commands (0x00-0x7F) are used for an extended command set.
+# 
+# type                command  first byte       second byte      ...
+# ----------------------------------------------------------------------------
+# string                0x71   char *string ...
+# firmware name/version 0x79   major version   minor version     char *name...
+
 
 class BoardBaseTest(unittest.TestCase):
     def setUp(self):
+        # Test with the MockupSerial so no real connection is needed
         pyfirmata.pyfirmata.serial.Serial = mockup.MockupSerial
         self.board = pyfirmata.Board('test')
 
@@ -40,6 +50,7 @@ class TestBoardMessages(BoardBaseTest):
     # TODO Test layout of Board Mega
     # TODO Test if messages written are correct...
 
+    # First test the handlers
     def test_handle_analog_message(self):
         self.assertEqual(self.board.analog[3].read(), None)
         # Test it returns false with not enough params
@@ -63,6 +74,9 @@ class TestBoardMessages(BoardBaseTest):
         self.assertTrue(self.board._handle_report_version([2, 1]))
         self.assertEqual(self.board.firmata_version, (2, 1))
         
+    # Now test the whole structure.
+    
+        
 class TestBoardLayout(BoardBaseTest):
 
     def test_pwm_layout(self):
@@ -72,6 +86,8 @@ class TestBoardLayout(BoardBaseTest):
                 pins.append(self.board.get_pin('d:%d:p' % pin.pin_number))
         for pin in pins:
             self.assertEqual(pin.mode, pyfirmata.PWM)
+            self.assertTrue(pin.pin_number in BOARDS['arduino']['pwm'])
+        self.assertTrue(len(pins) == len(BOARDS['arduino']['pwm']))
         
     def test_get_pin_digital(self):
         pin = self.board.get_pin('d:13:o')
@@ -90,47 +106,20 @@ class TestBoardLayout(BoardBaseTest):
         self.board.exit()
         pyfirmata.serial.Serial = serial.Serial
         
-class TestMockupBoard(unittest.TestCase):
-    
+class TestMockupBoardLayout(TestBoardLayout, TestBoardMessages):
+    """
+    TestMockupBoardLayout is subclassed from TestBoardLayout and
+    TestBoardMessages as it should pass the same tests, but with the
+    MockupBoard.
+    """
     def setUp(self):
         self.board = mockup.MockupBoard('test')
-    
-    def test_identifier(self):
-        self.assertEqual(self.board.identifier, ord(chr(ID)))
-    
-    def test_pwm_layout(self):
-        pins = []
-        for pin_nr in self.board.layout['p']:
-            pins.append(self.board.get_pin('d:%d:p' % pin_nr))
-        for pin in pins:
-            mode = pin.get_mode()
-            self.assertEqual(mode, pyfirmata.DIGITAL_PWM)
-        
-    def test_get_pin_digital(self):
-        pin = self.board.get_pin('d:13:o')
-        self.assertEqual(pin.pin_number, 5)
-        self.assertEqual(pin.mode, pyfirmata.DIGITAL_OUTPUT)
-        self.assertEqual(pin.sp, self.board.sp)
-        self.assertEqual(pin.port.port_number, 1)
-        self.assertEqual(pin._get_board_pin_number(), 13)
-        self.assertEqual(pin.port.get_active(), 1)
-        
-    def test_get_pin_analog(self):
-        pin = self.board.get_pin('a:5:i')
-        self.assertEqual(pin.pin_number, 5)
-        self.assertEqual(pin.sp, self.board.sp)
-        self.assertEqual(pin.get_active(), 1)
-        self.assertEqual(pin.value, -1)
-        
-    def tearDown(self):
-        self.board.exit()
-        pyfirmata.serial.Serial = serial.Serial
 
 
 board_messages = unittest.TestLoader().loadTestsFromTestCase(TestBoardMessages)
 board_layout = unittest.TestLoader().loadTestsFromTestCase(TestBoardLayout)
 default = unittest.TestSuite([board_messages, board_layout])
-mockup_suite = unittest.TestLoader().loadTestsFromTestCase(TestMockupBoard)
+mockup_suite = unittest.TestLoader().loadTestsFromTestCase(TestMockupBoardLayout)
 
 if __name__ == '__main__':
     parser = OptionParser()
