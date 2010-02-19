@@ -18,30 +18,12 @@ class MockupSerial(object):
             return ''
             
     def write(self, value):
-        if value == chr(pyfirmata.REPORT_ARDUINO_ID):
-            self.return_id = True
+        pass
             
     def close(self):
         pass
-
-class MockupArduinos(pyfirmata.Arduinos):
-    def __init__(self, identifier='', arduinos_map={}, values_dict={}):
-        self.values_dict = values_dict
-        for a in arduinos_map.values():
-            self[a['name']] = MockupArduino(name=a['name'], type=a['board'], values_dict=values_dict)
         
-    def update_values_dict(self, values_dict=None):
-        if values_dict is not None:
-            self.values_dict.update(values_dict)
-        if values_dict == {}: # reset
-            self.values_dict = {}
-        self['gen'].values_dict = self.values_dict
-        self['gen'].update_values_dict()
-    
-    def reset_taken(self):
-        self['gen'].reset_taken()
-        
-class MockupArduino(pyfirmata.Arduino):
+class MockupBoard(pyfirmata.Board):
 
     def __init__(self, port='', type="normal", values_dict={}, name=''):
         self.name = name
@@ -63,16 +45,16 @@ class MockupArduino(pyfirmata.Arduino):
         for pin in self.analog:
             pin.values_dict = self.values_dict
         
-class MockupPort(pyfirmata.DigitalPort):
-    def __init__(self, sp, port_number):
-        self.sp = sp
+class MockupPort(pyfirmata.Port):
+    def __init__(self, board, port_number):
+        self.board = board
         self.port_number = port_number
         self.reporting = False
         
         self.pins = []
         for i in range(8):
             pin_nr = i + self.port_number * 8
-            self.pins.append(MockupPin(sp, pin_nr, type=pyfirmata.DIGITAL, port=self))
+            self.pins.append(MockupPin(self.board, pin_nr, type=pyfirmata.DIGITAL, port=self))
 
     def update_values_dict(self):
         for pin in self.pins:
@@ -129,8 +111,7 @@ class Iterator(object):
     def stop(self):
         pass
 
-pyfirmata.DigitalPort = MockupPort
+pyfirmata.Port = MockupPort
 pyfirmata.Pin = MockupPin
 
-Arduinos = MockupArduinos
-Arduino = MockupArduino
+Board = MockupBoard

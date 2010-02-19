@@ -4,20 +4,18 @@ import time
 from optparse import OptionParser
 
 import pyfirmata
-import mockup
+from pyfirmata import mockup
 
-# TODO Test Arduinos class
-
-class TestLiveArduinos(unittest.TestCase):
+class TestLiveBoards(unittest.TestCase):
     """
-    Test two live arduinos. On the 'transmitter' arduino:
+    Test two live boards. On the 'transmitter' board:
     
     - connect 5v and analog port 0 directly
-    - connect digital port 2 to the 'receiver' arduino's analog port 2 directly
-    - connect digital port 5 to the 'receiver' arduino's analog port 5 directly
-    - connect 3v to the 'receiver' arduino's analog port 1 directly
+    - connect digital port 2 to the 'receiver' board's analog port 2 directly
+    - connect digital port 5 to the 'receiver' board's analog port 5 directly
+    - connect 3v to the 'receiver' board's analog port 1 directly
     
-    On the 'receiver' arduino:
+    On the 'receiver' board:
     
     - connect ground and analog port 0 directly
     
@@ -27,9 +25,9 @@ class TestLiveArduinos(unittest.TestCase):
     """
     
     def setUp(self):
-        self.arduinos = pyfirmata.Arduinos()
-        assert len(self.arduinos) >= 2, "Only %d arduino(s) found. I need at least 2!" % len(arduinos)
-        x, y = self.arduinos.values()[0], self.arduinos.values()[1]
+        self.boards = pyfirmata.Boards()
+        assert len(self.boards) >= 2, "Only %d board(s) found. I need at least 2!" % len(boards)
+        x, y = self.boards.values()[0], self.boards.values()[1]
         it1, it2 = pyfirmata.Iterator(x), pyfirmata.Iterator(y)
         it1.start(), it2.start()
         # give iterator time to iterate
@@ -44,8 +42,8 @@ class TestLiveArduinos(unittest.TestCase):
             self.receiver = y
         else:
             self.fail("Could not complete setup. One, and only one of the \
-                arduino's analog ports should be set high by connecting it to \
-                its 5v output. That arduino will be considered the transmitter. \
+                board's analog ports should be set high by connecting it to \
+                its 5v output. That board will be considered the transmitter. \
                 Values received: %f and %f" % (x0.read(), y0.read()))
         self.Ta0 = self.transmitter.analog[0] # already taken by line 36
         self.Ra1 = self.receiver.get_pin('a:1:i')
@@ -108,87 +106,82 @@ class TestLiveArduinos(unittest.TestCase):
         self.failUnless(0.09 < value < 0.11, msg="%f not between 0.09 and 0.11" % value)
         
     def tearDown(self):
-        self.arduinos.exit()
+        self.boards.exit()
 
-class TestArduino(unittest.TestCase):
-    # TODO Test layout of Arduino Mega
+class TestBoard(unittest.TestCase):
+    # TODO Test layout of Board Mega
     # TODO Test if messages are correct...
     
     def setUp(self):
-        pyfirmata.serial.Serial = mockup.MockupSerial
-        self.arduino = pyfirmata.Arduino('test')
-        self.arduino.setup_layout(pyfirmata.BOARDS['normal'])
-    
-    def test_identifier(self):
-        self.assertEqual(self.arduino.id, ord(chr(1)))
+        pyfirmata.pyfirmata.serial.Serial = mockup.MockupSerial
+        self.board = pyfirmata.Board('test')
+        # self.board.setup_layout(pyfirmata.BOARDS['normal'])
 
     def test_pwm_layout(self):
         pins = []
-        for pin in self.arduino.digital:
+        for pin in self.board.digital:
             if pin.PWM_CAPABLE:
-                pins.append(self.arduino.get_pin('d:%d:p' % pin.pin_number))
+                pins.append(self.board.get_pin('d:%d:p' % pin.pin_number))
         for pin in pins:
             self.assertEqual(pin.mode, pyfirmata.PWM)
         
     def test_get_pin_digital(self):
-        pin = self.arduino.get_pin('d:13:o')
+        pin = self.board.get_pin('d:13:o')
         self.assertEqual(pin.pin_number, 13)
         self.assertEqual(pin.mode, pyfirmata.OUTPUT)
-        self.assertEqual(pin.sp, self.arduino.sp)
         self.assertEqual(pin.port.port_number, 1)
-        self.assertEqual(pin.port.get_active(), 1)
+        self.assertEqual(pin.port.reporting, False)
         
     def test_get_pin_analog(self):
-        pin = self.arduino.get_pin('a:5:i')
+        pin = self.board.get_pin('a:5:i')
         self.assertEqual(pin.pin_number, 5)
-        self.assertEqual(pin.sp, self.arduino.sp)
         self.assertEqual(pin.reporting, True)
         self.assertEqual(pin.value, None)
         
     def tearDown(self):
-        self.arduino.exit()
+        self.board.exit()
         pyfirmata.serial.Serial = serial.Serial
         
-class TestMockupArduino(unittest.TestCase):
+class TestMockupBoard(unittest.TestCase):
     
     def setUp(self):
-        self.arduino = mockup.MockupArduino('test')
+        self.board = mockup.MockupBoard('test')
     
     def test_identifier(self):
-        self.assertEqual(self.arduino.identifier, ord(chr(ID)))
+        self.assertEqual(self.board.identifier, ord(chr(ID)))
     
     def test_pwm_layout(self):
         pins = []
-        for pin_nr in self.arduino.layout['p']:
-            pins.append(self.arduino.get_pin('d:%d:p' % pin_nr))
+        for pin_nr in self.board.layout['p']:
+            pins.append(self.board.get_pin('d:%d:p' % pin_nr))
         for pin in pins:
             mode = pin.get_mode()
             self.assertEqual(mode, pyfirmata.DIGITAL_PWM)
         
     def test_get_pin_digital(self):
-        pin = self.arduino.get_pin('d:13:o')
+        pin = self.board.get_pin('d:13:o')
         self.assertEqual(pin.pin_number, 5)
         self.assertEqual(pin.mode, pyfirmata.DIGITAL_OUTPUT)
-        self.assertEqual(pin.sp, self.arduino.sp)
+        self.assertEqual(pin.sp, self.board.sp)
         self.assertEqual(pin.port.port_number, 1)
         self.assertEqual(pin._get_board_pin_number(), 13)
         self.assertEqual(pin.port.get_active(), 1)
         
     def test_get_pin_analog(self):
-        pin = self.arduino.get_pin('a:5:i')
+        pin = self.board.get_pin('a:5:i')
         self.assertEqual(pin.pin_number, 5)
-        self.assertEqual(pin.sp, self.arduino.sp)
+        self.assertEqual(pin.sp, self.board.sp)
         self.assertEqual(pin.get_active(), 1)
         self.assertEqual(pin.value, -1)
         
     def tearDown(self):
-        self.arduino.exit()
+        self.board.exit()
         pyfirmata.serial.Serial = serial.Serial
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(TestArduino)
-live_suite = unittest.TestLoader().loadTestsFromTestCase(TestLiveArduinos)
-mockup_suite = unittest.TestLoader().loadTestsFromTestCase(TestMockupArduino)
+suite = unittest.TestLoader().loadTestsFromTestCase(TestBoard)
+live_suite = unittest.TestLoader().loadTestsFromTestCase(TestLiveBoards)
+mockup_suite = unittest.TestLoader().loadTestsFromTestCase(TestMockupBoard)
 
 if __name__ == '__main__':
     parser = OptionParser()

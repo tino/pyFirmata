@@ -1,22 +1,23 @@
-from serial import SerialException
+import serial
 import threading
 import util
+import time
 from boards import BOARDS
 
 # Message command bytes - straight from Firmata.h
-DIGITAL_MESSAGE = 0x90,      # send data for a digital pin
-ANALOG_MESSAGE = 0xE0,       # send data for an analog pin (or PWM)
-DIGITAL_PULSE = 0x91,        # SysEx command to send a digital pulse
+DIGITAL_MESSAGE = 0x90      # send data for a digital pin
+ANALOG_MESSAGE = 0xE0       # send data for an analog pin (or PWM)
+DIGITAL_PULSE = 0x91        # SysEx command to send a digital pulse
 
-# PULSE_MESSAGE = 0xA0,      # proposed pulseIn/Out msg (SysEx)
-# SHIFTOUT_MESSAGE = 0xB0,   # proposed shiftOut msg (SysEx)
-REPORT_ANALOG = 0xC0,        # enable analog input by pin #
-REPORT_DIGITAL = 0xD0,       # enable digital input by port pair
-START_SYSEX = 0xF0,          # start a MIDI SysEx msg
-SET_PIN_MODE = 0xF4,         # set a pin to INPUT/OUTPUT/PWM/etc
-END_SYSEX = 0xF7,            # end a MIDI SysEx msg
-REPORT_VERSION = 0xF9,       # report firmware version
-SYSTEM_RESET = 0xFF,         # reset from MIDI
+# PULSE_MESSAGE = 0xA0      # proposed pulseIn/Out msg (SysEx)
+# SHIFTOUT_MESSAGE = 0xB0   # proposed shiftOut msg (SysEx)
+REPORT_ANALOG = 0xC0        # enable analog input by pin #
+REPORT_DIGITAL = 0xD0       # enable digital input by port pair
+START_SYSEX = 0xF0          # start a MIDI SysEx msg
+SET_PIN_MODE = 0xF4         # set a pin to INPUT/OUTPUT/PWM/etc
+END_SYSEX = 0xF7            # end a MIDI SysEx msg
+REPORT_VERSION = 0xF9       # report firmware version
+SYSTEM_RESET = 0xFF         # reset from MIDI
 
 # Pin modes.
 # except from UNAVAILABLE taken from Firmata.h
@@ -45,12 +46,12 @@ class Board(object):
     """
     
     def __init__(self, port, type="arduino", baudrate=57600):
-        self.type = type
-        self.setup_layout(BOARDS[type])
-        self.command_handlers = dict()
         self.sp = serial.Serial(port, baudrate)
         # Allow 2 secs for Arduino's auto-reset to happen
         self.pass_time(2)
+        self.type = type
+        self.command_handlers = {}
+        self.setup_layout(BOARDS[type])
         
     def __str__(self):
         return "Board (%s) on %s" % (self.type, self.sp.port)
@@ -79,14 +80,14 @@ class Board(object):
         # Create pin instances based on board layout
         self.analog = []
         for i in board_layout['analog']:
-            self.analog.append(Pin(self.sp, i, board_name=self.name))
+            self.analog.append(Pin(self, i))
         # Only create digital ports if the Firmata can use them (ie. not on the Mega...)
         # TODO Why is (TOTAL_FIRMATA_PINS + 7) / 8 used in Firmata?
         if board_layout['use_ports']:
             self.digital = []
             self.digital_ports = []
             for i in range(len(board_layout['digital']) / 7):
-                self.digital_ports.append(Port(self.sp, i, self))
+                self.digital_ports.append(Port(self, i))
             # Allow to access the Pin instances directly
             for port in self.digital_ports:
                 self.digital += port.pins
@@ -95,7 +96,7 @@ class Board(object):
         else:
             self.digital = []
             for i in board_layout['digital']:
-                self.digital.append(Pin(self.sp, i, type=DIGITAL, board_name=self.name))
+                self.digital.append(Pin(self.sp, i, type=DIGITAL))
         # Disable certain ports like Rx/Tx and crystal ports
         for i in board_layout['disabled']:
             self.digital[i].mode = UNAVAILABLE
@@ -265,9 +266,8 @@ class Board(object):
 
 class Port(object):
     """ An 8-bit port on the board """
-    def __init__(self, sp, port_number, board):
+    def __init__(self, board, port_number):
         self.board = board
-        self.sp = sp
         self.port_number = port_number
         self.reporting = False
         
@@ -283,13 +283,13 @@ class Port(object):
         """ Enable reporting of values for the whole port """
         self.reporting = True
         msg = chr(REPORT_DIGITAL + self.port_number + 1)
-        self.sp.write(msg)
+        self.board.sp.write(msg)
         
     def disable_reporting(self):
         """ Disable the reporting of the port """
         self.reporting = False
         msg = chr(REPORT_DIGITAL + self.port_number + 0)
-        self.sp.write(msg)
+        self.board.sp.write(msg)
         
     def set_value(self, mask):
         """Record the value of each of the input pins belonging to the port"""
@@ -309,15 +309,14 @@ class Port(object):
         msg = chr(DIGITAL_MESSAGE + self.port_number)
         msg += chr(mask % 128)
         msg += chr(mask >> 7)
-        self.sp.write(msg)
+        self.board.sp.write(msg)
 
 class Pin(object):
     """ A Pin representation """
-    def __init__(self, sp, pin_number, type=ANALOG, board_name=None, port=None):
-        self.sp = sp
+    def __init__(self, board, pin_number, type=ANALOG, port=None):
+        self.board = board
         self.pin_number = pin_number
         self.type = type
-        self.board_name = board_name
         self.port = port
         self.PWM_CAPABLE = False
         self._mode = (type == DIGITAL and OUTPUT or INPUT)
@@ -347,7 +346,7 @@ class Pin(object):
         command = chr(SET_PIN_MODE)
         command += chr(self.pin_number)
         command += chr(mode)
-        self.sp.write(command)
+        self.board.sp.write(command)
         
     def _get_mode(self):
         return self._mode
@@ -361,14 +360,14 @@ class Pin(object):
         self.reporting = True
         msg = chr(REPORT_ANALOG + self.pin_number)
         msg += chr(1)
-        self.sp.write(msg)
+        self.board.sp.write(msg)
         
     def disable_reporting(self):
         """ Disable the reporting of an input pin """
         self.reporting = False
         msg = chr(REPORT_ANALOG + self.pin_number)
         msg += chr(0)
-        self.sp.write(msg)
+        self.board.sp.write(msg)
     
     def read(self):
         """
@@ -400,13 +399,13 @@ class Pin(object):
                     msg = chr(DIGITAL_MESSAGE)
                     msg += chr(self.pin_number)
                     msg += chr(value)
-                    self.sp.write(msg)
+                    self.board.sp.write(msg)
             elif self.mode is PWM:
                 value = int(round(value * 255))
                 msg = chr(ANALOG_MESSAGE + self.pin_number)
                 msg += chr(value % 128)
                 msg += chr(value >> 7)
-                self.sp.write(msg)
+                self.board.sp.write(msg)
                 
     def send_sysex(self, sysex_cmd, data=[]):
         """
@@ -416,12 +415,12 @@ class Pin(object):
         :arg data: A list of data values
         """
         # TODO make the boards send_sysex available to the pin
-        self.sp.write(chr(START_SYSEX))
-        self.sp.write(chr(sysex_cmd))
+        self.board.sp.write(chr(START_SYSEX))
+        self.board.sp.write(chr(sysex_cmd))
         for byte in data:
             try:
                 byte = chr(byte)
             except ValueError:
                 byte = chr(byte >> 7) # TODO send multiple bytes
-            self.sp.write(byte)
-        self.sp.write(chr(END_SYSEX))
+            self.board.sp.write(byte)
+        self.board.sp.write(chr(END_SYSEX))
