@@ -44,13 +44,14 @@ class Board(object):
     """
     Base class for any board
     """
+    firmata_version = None
+    command_handlers = {}
     
     def __init__(self, port, type="arduino", baudrate=57600):
         self.sp = serial.Serial(port, baudrate)
         # Allow 2 secs for Arduino's auto-reset to happen
-        self.pass_time(2)
+        # self.pass_time(2)
         self.type = type
-        self.command_handlers = {}
         self.setup_layout(BOARDS[type])
         
     def __str__(self):
@@ -257,12 +258,11 @@ class Board(object):
         return True
 
     def _handle_report_version(self, data):
-        if len(data) < 3:
+        if len(data) < 2:
             return False
         major, minor = data
         self.firmata_version = (major, minor)
-
-        
+        return True
 
 class Port(object):
     """ An 8-bit port on the board """
