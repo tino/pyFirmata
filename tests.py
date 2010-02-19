@@ -7,6 +7,8 @@ import pyfirmata
 from pyfirmata import mockup
 from pyfirmata.util import to_7_bits
 
+# This should be covered:
+#
 # This protocol uses the MIDI message format, but does not use the whole
 # protocol.  Most of the command mappings here will not be directly usable in
 # terms of MIDI controllers and synths.  It should co-exist with MIDI without
@@ -29,18 +31,15 @@ from pyfirmata.util import to_7_bits
 # protocol version      0xF9              major version         minor version
 # system reset          0xFF
 
-
-
-class TestBoard(unittest.TestCase):
-    # TODO Test layout of Board Mega
-    # TODO Test if messages are correct...
-    
+class BoardBaseTest(unittest.TestCase):
     def setUp(self):
         pyfirmata.pyfirmata.serial.Serial = mockup.MockupSerial
         self.board = pyfirmata.Board('test')
-        # self.board.setup_layout(pyfirmata.BOARDS['normal'])
-        
-    
+
+class TestBoardMessages(BoardBaseTest):
+    # TODO Test layout of Board Mega
+    # TODO Test if messages written are correct...
+
     def test_handle_analog_message(self):
         self.assertEqual(self.board.analog[3].read(), None)
         # Test it returns false with not enough params
@@ -63,6 +62,8 @@ class TestBoard(unittest.TestCase):
         self.assertFalse(self.board._handle_report_version([1]))
         self.assertTrue(self.board._handle_report_version([2, 1]))
         self.assertEqual(self.board.firmata_version, (2, 1))
+        
+class TestBoardLayout(BoardBaseTest):
 
     def test_pwm_layout(self):
         pins = []
@@ -126,23 +127,20 @@ class TestMockupBoard(unittest.TestCase):
         pyfirmata.serial.Serial = serial.Serial
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(TestBoard)
+board_messages = unittest.TestLoader().loadTestsFromTestCase(TestBoardMessages)
+board_layout = unittest.TestLoader().loadTestsFromTestCase(TestBoardLayout)
+default = unittest.TestSuite([board_messages, board_layout])
 mockup_suite = unittest.TestLoader().loadTestsFromTestCase(TestMockupBoard)
 
 if __name__ == '__main__':
     parser = OptionParser()
-    parser.add_option("-l", "--live", dest="live", action="store_true",
-        help="Also run the live tests. Make sure the hardware is connected properly")
     parser.add_option("-m", "--mockup", dest="mockup", action="store_true",
         help="Also run the mockup tests")
     options, args = parser.parse_args()
-    if not options.live and not options.mockup:
+    if not options.mockup:
         print "Running normal suite. Also consider running the live (-l, --live) \
                 and mockup (-m, --mockup) suites"
-        unittest.TextTestRunner(verbosity=3).run(suite)
-    if options.live:
-        print "Running the live test suite"
-        unittest.TextTestRunner(verbosity=2).run(live_suite)
+        unittest.TextTestRunner(verbosity=3).run(default)
     if options.mockup:
         print "Running the mockup test suite"
         unittest.TextTestRunner(verbosity=2).run(mockup_suite)
