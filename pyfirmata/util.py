@@ -28,6 +28,26 @@ class Iterator(threading.Thread):
                 except (TypeError, IndexError):
                     pass
                 raise
+                
+def to_7_bits(integer):
+    """
+    Breaks an integer into two 7 bit bytes.
+    
+    >>> for i in range(32768):
+    ...     val = to_7_bits(i)
+    ...     assert len(val) == 2
+    ...
+    >>> to_7_bits(32767)
+    ('\\x7f', '\\xff')
+    >>> to_7_bits(32768)
+    Traceback (most recent call last):
+        ...
+    ValueError: Can't handle values bigger than 32767 (max for 2 bits)
+    
+    """
+    if integer > 32767:
+        raise ValueError, "Can't handle values bigger than 32767 (max for 2 bits)"
+    return chr(integer % 128), chr(integer >> 7)
 
 def break_to_bytes(value):
     """
