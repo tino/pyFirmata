@@ -50,7 +50,7 @@ class Board(object):
     def __init__(self, port, type="arduino", baudrate=57600):
         self.sp = serial.Serial(port, baudrate)
         # Allow 2 secs for Arduino's auto-reset to happen
-        # self.pass_time(2)
+        self.pass_time(2)
         self.type = type
         self.setup_layout(BOARDS[type])
         
