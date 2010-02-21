@@ -1,6 +1,5 @@
 import serial
-import threading
-import util
+import inspect
 import time
 from boards import BOARDS
 
@@ -45,7 +44,10 @@ class Board(object):
     Base class for any board
     """
     firmata_version = None
-    command_handlers = {}
+    _command_handlers = {}
+    _command = None
+    _stored_data = []
+    _parsing_sysex = False
     
     def __init__(self, port, type="arduino", baudrate=57600):
         self.sp = serial.Serial(port, baudrate)
@@ -105,10 +107,23 @@ class Board(object):
         self.taken = { 'analog' : dict(map(lambda p: (p.pin_number, False), self.analog)),
                        'digital' : dict(map(lambda p: (p.pin_number, False), self.digital)) }
         # Setup default handlers for standard incoming commands
-        self.command_handlers[ANALOG_MESSAGE] = self._handle_analog_message
-        self.command_handlers[DIGITAL_MESSAGE] =  self._handle_digital_message
-        self.command_handlers[REPORT_VERSION] = self._handle_report_version
-        
+        self.add_cmd_handler(ANALOG_MESSAGE, self._handle_analog_message)
+        self.add_cmd_handler(DIGITAL_MESSAGE, self._handle_digital_message)
+        self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
+    
+    def add_cmd_handler(self, cmd, func):
+        """ 
+        Adds a command handler for a command.
+        """
+        len_args = len(inspect.getargspec(func)[0])
+        def add_meta(f):
+            def decorator(*args, **kwargs):
+                f(*args, **kwargs)
+            decorator.bytes_needed = len_args - 1 # exclude self
+            decorator.__name__ = f.__name__
+            return decorator
+        func = add_meta(func)
+        self._command_handlers[cmd] = func
         
     def get_pin(self, pin_def):
         """
@@ -184,50 +199,62 @@ class Board(object):
         """
         if not byte:
             return
-        byte = ord(byte)
+        data = ord(byte)
         if self._parsing_sysex:
-            if byte == END_SYSEX:
+            if data == END_SYSEX:
                 self._parsing_sysex = False
                 self._process_sysex_message(self._stored_data)
                 self._stored_data = []
             else:
-                self._stored_data.append(byte)
+                self._stored_data.append(data)
         elif not self._command:
-            if byte not in self.command_handlers:
+            # Commands can have 'channel data' like a pin nummber appended. 
+            # This is for commands smaller than 0xF0
+            if data < 0xF0:
+                #Multibyte command
+                command = data & 0xF0
+                self._stored_data.append(data & 0x0F)
+            else:
+                command = data
+            if command not in self._command_handlers:
                 # We received a byte not denoting a command with handler 
                 # while we are not processing any commands data. Nothing we
-                # can do about it so discard and we'll see what comes next.
+                # can do about it so discard everything and we'll see what 
+                # comes next.
+                self._stored_data = []
                 return
-            self._command = byte
+            self._command = command
         else:
             # This is a data command either belonging to a sysex message, or
             # to a multibyte command. Append it to the data and see if we can
             # process the command. If _process_command returns False, it
             # needs more data.
-            self._stored_data.append(byte)
-            try:
-                if self._process_command(self._command, self._stored_data):
-                    self._command = None
-                    self._stored_data = []
-            except ValueError:
+            self._stored_data.append(data)
+            if self._process_command(self._command, self._stored_data):
                 self._command = None
                 self._stored_data = []
     
-    def _process_command(command, data):
+    def _process_command(self, command, data):
         """
-        Tries to get a handler for this command from the self.cmds helper and will
-        return its return status.
+        Tries to get a handler for this command from the self.cmds helper.
+        Will return True if command is handled. This means either the handler
+        handled the data correctly, or it raised a ValueError for not getting
+        in the correct data. It will return False if there wasn't enough data
+        for the handler
         """
+        # TODO document that a handler should 
+        handler = self._command_handlers[command]
+        if len(data) < handler.bytes_needed:
+            return False
         try:
-             handle_cmd = self.command_handlers[command]
-             return handle_cmd(self, data)
-        except (KeyError, ValueError):
-            # something got corrupted
-            raise ValueError
+            handler(*data)
+        except ValueError:
+            return True
+        return True
             
     def _process_sysex_message(self, data):
         # TODO implement or make _process_command deal with it
-        pass
+        raise NotImplemented
             
     def get_firmata_version(self):
         """
@@ -241,26 +268,23 @@ class Board(object):
         self.sp.close()
         
     # Command handlers
-    def _handle_analog_message(self, data):
-        if len(data) < 3:
-            return False
-        pin_number, lsb, msb = data
-        value = float(msb << 7 | lsb) / 1023
-        self.analog[pin_number].value = value
+    def _handle_analog_message(self, pin_nr, lsb, msb):
+        value = float((msb << 7) + lsb) / 1023
+        # Only set the value if we are actually reporting
+        if self.analog[pin_nr].reporting:
+            self.analog[pin_nr].value = value
         return True
 
-    def _handle_digital_message(self, data):
-        if len(data) < 3:
-            return False
-        pin_number, lsb, msb = data
-        value = msb << 7 | lsb
-        self.digital[pin_number].value = value
+    def _handle_digital_message(self, port_nr, lsb, msb):
+        """
+        Digital messages always go by the whole port. This means we have a
+        bitmask wich we update the port.
+        """
+        mask = (msb << 7) + lsb
+        self.digital_ports[port_nr]._update(mask)
         return True
 
-    def _handle_report_version(self, data):
-        if len(data) < 2:
-            return False
-        major, minor = data
+    def _handle_report_version(self, major, minor):
         self.firmata_version = (major, minor)
         return True
 
@@ -290,13 +314,6 @@ class Port(object):
         self.reporting = False
         msg = chr(REPORT_DIGITAL + self.port_number + 0)
         self.board.sp.write(msg)
-        
-    def set_value(self, mask):
-        """Record the value of each of the input pins belonging to the port"""
-        
-        for pin in self.pins:
-            if pin.mode is INPUT:
-                pin.set_value((mask & (1 << pin.pin_number)) > 1)
                 
     def write(self):
         """Set the output pins of the port to the correct state"""
@@ -310,6 +327,15 @@ class Port(object):
         msg += chr(mask % 128)
         msg += chr(mask >> 7)
         self.board.sp.write(msg)
+        
+    def _update(self, mask):
+        """
+        Update the values for the pins marked as input with the mask.
+        """
+        if self.reporting:
+            for pin in self.pins:
+                if pin.mode is INPUT:
+                    pin.value = (mask & (1 << pin.pin_number)) > 1
 
 class Pin(object):
     """ A Pin representation """
@@ -325,8 +351,6 @@ class Pin(object):
         
     def __str__(self):
         type = {ANALOG : 'Analog', DIGITAL : 'Digital'}[self.type]
-        if self.board_name:
-            return "%s pin %d on %s" % (type, self.pin_number, self.board_name)
         return "%s pin %d" % (type, self.pin_number)
 
     def _set_mode(self, mode):
@@ -347,6 +371,8 @@ class Pin(object):
         command += chr(self.pin_number)
         command += chr(mode)
         self.board.sp.write(command)
+        if mode == INPUT:
+            self.enable_reporting()
         
     def _get_mode(self):
         return self._mode
@@ -357,10 +383,13 @@ class Pin(object):
         """ Set an input pin to report values """
         if self.mode is not INPUT:
             raise IOError, "%s is not an input and can therefore not report" % self
-        self.reporting = True
-        msg = chr(REPORT_ANALOG + self.pin_number)
-        msg += chr(1)
-        self.board.sp.write(msg)
+        if self.type == ANALOG:
+            self.reporting = True
+            msg = chr(REPORT_ANALOG + self.pin_number)
+            msg += chr(1)
+            self.board.sp.write(msg)
+        else:
+            self.port.enable_reporting() # TODO This is not going to work for non-optimized boards like Mega
         
     def disable_reporting(self):
         """ Disable the reporting of an input pin """

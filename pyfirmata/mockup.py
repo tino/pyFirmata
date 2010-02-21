@@ -23,7 +23,7 @@ class MockupSerial(deque):
     >>> s.close()
     """
     def __init__(self, port, baudrate, timeout=0.02):
-        pass
+        self.port = port or 'somewhere'
         
     def read(self, count=1):
         if count > 1:
@@ -41,7 +41,13 @@ class MockupSerial(deque):
         return val
             
     def write(self, value):
-        self.append(value)
+        """
+        Appends items flat to the deque. So iterables will be unpacked.
+        """
+        if hasattr(value, '__iter__'):
+            self.extend(value)
+        else:
+            self.append(value)
             
     def close(self):
         self.clear()
