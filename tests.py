@@ -12,9 +12,6 @@ from pyfirmata.util import to_7_bits
 
 # type                command  channel    first byte            second byte 
 # ---------------------------------------------------------------------------
-# report analog pin     0xC0   pin #      disable/enable(0/1)   - n/a -
-# report digital port   0xD0   port       disable/enable(0/1)   - n/a -
-# 
 # sysex start           0xF0   
 # set pin mode(I/O)     0xF4              pin # (0-127)         pin state(0=in)
 # sysex end             0xF7   
@@ -37,6 +34,13 @@ class BoardBaseTest(unittest.TestCase):
             
 class TestBoardMessages(BoardBaseTest):
     # TODO Test layout of Board Mega
+    def assert_serial(self, *list_of_chrs):
+        res = self.board.sp.read()
+        serial_msg = res
+        while res:
+            res = self.board.sp.read()
+            serial_msg += res
+        self.assertEqual(''.join(list_of_chrs), serial_msg)
 
     # First test the handlers
     def test_handle_analog_message(self):
@@ -62,6 +66,13 @@ class TestBoardMessages(BoardBaseTest):
     def test_handle_report_version(self):
         self.assertEqual(self.board.firmata_version, None)
         self.assertTrue(self.board._handle_report_version(2, 1))
+        self.assertEqual(self.board.firmata_version, (2, 1))
+        
+    def test_handle_report_firmware(self):
+        self.assertEqual(self.board.firmware, None)
+        data = [2, 1] + [ord(x) for x in 'Firmware_name']
+        self.assertTrue(self.board._handle_report_firmware(*data))
+        self.assertEqual(self.board.firmware, 'Firmware_name')
         self.assertEqual(self.board.firmata_version, (2, 1))
         
     # type                command  channel    first byte            second byte 
@@ -108,7 +119,63 @@ class TestBoardMessages(BoardBaseTest):
         self.board.sp.write([chr(pyfirmata.REPORT_VERSION), chr(2), chr(1)])
         self.iterate(3)
         self.assertEqual(self.board.firmata_version, (2, 1))
-        self.board._stored_data = []
+    
+    # Receive Firmware Name and Version (after query)
+    # 0  START_SYSEX (0xF0)
+    # 1  queryFirmware (0x79)
+    # 2  major version (0-127)
+    # 3  minor version (0-127)
+    # 4  first 7-bits of firmware name
+    # 5  second 7-bits of firmware name
+    # x  ...for as many bytes as it needs)
+    # 6  END_SYSEX (0xF7)
+    def test_incoming_report_firmware(self):
+        self.assertEqual(self.board.firmware, None)
+        self.assertEqual(self.board.firmata_version, None)
+        msg = [chr(pyfirmata.START_SYSEX), 
+               chr(pyfirmata.REPORT_FIRMWARE), 
+               chr(2), 
+               chr(1)] + [i for i in 'Firmware_name'] + \
+              [chr(pyfirmata.END_SYSEX)]
+        self.board.sp.write(msg)
+        self.iterate(25)
+        self.assertEqual(self.board.firmware, 'Firmware_name')
+        self.assertEqual(self.board.firmata_version, (2, 1))
+        
+    # type                command  channel    first byte            second byte 
+    # ---------------------------------------------------------------------------
+    # report analog pin     0xC0   pin #      disable/enable(0/1)   - n/a -
+    def test_report_analog(self):
+        self.board.analog[1].enable_reporting()
+        self.assert_serial(chr(0xC0 + 1), chr(1))
+        self.assertTrue(self.board.analog[1].reporting)
+        self.board.analog[1].disable_reporting()
+        self.assert_serial(chr(0xC0 + 1), chr(0))
+        self.assertFalse(self.board.analog[1].reporting)
+        
+    # type                command  channel    first byte            second byte 
+    # ---------------------------------------------------------------------------
+    # report digital port   0xD0   port       disable/enable(0/1)   - n/a -
+    def test_report_digital(self):
+        # This should enable reporting of whole port 1
+        self.board.digital[8]._mode = pyfirmata.INPUT # Outputs can't report
+        self.board.digital[8].enable_reporting()
+        self.assert_serial(chr(0xD0 + 1), chr(1))
+        self.assertTrue(self.board.digital_ports[1].reporting)
+        self.board.digital[8].disable_reporting()
+        self.assert_serial(chr(0xD0 + 1), chr(0))
+        
+    # Generic Sysex Message
+    # 0     START_SYSEX (0xF0)
+    # 1     sysex command (0x00-0x7F)
+    # x     between 0 and MAX_DATA_BYTES 7-bit bytes of arbitrary data
+    # last  END_SYSEX (0xF7)
+    def test_sysex_message(self):
+        # 0x7 is queryFirmware, but that doesn't matter for now
+        self.board.send_sysex(0x7, [1, 2, 3])
+        sysex = (chr(0xF0), chr(0x7), chr(1), chr(2), chr(3), chr(0xF7))
+        self.assert_serial(*sysex)
+        
         
 class TestBoardLayout(BoardBaseTest):
 

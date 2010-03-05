@@ -17,6 +17,21 @@ SET_PIN_MODE = 0xF4         # set a pin to INPUT/OUTPUT/PWM/etc
 END_SYSEX = 0xF7            # end a MIDI SysEx msg
 REPORT_VERSION = 0xF9       # report firmware version
 SYSTEM_RESET = 0xFF         # reset from MIDI
+QUERY_FIRMWARE = 0x79       # query the firmware name
+
+# extended command set using sysex (0-127/0x00-0x7F)
+# 0x00-0x0F reserved for user-defined commands */
+SERVO_CONFIG = 0x70         # set max angle, minPulse, maxPulse, freq
+STRING_DATA = 0x71          # a string message with 14-bits per char
+SHIFT_DATA = 0x75           # a bitstream to/from a shift register
+I2C_REQUEST = 0x76          # send an I2C read/write request
+I2C_REPLY = 0x77            # a reply to an I2C read request
+I2C_CONFIG = 0x78           # config I2C settings such as delay times and power pins
+REPORT_FIRMWARE = 0x79      # report name and version of the firmware
+SAMPLING_INTERVAL = 0x7A    # set the poll rate of the main loop
+SYSEX_NON_REALTIME = 0x7E   # MIDI Reserved for non-realtime messages
+SYSEX_REALTIME = 0x7F       # MIDI Reserved for realtime messages
+
 
 # Pin modes.
 # except from UNAVAILABLE taken from Firmata.h
@@ -44,6 +59,7 @@ class Board(object):
     Base class for any board
     """
     firmata_version = None
+    firmware = None
     _command_handlers = {}
     _command = None
     _stored_data = []
@@ -110,6 +126,7 @@ class Board(object):
         self.add_cmd_handler(ANALOG_MESSAGE, self._handle_analog_message)
         self.add_cmd_handler(DIGITAL_MESSAGE, self._handle_digital_message)
         self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
+        self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
     
     def add_cmd_handler(self, cmd, func):
         """ 
@@ -203,15 +220,17 @@ class Board(object):
         if self._parsing_sysex:
             if data == END_SYSEX:
                 self._parsing_sysex = False
-                self._process_sysex_message(self._stored_data)
+                self._process_command(self._stored_data[0], self._stored_data[1:])
                 self._stored_data = []
             else:
                 self._stored_data.append(data)
         elif not self._command:
-            # Commands can have 'channel data' like a pin nummber appended. 
-            # This is for commands smaller than 0xF0
-            if data < 0xF0:
-                #Multibyte command
+            if data == START_SYSEX:
+                self._parsing_sysex = True
+                return
+            elif data < 0xF0:
+                # Commands can have 'channel data' like a pin nummber appended. 
+                # This is for commands smaller than 0xF0
                 command = data & 0xF0
                 self._stored_data.append(data & 0x0F)
             else:
@@ -252,10 +271,6 @@ class Board(object):
             return True
         return True
             
-    def _process_sysex_message(self, data):
-        # TODO implement or make _process_command deal with it
-        raise NotImplemented
-            
     def get_firmata_version(self):
         """
         Returns a version tuple (major, mino) for the firmata firmware on the
@@ -287,6 +302,13 @@ class Board(object):
     def _handle_report_version(self, major, minor):
         self.firmata_version = (major, minor)
         return True
+        
+    def _handle_report_firmware(self, *data):
+        major = data[0]
+        minor = data[1]
+        self.firmata_version = (major, minor)
+        self.firmware = ''.join([chr(x) for x in data[2:]]) # TODO this is more complicated, values is send as 7 bit bytes
+        return True
 
 class Port(object):
     """ An 8-bit port on the board """
@@ -306,13 +328,15 @@ class Port(object):
     def enable_reporting(self):
         """ Enable reporting of values for the whole port """
         self.reporting = True
-        msg = chr(REPORT_DIGITAL + self.port_number + 1)
+        msg = chr(REPORT_DIGITAL + self.port_number)
+        msg += chr(1)
         self.board.sp.write(msg)
         
     def disable_reporting(self):
         """ Disable the reporting of the port """
         self.reporting = False
-        msg = chr(REPORT_DIGITAL + self.port_number + 0)
+        msg = chr(REPORT_DIGITAL + self.port_number)
+        msg += chr(0)
         self.board.sp.write(msg)
                 
     def write(self):
@@ -393,10 +417,13 @@ class Pin(object):
         
     def disable_reporting(self):
         """ Disable the reporting of an input pin """
-        self.reporting = False
-        msg = chr(REPORT_ANALOG + self.pin_number)
-        msg += chr(0)
-        self.board.sp.write(msg)
+        if self.type == ANALOG:
+            self.reporting = False
+            msg = chr(REPORT_ANALOG + self.pin_number)
+            msg += chr(0)
+            self.board.sp.write(msg)
+        else:
+            self.port.disable_reporting() # TODO This is not going to work for non-optimized boards like Mega
     
     def read(self):
         """
