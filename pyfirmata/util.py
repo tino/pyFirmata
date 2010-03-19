@@ -1,5 +1,6 @@
 import threading
 import serial
+import time
 
 class Iterator(threading.Thread):
     def __init__(self, board):

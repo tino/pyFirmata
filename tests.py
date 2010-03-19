@@ -215,7 +215,6 @@ class TestMockupBoardLayout(TestBoardLayout, TestBoardMessages):
     def setUp(self):
         self.board = mockup.MockupBoard('test')
 
-
 board_messages = unittest.TestLoader().loadTestsFromTestCase(TestBoardMessages)
 board_layout = unittest.TestLoader().loadTestsFromTestCase(TestBoardLayout)
 default = unittest.TestSuite([board_messages, board_layout])
