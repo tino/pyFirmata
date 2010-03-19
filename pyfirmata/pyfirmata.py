@@ -220,7 +220,8 @@ class Board(object):
         if self._parsing_sysex:
             if data == END_SYSEX:
                 self._parsing_sysex = False
-                self._process_command(self._stored_data[0], self._stored_data[1:])
+                if self._stored_data[0] in self._command_handlers:
+                    self._process_command(self._stored_data[0], self._stored_data[1:])
                 self._stored_data = []
             else:
                 self._stored_data.append(data)
