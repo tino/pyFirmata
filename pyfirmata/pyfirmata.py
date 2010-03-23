@@ -289,8 +289,11 @@ class Board(object):
     def _handle_analog_message(self, pin_nr, lsb, msb):
         value = float((msb << 7) + lsb) / 1023
         # Only set the value if we are actually reporting
-        if self.analog[pin_nr].reporting:
-            self.analog[pin_nr].value = value
+        try:
+            if self.analog[pin_nr].reporting:
+                self.analog[pin_nr].value = value
+        except IndexError:
+            raise ValueError
         return True
 
     def _handle_digital_message(self, port_nr, lsb, msb):
@@ -299,7 +302,10 @@ class Board(object):
         bitmask wich we update the port.
         """
         mask = (msb << 7) + lsb
-        self.digital_ports[port_nr]._update(mask)
+        try:
+            self.digital_ports[port_nr]._update(mask)
+        except IndexError:
+            raise ValueError
         return True
 
     def _handle_report_version(self, major, minor):
