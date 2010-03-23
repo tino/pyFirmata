@@ -262,7 +262,7 @@ class Board(object):
         in the correct data. It will return False if there wasn't enough data
         for the handler
         """
-        # TODO document that a handler should 
+        # TODO document that a handler should
         handler = self._command_handlers[command]
         if len(data) < handler.bytes_needed:
             return False
@@ -368,7 +368,8 @@ class Port(object):
         if self.reporting:
             for pin in self.pins:
                 if pin.mode is INPUT:
-                    pin.value = (mask & (1 << pin.pin_number)) > 1
+                    pin_nr = pin.pin_number - self.port_number * 8
+                    pin.value = (mask & (1 << pin_nr)) > 1
 
 class Pin(object):
     """ A Pin representation """

@@ -98,16 +98,16 @@ class TestBoardMessages(BoardBaseTest):
     # digital I/O message   0x90   port       LSB(bits 0-6)         MSB(bits 7-13)
     def test_incoming_digital_message(self):
         # A digital message sets the value for a whole port. We will set pin
-        # 2 (on port 0) to 1 to test if this is working.
-        self.board.digital[2].mode = pyfirmata.INPUT
+        # 9 (on port 1) to 1 to test if this is working.
+        self.board.digital[9].mode = pyfirmata.INPUT
         self.board.sp.clear() # clear mode sent over the wire.
         # Create the mask
         mask = 0
-        mask |= 1 << 2 # set the bit for pin 2 to to 1
-        self.assertEqual(self.board.digital[2].read(), None)
-        self.board.sp.write([chr(pyfirmata.DIGITAL_MESSAGE + 0), chr(mask % 128), chr(mask >> 7)])
+        mask |= 1 << (9 - 8) # set the bit for pin 9 to to 1
+        self.assertEqual(self.board.digital[9].read(), None)
+        self.board.sp.write([chr(pyfirmata.DIGITAL_MESSAGE + 1), chr(mask % 128), chr(mask >> 7)])
         self.iterate(3)
-        self.assertEqual(self.board.digital[2].read(), True)
+        self.assertEqual(self.board.digital[9].read(), True)
         
     # version report format
     # -------------------------------------------------
