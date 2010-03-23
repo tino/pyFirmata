@@ -268,7 +268,9 @@ class Board(object):
             return False
         try:
             handler(*data)
-        except ValueError:
+        except ValueError, TypeError:
+            # TypeError occurs when we pass to many arguments.
+            # ValueError may be thrown when the received data is not correct.
             return True
         return True
             
