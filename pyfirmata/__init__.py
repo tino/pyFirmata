@@ -1,1 +1,1 @@
-from pyfirmata import *
+from pyfirmata import Board
