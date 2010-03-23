@@ -340,6 +340,9 @@ class Port(object):
         msg = chr(REPORT_DIGITAL + self.port_number)
         msg += chr(1)
         self.board.sp.write(msg)
+        for pin in self.pins:
+            if pin.mode == INPUT:
+                pin.reporting = True # TODO Shouldn't this happen at the pin?
         
     def disable_reporting(self):
         """ Disable the reporting of the port """
