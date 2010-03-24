@@ -1,6 +1,7 @@
 import threading
 import serial
 import time
+import os
 import pyfirmata
 
 class Boards(dict):
