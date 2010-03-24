@@ -7,8 +7,6 @@ pyFirmata
 Usage
 =====
 
-.. code-block:: python
-
     >>> from pyfirmata import Board, util
     >>> board = Board('/dev/tty.usbserial-A6008rIF')
     >>> board.digital[13].write(1)
