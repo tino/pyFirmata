@@ -65,11 +65,14 @@ class Board(object):
     _stored_data = []
     _parsing_sysex = False
     
-    def __init__(self, port, type="arduino", baudrate=57600):
+    def __init__(self, port, type="arduino", baudrate=57600, name=None):
         self.sp = serial.Serial(port, baudrate)
         # Allow 2 secs for Arduino's auto-reset to happen
         self.pass_time(2)
         self.type = type
+        self.name = name
+        if not self.name:
+            self.name = port
         self.setup_layout(BOARDS[type])
         
     def __str__(self):
