@@ -176,6 +176,13 @@ class TestBoardMessages(BoardBaseTest):
         sysex = (chr(0xF0), chr(0x7), chr(1), chr(2), chr(3), chr(0xF7))
         self.assert_serial(*sysex)
         
+    def test_too_much_data(self):
+        """ 
+        ``_process_command`` should return True when too much data is given
+        for a handler.
+        """
+        res = self.board._process_command(pyfirmata.ANALOG_MESSAGE, [1, 1, 1, 1, 1])
+        self.assertTrue(res)
         
 class TestBoardLayout(BoardBaseTest):
 
