@@ -1,3 +1,3 @@
-from pyfirmata import Board
+from pyfirmata import *
 
 __version__ = '0.9'
