@@ -74,6 +74,8 @@ class Board(object):
         if not self.name:
             self.name = port
         self.setup_layout(BOARDS[type])
+        # TODO Test if we get a firmware name and version, otherwise there 
+        # probably isn't any Firmata installed
         
     def __str__(self):
         return "Board (%s) on %s" % (self.type, self.sp.port)
@@ -217,6 +219,7 @@ class Board(object):
         Does the actual processing of the data from the microcontroller and
         delegates the command processing to :method:`_process_command`
         """
+        # TODO Make this method greedy: read all the bytes from a command at once
         if not byte:
             return
         data = ord(byte)
