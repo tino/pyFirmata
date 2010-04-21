@@ -212,73 +212,42 @@ class Board(object):
         This method should be called in a main loop, or in an
         :class:`Iterator` instance to keep this boards pin values up to date
         """
-        self._process_data(self.sp.read())
-        
-    def _process_data(self, byte):
-        """
-        Does the actual processing of the data from the microcontroller and
-        delegates the command processing to :method:`_process_command`
-        """
-        # TODO Make this method greedy: read all the bytes from a command at once
+        byte = self.sp.read()
         if not byte:
             return
         data = ord(byte)
-        if self._parsing_sysex:
-            if data == END_SYSEX:
-                self._parsing_sysex = False
-                if self._stored_data[0] in self._command_handlers:
-                    self._process_command(self._stored_data[0], self._stored_data[1:])
-                self._stored_data = []
-            else:
-                self._stored_data.append(data)
-        elif not self._command:
-            if data == START_SYSEX:
-                self._parsing_sysex = True
+        received_data = []
+        handler = None
+        if data < START_SYSEX:
+            # These commands can have 'channel data' like a pin nummber appended.
+            try:
+                handler = self._command_handlers[data & 0xF0]
+            except KeyError:
                 return
-            elif data < 0xF0:
-                # Commands can have 'channel data' like a pin nummber appended. 
-                # This is for commands smaller than 0xF0
-                command = data & 0xF0
-                self._stored_data.append(data & 0x0F)
-            else:
-                command = data
-            if command not in self._command_handlers:
-                # We received a byte not denoting a command with handler 
-                # while we are not processing any commands data. Nothing we
-                # can do about it so discard everything and we'll see what 
-                # comes next.
-                self._stored_data = []
+            received_data.append(data & 0x0F)
+            while len(received_data) < handler.bytes_needed:
+                received_data.append(ord(self.sp.read()))
+        elif data == START_SYSEX:
+            data = ord(self.sp.read())
+            handler = self._command_handlers.get(data)
+            if not handler:
                 return
-            self._command = command
+            data = ord(self.sp.read())
+            while data != END_SYSEX:
+                received_data.append(data)
+                data = ord(self.sp.read())
         else:
-            # This is a data command either belonging to a sysex message, or
-            # to a multibyte command. Append it to the data and see if we can
-            # process the command. If _process_command returns False, it
-            # needs more data.
-            self._stored_data.append(data)
-            if self._process_command(self._command, self._stored_data):
-                self._command = None
-                self._stored_data = []
-    
-    def _process_command(self, command, data):
-        """
-        Tries to get a handler for this command from the self.cmds helper.
-        Will return True if command is handled. This means either the handler
-        handled the data correctly, or it raised a ValueError for not getting
-        in the correct data. It will return False if there wasn't enough data
-        for the handler
-        """
-        # TODO document that a handler should
-        handler = self._command_handlers[command]
-        if len(data) < handler.bytes_needed:
-            return False
+            try:
+                handler = self._command_handlers[data]
+            except KeyError:
+                return
+            while len(received_data) < handler.bytes_needed:
+                received_data.append(ord(self.sp.read()))
+        # Handle the data
         try:
-            handler(*data)
-        except (ValueError, TypeError):
-            # TypeError occurs when we pass to many arguments.
-            # ValueError may be thrown when the received data is not correct.
-            return True
-        return True
+            handler(*received_data)
+        except ValueError:
+            pass
             
     def get_firmata_version(self):
         """
@@ -300,7 +269,6 @@ class Board(object):
                 self.analog[pin_nr].value = value
         except IndexError:
             raise ValueError
-        return True
 
     def _handle_digital_message(self, port_nr, lsb, msb):
         """
@@ -312,18 +280,15 @@ class Board(object):
             self.digital_ports[port_nr]._update(mask)
         except IndexError:
             raise ValueError
-        return True
 
     def _handle_report_version(self, major, minor):
         self.firmata_version = (major, minor)
-        return True
         
     def _handle_report_firmware(self, *data):
         major = data[0]
         minor = data[1]
         self.firmata_version = (major, minor)
         self.firmware = ''.join([chr(x) for x in data[2:]]) # TODO this is more complicated, values is send as 7 bit bytes
-        return True
 
 class Port(object):
     """ An 8-bit port on the board """

@@ -1,8 +1,6 @@
 import unittest
 import serial
 import time
-from optparse import OptionParser
-
 import pyfirmata
 from pyfirmata import mockup
 from pyfirmata.boards import BOARDS
@@ -12,14 +10,8 @@ from pyfirmata.util import to_7_bits
 
 # type                command  channel    first byte            second byte 
 # ---------------------------------------------------------------------------
-# sysex start           0xF0   
 # set pin mode(I/O)     0xF4              pin # (0-127)         pin state(0=in)
-# sysex end             0xF7   
-# protocol version      0xF9              major version         minor version
 # system reset          0xFF
-#
-# SysEx-based commands (0x00-0x7F) are used for an extended command set.
-
 
 class BoardBaseTest(unittest.TestCase):
     def setUp(self):
@@ -27,10 +19,6 @@ class BoardBaseTest(unittest.TestCase):
         pyfirmata.pyfirmata.serial.Serial = mockup.MockupSerial
         self.board = pyfirmata.Board('')
         self.board._stored_data = [] # FIXME How can it be that a fresh instance sometimes still contains data?
-        
-    def iterate(self, count):
-        for i in range(count):
-            self.board.iterate()
             
 class TestBoardMessages(BoardBaseTest):
     # TODO Test layout of Board Mega
@@ -48,7 +36,7 @@ class TestBoardMessages(BoardBaseTest):
         self.assertEqual(self.board.analog[3].read(), None)
         # This sould set it correctly. 1023 (127, 7 in to 7 bit bytes) is the
         # max value an analog pin will send and it should result in a value 1
-        self.assertTrue(self.board._handle_analog_message(3, 127, 7))
+        self.board._handle_analog_message(3, 127, 7)
         self.assertEqual(self.board.analog[3].read(), 1.0)
         
     def test_handle_digital_message(self):
@@ -60,18 +48,18 @@ class TestBoardMessages(BoardBaseTest):
         mask = 0
         mask |= 1 << 5 # set the bit for pin 5 to to 1
         self.assertEqual(self.board.digital[5].read(), None)
-        self.assertTrue(self.board._handle_digital_message(0, mask % 128, mask >> 7))
+        self.board._handle_digital_message(0, mask % 128, mask >> 7)
         self.assertEqual(self.board.digital[5].read(), True)
         
     def test_handle_report_version(self):
         self.assertEqual(self.board.firmata_version, None)
-        self.assertTrue(self.board._handle_report_version(2, 1))
+        self.board._handle_report_version(2, 1)
         self.assertEqual(self.board.firmata_version, (2, 1))
         
     def test_handle_report_firmware(self):
         self.assertEqual(self.board.firmware, None)
         data = [2, 1] + [ord(x) for x in 'Firmware_name']
-        self.assertTrue(self.board._handle_report_firmware(*data))
+        self.board._handle_report_firmware(*data)
         self.assertEqual(self.board.firmware, 'Firmware_name')
         self.assertEqual(self.board.firmata_version, (2, 1))
         
@@ -83,13 +71,13 @@ class TestBoardMessages(BoardBaseTest):
         self.assertEqual(self.board.analog[4].reporting, False)
         # Should do nothing as the pin isn't set to report
         self.board.sp.write([chr(pyfirmata.ANALOG_MESSAGE + 4), chr(127), chr(7)])
-        self.iterate(3)
+        self.board.iterate()
         self.assertEqual(self.board.analog[4].read(), None)
         self.board.analog[4].enable_reporting()
         self.board.sp.clear()
         # This should set analog port 4 to 1
         self.board.sp.write([chr(pyfirmata.ANALOG_MESSAGE + 4), chr(127), chr(7)])
-        self.iterate(3)
+        self.board.iterate()
         self.assertEqual(self.board.analog[4].read(), 1.0)
         self.board._stored_data = []
     
@@ -106,7 +94,7 @@ class TestBoardMessages(BoardBaseTest):
         mask |= 1 << (9 - 8) # set the bit for pin 9 to to 1
         self.assertEqual(self.board.digital[9].read(), None)
         self.board.sp.write([chr(pyfirmata.DIGITAL_MESSAGE + 1), chr(mask % 128), chr(mask >> 7)])
-        self.iterate(3)
+        self.board.iterate()
         self.assertEqual(self.board.digital[9].read(), True)
         
     # version report format
@@ -117,7 +105,7 @@ class TestBoardMessages(BoardBaseTest):
     def test_incoming_report_version(self):
         self.assertEqual(self.board.firmata_version, None)
         self.board.sp.write([chr(pyfirmata.REPORT_VERSION), chr(2), chr(1)])
-        self.iterate(3)
+        self.board.iterate()
         self.assertEqual(self.board.firmata_version, (2, 1))
     
     # Receive Firmware Name and Version (after query)
@@ -138,7 +126,7 @@ class TestBoardMessages(BoardBaseTest):
                chr(1)] + [i for i in 'Firmware_name'] + \
               [chr(pyfirmata.END_SYSEX)]
         self.board.sp.write(msg)
-        self.iterate(25)
+        self.board.iterate()
         self.assertEqual(self.board.firmware, 'Firmware_name')
         self.assertEqual(self.board.firmata_version, (2, 1))
         
@@ -178,11 +166,21 @@ class TestBoardMessages(BoardBaseTest):
         
     def test_too_much_data(self):
         """ 
-        ``_process_command`` should return True when too much data is given
-        for a handler.
+        When we send random bytes, before or after a command, they should be
+        ignored to prevent cascading errors when missing a byte.
         """
-        res = self.board._process_command(pyfirmata.ANALOG_MESSAGE, [1, 1, 1, 1, 1])
-        self.assertTrue(res)
+        self.board.analog[4].enable_reporting()
+        self.board.sp.clear()
+        # Crap
+        self.board.sp.write([chr(i) for i in range(10)])
+        # This should set analog port 4 to 1
+        self.board.sp.write([chr(pyfirmata.ANALOG_MESSAGE + 4), chr(127), chr(7)])
+        # Crap
+        self.board.sp.write([chr(10-i) for i in range(10)])
+        while len(self.board.sp):
+            self.board.iterate()
+        self.assertEqual(self.board.analog[4].read(), 1.0)
+        
         
 class TestBoardLayout(BoardBaseTest):
 
@@ -228,13 +226,13 @@ default = unittest.TestSuite([board_messages, board_layout])
 mockup_suite = unittest.TestLoader().loadTestsFromTestCase(TestMockupBoardLayout)
 
 if __name__ == '__main__':
+    from optparse import OptionParser
     parser = OptionParser()
     parser.add_option("-m", "--mockup", dest="mockup", action="store_true",
         help="Also run the mockup tests")
     options, args = parser.parse_args()
     if not options.mockup:
-        print "Running normal suite. Also consider running the live (-l, --live) \
-                and mockup (-m, --mockup) suites"
+        print "Running normal suite. Also consider running the mockup (-m, --mockup) suite"
         unittest.TextTestRunner(verbosity=3).run(default)
     if options.mockup:
         print "Running the mockup test suite"
