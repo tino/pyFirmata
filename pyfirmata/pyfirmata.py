@@ -65,20 +65,20 @@ class Board(object):
     _stored_data = []
     _parsing_sysex = False
     
-    def __init__(self, port, type="arduino", baudrate=57600, name=None):
+    def __init__(self, port, layout, baudrate=57600, name=None):
         self.sp = serial.Serial(port, baudrate)
         # Allow 2 secs for Arduino's auto-reset to happen
+        # TODO Is this still necessary?
         self.pass_time(2)
-        self.type = type
         self.name = name
         if not self.name:
             self.name = port
-        self.setup_layout(BOARDS[type])
+        self.setup_layout(layout)
         # TODO Test if we get a firmware name and version, otherwise there 
         # probably isn't any Firmata installed
         
     def __str__(self):
-        return "Board (%s) on %s" % (self.type, self.sp.port)
+        return "Board %s on %s" % (self.name, self.sp.port)
         
     def __del__(self):
         ''' 
