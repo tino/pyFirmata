@@ -158,11 +158,19 @@ class TestBoardMessages(BoardBaseTest):
     # 1     sysex command (0x00-0x7F)
     # x     between 0 and MAX_DATA_BYTES 7-bit bytes of arbitrary data
     # last  END_SYSEX (0xF7)
-    def test_sysex_message(self):
-        # 0x7 is queryFirmware, but that doesn't matter for now
-        self.board.send_sysex(0x7, [1, 2, 3])
-        sysex = (chr(0xF0), chr(0x7), chr(1), chr(2), chr(3), chr(0xF7))
+    def test_send_sysex_message(self):
+        # 0x79 is queryFirmware, but that doesn't matter for now
+        self.board.send_sysex(0x79, [1, 2, 3])
+        sysex = (chr(0xF0), chr(0x79), chr(1), chr(2), chr(3), chr(0xF7))
         self.assert_serial(*sysex)
+        
+    def test_receive_sysex_message(self):
+        sysex = (chr(0xF0), chr(0x79), chr(2), chr(1), 'a', 'b', 'c', chr(0xF7))
+        self.board.sp.write(sysex)
+        while len(self.board.sp):
+            self.board.iterate()
+        self.assertEqual(self.board.firmata_version, (2, 1))
+        self.assertEqual(self.board.firmware, 'abc')
         
     def test_too_much_data(self):
         """ 
