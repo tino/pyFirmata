@@ -17,7 +17,7 @@ class BoardBaseTest(unittest.TestCase):
     def setUp(self):
         # Test with the MockupSerial so no real connection is needed
         pyfirmata.pyfirmata.serial.Serial = mockup.MockupSerial
-        self.board = pyfirmata.Board('')
+        self.board = pyfirmata.Board('', BOARDS['arduino'])
         self.board._stored_data = [] # FIXME How can it be that a fresh instance sometimes still contains data?
             
 class TestBoardMessages(BoardBaseTest):
@@ -218,7 +218,7 @@ class TestMockupBoardLayout(TestBoardLayout, TestBoardMessages):
     MockupBoard.
     """
     def setUp(self):
-        self.board = mockup.MockupBoard('test')
+        self.board = mockup.MockupBoard('test', BOARDS['arduino'])
 
 board_messages = unittest.TestLoader().loadTestsFromTestCase(TestBoardMessages)
 board_layout = unittest.TestLoader().loadTestsFromTestCase(TestBoardLayout)

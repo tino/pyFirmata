@@ -54,9 +54,9 @@ class MockupSerial(deque):
         
 class MockupBoard(pyfirmata.Board):
 
-    def __init__(self, port='', type="arduino", values_dict={}):
+    def __init__(self, port, layout, values_dict={}):
         self.sp = MockupSerial(port, 57600)
-        self.setup_layout(pyfirmata.BOARDS[type])
+        self.setup_layout(layout)
         self.values_dict = values_dict
         self.id = 1
         
