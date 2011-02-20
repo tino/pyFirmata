@@ -9,7 +9,8 @@ class Arduino(Board):
     """
     A board that wil set itself up as a normal Arduino.
     """
-    def __init__(*args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        args = list(args)
         args.append(BOARDS['arduino'])
         super(Arduino, self).__init__(*args, **kwargs)
         
@@ -20,7 +21,8 @@ class ArduinoMega(Board):
     """
     A board that wil set itself up as an Arduino Mega.
     """
-    def __init__(*args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        args = list(args)
         args.append(BOARDS['arduino_mega'])
         super(Arduino, self).__init__(*args, **kwargs)
     
