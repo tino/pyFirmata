@@ -6,5 +6,6 @@ cov
 .coverage
 applet
 Firmata-*
+Firmata
 hardwareAbstraction
 docs/_build
