@@ -261,7 +261,8 @@ class Board(object):
         
     def exit(self):
         """ Call this to exit cleanly. """
-        self.sp.close()
+        if hasattr(self, 'sp'):
+            self.sp.close()
         
     # Command handlers
     def _handle_analog_message(self, pin_nr, lsb, msb):
