@@ -37,7 +37,7 @@ class Iterator(threading.Thread):
     def run(self):
         while 1:
             try:
-                while self.board.iterate():
+                while self.board.bytes_available():
                     self.board.iterate()
                 time.sleep(0.001)
             except (AttributeError, serial.SerialException, OSError), e:

@@ -206,6 +206,9 @@ class Board(object):
             self.sp.write(byte)
         self.sp.write(chr(END_SYSEX))
         
+    def bytes_available(self):
+        return self.sp.inWaiting()
+
     def iterate(self):
         """ 
         Reads and handles data from the microcontroller over the serial port.
