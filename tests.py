@@ -1,10 +1,9 @@
 import unittest
 import serial
-import time
 import pyfirmata
 from pyfirmata import mockup
 from pyfirmata.boards import BOARDS
-from pyfirmata.util import to_7_bits
+from pyfirmata.util import str_to_two_byte_iter
 
 # Messages todo left:
 
@@ -58,7 +57,7 @@ class TestBoardMessages(BoardBaseTest):
         
     def test_handle_report_firmware(self):
         self.assertEqual(self.board.firmware, None)
-        data = [2, 1] + [ord(x) for x in 'Firmware_name']
+        data = [2, 1] + str_to_two_byte_iter('Firmware_name')
         self.board._handle_report_firmware(*data)
         self.assertEqual(self.board.firmware, 'Firmware_name')
         self.assertEqual(self.board.firmata_version, (2, 1))
@@ -123,7 +122,7 @@ class TestBoardMessages(BoardBaseTest):
         msg = [chr(pyfirmata.START_SYSEX), 
                chr(pyfirmata.REPORT_FIRMWARE), 
                chr(2), 
-               chr(1)] + [i for i in 'Firmware_name'] + \
+               chr(1)] + str_to_two_byte_iter('Firmware_name') + \
               [chr(pyfirmata.END_SYSEX)]
         self.board.sp.write(msg)
         self.board.iterate()
@@ -165,7 +164,8 @@ class TestBoardMessages(BoardBaseTest):
         self.assert_serial(*sysex)
         
     def test_receive_sysex_message(self):
-        sysex = (chr(0xF0), chr(0x79), chr(2), chr(1), 'a', 'b', 'c', chr(0xF7))
+        sysex = (chr(0xF0), chr(0x79), chr(2), chr(1), 'a', '\x00', 'b', 
+            '\x00', 'c', '\x00', chr(0xF7))
         self.board.sp.write(sysex)
         while len(self.board.sp):
             self.board.iterate()

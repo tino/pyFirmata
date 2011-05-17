@@ -1,7 +1,7 @@
 import serial
 import inspect
 import time
-from boards import BOARDS
+from util import two_byte_iter_to_str
 
 # Message command bytes - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -90,11 +90,7 @@ class Board(object):
         
     def send_as_two_bytes(self, val):
         self.sp.write(chr(val % 128) + chr(val >> 7))
-        
-    def received_as_two_bytes(self, bytes):
-        lsb, msb = bytes
-        return msb << 7 | lsb
-        
+
     def setup_layout(self, board_layout):
         """
         Setup the Pin instances based on the given board-layout. Maybe it will
@@ -292,7 +288,7 @@ class Board(object):
         major = data[0]
         minor = data[1]
         self.firmata_version = (major, minor)
-        self.firmware = ''.join([chr(x) for x in data[2:]]) # TODO this is more complicated, values is send as 7 bit bytes
+        self.firmware = two_byte_iter_to_str(data[2:])
 
 class Port(object):
     """ An 8-bit port on the board """

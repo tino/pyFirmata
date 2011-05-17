@@ -57,17 +57,17 @@ class Iterator(threading.Thread):
                     pass
                 raise
                 
-def to_7_bits(integer):
+def to_two_bytes(integer):
     """
     Breaks an integer into two 7 bit bytes.
     
     >>> for i in range(32768):
-    ...     val = to_7_bits(i)
+    ...     val = to_two_bytes(i)
     ...     assert len(val) == 2
     ...
-    >>> to_7_bits(32767)
+    >>> to_two_bytes(32767)
     ('\\x7f', '\\xff')
-    >>> to_7_bits(32768)
+    >>> to_two_bytes(32768)
     Traceback (most recent call last):
         ...
     ValueError: Can't handle values bigger than 32767 (max for 2 bits)
@@ -76,6 +76,81 @@ def to_7_bits(integer):
     if integer > 32767:
         raise ValueError, "Can't handle values bigger than 32767 (max for 2 bits)"
     return chr(integer % 128), chr(integer >> 7)
+    
+def from_two_bytes(bytes):
+    """
+    Return an integer from two 7 bit bytes.
+    
+    >>> for i in range(32766, 32768):
+    ...     val = to_two_bytes(i)
+    ...     ret = from_two_bytes(val)
+    ...     assert ret == i
+    ...
+    >>> from_two_bytes(('\\xff', '\\xff'))
+    32767
+    >>> from_two_bytes(('\\x7f', '\\xff'))
+    32767
+    """
+    lsb, msb = bytes
+    try:
+        # Usually bytes have been converted to integers with ord already
+        return msb << 7 | lsb
+    except TypeError:
+        # But add this for easy testing
+        # One of them can be a string, or both
+        try:
+            lsb = ord(lsb)
+        except TypeError:
+            pass
+        try:
+            msb = ord(msb)
+        except TypeError:
+            pass
+        return msb << 7 | lsb
+    
+def two_byte_iter_to_str(bytes):
+    """
+    Return a string made from a list of two byte chars.
+    
+    >>> string, s = 'StandardFirmata', []
+    >>> for i in string:
+    ...   s.append(i)
+    ...   s.append('\\x00')
+    >>> two_byte_iter_to_str(s)
+    'StandardFirmata'
+    
+    >>> string, s = 'StandardFirmata', []
+    >>> for i in string:
+    ...   s.append(ord(i))
+    ...   s.append(ord('\\x00'))
+    >>> two_byte_iter_to_str(s)
+    'StandardFirmata'
+    """
+    bytes = list(bytes)
+    chars = []
+    while bytes:
+        lsb = bytes.pop(0)
+        try:
+            msb = bytes.pop(0)
+        except IndexError:
+            msb = 0x00
+        chars.append(chr(from_two_bytes((lsb, msb))))
+    return ''.join(chars)
+    
+def str_to_two_byte_iter(string):
+    """
+    Return a iter consisting of two byte chars from a string.
+    
+    >>> string, iter = 'StandardFirmata', []
+    >>> for i in string:
+    ...   iter.append(i)
+    ...   iter.append('\\x00')
+    >>> assert iter == str_to_two_byte_iter(string)
+     """
+    bytes = []
+    for char in string:
+        bytes += list(to_two_bytes(ord(char)))
+    return bytes
 
 def break_to_bytes(value):
     """
