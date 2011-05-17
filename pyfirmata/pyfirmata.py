@@ -67,14 +67,19 @@ class Board(object):
     
     def __init__(self, port, layout, baudrate=57600, name=None):
         self.sp = serial.Serial(port, baudrate)
-        # Allow 2 secs for Arduino's auto-reset to happen
-        # TODO Is this still necessary?
-        self.pass_time(2)
+        # Allow 5 secs for Arduino's auto-reset to happen
+        # Alas, Firmata blinks it's version before printing it to serial
+        # For 2.3, even 5 seconds might not be enough.
+        # TODO Find a more reliable way to wait until the board is ready
+        self.pass_time(5)
         self.name = name
         if not self.name:
             self.name = port
         self.setup_layout(layout)
-        # TODO Test if we get a firmware name and version, otherwise there 
+        # Iterate over the first messages to get firmware data
+        while self.bytes_available():
+            self.iterate()
+        # TODO Test whether we got a firmware name and version, otherwise there 
         # probably isn't any Firmata installed
         
     def __str__(self):
