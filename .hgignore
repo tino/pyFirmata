@@ -9,3 +9,4 @@ Firmata-*
 Firmata
 hardwareAbstraction
 docs/_build
+build/
