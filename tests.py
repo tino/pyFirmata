@@ -61,7 +61,7 @@ class TestBoardMessages(BoardBaseTest):
         data = [2, 1] + str_to_two_byte_iter('Firmware_name')
         self.board._handle_report_firmware(*data)
         self.assertEqual(self.board.firmware, 'Firmware_name')
-        self.assertEqual(self.board.firmata_version, (2, 1))
+        self.assertEqual(self.board.firmware_version, (2, 1))
         
     # type                command  channel    first byte            second byte 
     # ---------------------------------------------------------------------------
@@ -119,7 +119,7 @@ class TestBoardMessages(BoardBaseTest):
     # 6  END_SYSEX (0xF7)
     def test_incoming_report_firmware(self):
         self.assertEqual(self.board.firmware, None)
-        self.assertEqual(self.board.firmata_version, None)
+        self.assertEqual(self.board.firmware_version, None)
         msg = [chr(pyfirmata.START_SYSEX), 
                chr(pyfirmata.REPORT_FIRMWARE), 
                chr(2), 
@@ -128,7 +128,7 @@ class TestBoardMessages(BoardBaseTest):
         self.board.sp.write(msg)
         self.board.iterate()
         self.assertEqual(self.board.firmware, 'Firmware_name')
-        self.assertEqual(self.board.firmata_version, (2, 1))
+        self.assertEqual(self.board.firmware_version, (2, 1))
         
     # type                command  channel    first byte            second byte 
     # ---------------------------------------------------------------------------
@@ -170,7 +170,7 @@ class TestBoardMessages(BoardBaseTest):
         self.board.sp.write(sysex)
         while len(self.board.sp):
             self.board.iterate()
-        self.assertEqual(self.board.firmata_version, (2, 1))
+        self.assertEqual(self.board.firmware_version, (2, 1))
         self.assertEqual(self.board.firmware, 'abc')
         
     def test_too_much_data(self):

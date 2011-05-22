@@ -60,6 +60,7 @@ class Board(object):
     """
     firmata_version = None
     firmware = None
+    firmware_version = None
     _command_handlers = {}
     _command = None
     _stored_data = []
@@ -292,7 +293,7 @@ class Board(object):
     def _handle_report_firmware(self, *data):
         major = data[0]
         minor = data[1]
-        self.firmata_version = (major, minor)
+        self.firmware_version = (major, minor)
         self.firmware = two_byte_iter_to_str(data[2:])
 
 class Port(object):
