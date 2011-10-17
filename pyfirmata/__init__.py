@@ -24,7 +24,7 @@ class ArduinoMega(Board):
     def __init__(self, *args, **kwargs):
         args = list(args)
         args.append(BOARDS['arduino_mega'])
-        super(Arduino, self).__init__(*args, **kwargs)
+        super(ArduinoMega, self).__init__(*args, **kwargs)
     
     def __str__(self):
         return 'Arduino Mega %s on %s' % (self.name, self.sp.port)
