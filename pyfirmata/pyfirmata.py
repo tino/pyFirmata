@@ -40,6 +40,7 @@ INPUT = 0          # as defined in wiring.h
 OUTPUT = 1         # as defined in wiring.h
 ANALOG = 2         # analog pin in analogInput mode
 PWM = 3            # digital pin in PWM output mode
+SERVO = 4          # digital pin in SERVO mode
 
 # Pin types
 DIGITAL = OUTPUT   # same as OUTPUT below
@@ -370,7 +371,8 @@ class Pin(object):
     def _set_mode(self, mode):
         """
         Set the mode of operation for the pin
-        :arg mode: Can be one of the pin modes: INPUT, OUTPUT, ANALOG or PWM
+        :arg mode: Can be one of the pin modes: INPUT, OUTPUT, ANALOG, PWM or
+            SERVO
         
         """
         if mode is UNAVAILABLE:
@@ -380,6 +382,9 @@ class Pin(object):
             raise IOError, "%s does not have PWM capabilities" % self
         if self._mode is UNAVAILABLE:
             raise IOError, "%s can not be used through Firmata" % self
+        if mode == SERVO and self.type != DIGITAL:
+            raise IOError, "Only digital pins can dirve servos! %s is not \
+                digital" % self
         self._mode = mode
         command = chr(SET_PIN_MODE)
         command += chr(self.pin_number)
@@ -428,8 +433,9 @@ class Pin(object):
         """
         Output a voltage from the pin
 
-        :arg value: Uses value as a boolean if the pin is in output mode, or 
-            expects a float from 0 to 1 if the pin is in PWM mode.
+        :arg value: Uses value as a boolean if the pin is in output mode, or
+            expects a float from 0 to 1 if the pin is in PWM mode. If the pin 
+            is in SERVO the value should be in degrees.
         
         """
         if self.mode is UNAVAILABLE:
@@ -452,6 +458,12 @@ class Pin(object):
                 msg += chr(value % 128)
                 msg += chr(value >> 7)
                 self.board.sp.write(msg)
+            elif self.mode is SERVO:
+                value = int(value)
+                msg = chr(ANALOG_MESSAGE + self.pin_number)
+                msg += chr(value % 128)
+                msg += chr(value >> 7)
+                self.board.sp.write(msg)
                 
     def send_sysex(self, sysex_cmd, data=[]):
         """
@@ -469,4 +481,26 @@ class Pin(object):
             except ValueError:
                 byte = chr(byte >> 7) # TODO send multiple bytes
             self.board.sp.write(byte)
+        self.board.sp.write(chr(END_SYSEX))
+        
+    def servo_config(self, min_pulse, max_pulse, angle=0):
+        """
+        Servo config on this pin.
+        
+        # TODO use send_sysex for this.
+        # TODO document
+        # TODO should this move to board?
+        """
+        pulse_min = chr(min_pulse % 128)
+        pulse_min += chr(min_pulse >> 7)
+        pulse_max = chr(max_pulse % 128)
+        pulse_max += chr(max_pulse >> 7)
+        angle_byte = chr(angle % 128)
+        angle_byte += chr(angle >> 7)
+        
+        self.board.sp.write(chr(START_SYSEX))
+        self.board.sp.write(chr(SERVO_CONFIG))
+        self.board.sp.write(chr(self.pin_number))
+        self.board.sp.write(pulse_min)
+        self.board.sp.write(pulse_max)
         self.board.sp.write(chr(END_SYSEX))
