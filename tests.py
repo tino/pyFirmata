@@ -164,6 +164,9 @@ class TestBoardMessages(BoardBaseTest):
         sysex = (chr(0xF0), chr(0x79), chr(1), chr(2), chr(3), chr(0xF7))
         self.assert_serial(*sysex)
         
+    def test_send_sysex_to_big_data(self):
+        self.assertRaises(ValueError, self.board.send_sysex, 0x79, [256, 1])
+        
     def test_receive_sysex_message(self):
         sysex = (chr(0xF0), chr(0x79), chr(2), chr(1), 'a', '\x00', 'b', 
             '\x00', 'c', '\x00', chr(0xF7))

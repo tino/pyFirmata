@@ -199,7 +199,7 @@ class Board(object):
         Sends a SysEx msg.
         
         :arg sysex_cmd: A sysex command byte
-        :arg data: A list of data values
+        :arg data: A list of 7-bit bytes of arbitrary data
         """
         self.sp.write(chr(START_SYSEX))
         self.sp.write(chr(sysex_cmd))
@@ -207,7 +207,8 @@ class Board(object):
             try:
                 byte = chr(byte)
             except ValueError:
-                byte = chr(byte >> 7) # TODO send multiple bytes
+                raise ValueError('Sysex data can be 7-bit bytes only. '
+                    'Consider using utils.to_two_bytes for bigger bytes.')
             self.sp.write(byte)
         self.sp.write(chr(END_SYSEX))
         
@@ -471,24 +472,6 @@ class Pin(object):
                 msg += chr(value % 128)
                 msg += chr(value >> 7)
                 self.board.sp.write(msg)
-                
-    def send_sysex(self, sysex_cmd, data=[]):
-        """
-        Sends a SysEx msg.
-        
-        :arg sysex_cmd: A sysex command byte
-        :arg data: A list of data values
-        """
-        # TODO make the boards send_sysex available to the pin
-        self.board.sp.write(chr(START_SYSEX))
-        self.board.sp.write(chr(sysex_cmd))
-        for byte in data:
-            try:
-                byte = chr(byte)
-            except ValueError:
-                byte = chr(byte >> 7) # TODO send multiple bytes
-            self.board.sp.write(byte)
-        self.board.sp.write(chr(END_SYSEX))
         
     def servo_config(self, min_pulse, max_pulse, angle=0):
         """
