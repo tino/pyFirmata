@@ -178,6 +178,8 @@ class Board(object):
         if pin.type is DIGITAL:
             if bits[2] == 'p':
                 pin.mode = PWM
+            elif bits[2] == 's':
+                pin.mode = SERVO
             elif bits[2] is not 'o':
                 pin.mode = INPUT
         else:
