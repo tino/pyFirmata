@@ -266,6 +266,11 @@ class Board(object):
         
     def exit(self):
         """ Call this to exit cleanly. """
+        # First detach all servo's, otherwise it somehow doesn't want to close...
+        # FIXME
+        for pin in self.digital:
+            if pin.mode == SERVO:
+                pin.mode = OUTPUT
         if hasattr(self, 'sp'):
             self.sp.close()
         
