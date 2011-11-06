@@ -1,10 +1,11 @@
 import unittest
 import doctest
 import serial
+from itertools import chain
 import pyfirmata
 from pyfirmata import mockup
 from pyfirmata.boards import BOARDS
-from pyfirmata.util import str_to_two_byte_iter
+from pyfirmata.util import str_to_two_byte_iter, to_two_bytes
 
 # Messages todo left:
 
@@ -28,7 +29,7 @@ class TestBoardMessages(BoardBaseTest):
         while res:
             res = self.board.sp.read()
             serial_msg += res
-        self.assertEqual(''.join(list_of_chrs), serial_msg)
+        self.assertEqual(''.join(list(list_of_chrs)), serial_msg)
 
     # First test the handlers
     def test_handle_analog_message(self):
@@ -164,6 +165,9 @@ class TestBoardMessages(BoardBaseTest):
         sysex = (chr(0xF0), chr(0x79), chr(1), chr(2), chr(3), chr(0xF7))
         self.assert_serial(*sysex)
         
+    def test_send_sysex_to_big_data(self):
+        self.assertRaises(ValueError, self.board.send_sysex, 0x79, [256, 1])
+        
     def test_receive_sysex_message(self):
         sysex = (chr(0xF0), chr(0x79), chr(2), chr(1), 'a', '\x00', 'b', 
             '\x00', 'c', '\x00', chr(0xF7))
@@ -189,8 +193,54 @@ class TestBoardMessages(BoardBaseTest):
         while len(self.board.sp):
             self.board.iterate()
         self.assertEqual(self.board.analog[4].read(), 1.0)
-        
-        
+    
+    # Servo config
+    # --------------------
+    # 0  START_SYSEX (0xF0)
+    # 1  SERVO_CONFIG (0x70)
+    # 2  pin number (0-127)
+    # 3  minPulse LSB (0-6)
+    # 4  minPulse MSB (7-13)
+    # 5  maxPulse LSB (0-6)
+    # 6  maxPulse MSB (7-13)
+    # 7  END_SYSEX (0xF7)
+    #
+    # then sets angle
+    # 8  analog I/O message (0xE0)
+    # 9  angle LSB
+    # 10 angle MSB
+    def test_servo_config(self):
+        self.board.servo_config(2)
+        data = chain([chr(0xF0), chr(0x70), chr(2)], to_two_bytes(544), 
+            to_two_bytes(2400), chr(0xF7), chr(0xE0 + 2), chr(0), chr(0))
+        self.assert_serial(*data)
+
+    def test_servo_config_min_max_pulse(self):
+        self.board.servo_config(2, 600, 2000)
+        data = chain([chr(0xF0), chr(0x70), chr(2)], to_two_bytes(600), 
+            to_two_bytes(2000), chr(0xF7), chr(0xE0 + 2), chr(0), chr(0))
+        self.assert_serial(*data)
+
+    def test_servo_config_min_max_pulse_angle(self):
+        self.board.servo_config(2, 600, 2000, angle=90)
+        data = chain([chr(0xF0), chr(0x70), chr(2)], to_two_bytes(600), 
+            to_two_bytes(2000), chr(0xF7))
+        angle_set = [chr(0xE0 + 2), chr(90 % 128), 
+            chr(90 >> 7)] # Angle set happens through analog message
+        data = list(data) + angle_set
+        self.assert_serial(*data)
+
+    def test_servo_config_invalid_pin(self):
+        self.assertRaises(IOError, self.board.servo_config, 1)
+
+    def test_set_mode_servo(self):
+        p = self.board.digital[2]
+        p.mode = pyfirmata.SERVO
+        data = chain([chr(0xF0), chr(0x70), chr(2)], to_two_bytes(544), 
+            to_two_bytes(2400), chr(0xF7), chr(0xE0 + 2), chr(0), chr(0))
+        self.assert_serial(*data)
+
+
 class TestBoardLayout(BoardBaseTest):
 
     def test_pwm_layout(self):
