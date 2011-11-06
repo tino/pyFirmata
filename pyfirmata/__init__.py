@@ -1,7 +1,7 @@
 from pyfirmata import *
 from boards import BOARDS
 
-__version__ = '0.9.3'
+__version__ = '0.9.4'
 
 # shortcut classes
 
