@@ -1,7 +1,8 @@
 import serial
 import inspect
 import time
-from util import two_byte_iter_to_str
+import itertools
+from util import two_byte_iter_to_str, to_two_bytes
 
 # Message command bytes - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -199,13 +200,16 @@ class Board(object):
         Sends a SysEx msg.
         
         :arg sysex_cmd: A sysex command byte
-        :arg data: A list of 7-bit bytes of arbitrary data
+        :arg data: A list of 7-bit bytes of arbitrary data (bytes may be 
+            already converted to chr's)
         """
         self.sp.write(chr(START_SYSEX))
         self.sp.write(chr(sysex_cmd))
         for byte in data:
             try:
                 byte = chr(byte)
+            except TypeError:
+                pass # byte is already a chr
             except ValueError:
                 raise ValueError('Sysex data can be 7-bit bytes only. '
                     'Consider using utils.to_two_bytes for bigger bytes.')
@@ -264,6 +268,22 @@ class Board(object):
         board.
         """
         return self.firmata_version
+        
+    def servo_config(self, pin, min_pulse=544, max_pulse=2400, angle=0):
+        """
+        Configure a pin as servo with min_pulse, max_pulse and first angle.
+        ``min_pulse`` and ``max_pulse`` default to the arduino defaults.
+        """
+        if pin > len(self.digital) or self.digital[pin].mode == UNAVAILABLE:
+            raise IOError("Pin %s is not a valid servo pin")
+        data = itertools.chain([pin], to_two_bytes(min_pulse),
+                                        to_two_bytes(max_pulse))
+        self.send_sysex(SERVO_CONFIG, data)
+        
+        # set pin._mode to SERVO so that it sends analog messages
+        # don't set pin.mode as that calls this method
+        self.digital[pin]._mode = SERVO
+        self.digital[pin].write(angle)
         
     def exit(self):
         """ Call this to exit cleanly. """
@@ -377,22 +397,22 @@ class Pin(object):
         return "%s pin %d" % (type, self.pin_number)
 
     def _set_mode(self, mode):
-        """
-        Set the mode of operation for the pin
-        :arg mode: Can be one of the pin modes: INPUT, OUTPUT, ANALOG, PWM or
-            SERVO
-        
-        """
         if mode is UNAVAILABLE:
             self._mode = UNAVAILABLE
             return
-        if mode is PWM and not self.PWM_CAPABLE:
-            raise IOError, "%s does not have PWM capabilities" % self
         if self._mode is UNAVAILABLE:
-            raise IOError, "%s can not be used through Firmata" % self
-        if mode == SERVO and self.type != DIGITAL:
-            raise IOError, "Only digital pins can dirve servos! %s is not \
-                digital" % self
+            raise IOError("%s can not be used through Firmata" % self)
+        if mode is PWM and not self.PWM_CAPABLE:
+            raise IOError("%s does not have PWM capabilities" % self)
+        if mode == SERVO:
+            if self.type != DIGITAL:
+                raise IOError("Only digital pins can drive servos! %s is not"
+                    "digital" % self)
+            self._mode = SERVO
+            self.board.servo_config(self.pin_number)
+            return
+        
+        # Set mode with SET_PIN_MODE message
         self._mode = mode
         command = chr(SET_PIN_MODE)
         command += chr(self.pin_number)
@@ -405,6 +425,10 @@ class Pin(object):
         return self._mode
         
     mode = property(_get_mode, _set_mode)
+    """
+    Mode of operation for the pin. Can be one of the pin modes: INPUT, OUTPUT,
+    ANALOG, PWM or SERVO (or UNAVAILABLE)
+    """
     
     def enable_reporting(self):
         """ Set an input pin to report values """
@@ -472,25 +496,3 @@ class Pin(object):
                 msg += chr(value % 128)
                 msg += chr(value >> 7)
                 self.board.sp.write(msg)
-        
-    def servo_config(self, min_pulse, max_pulse, angle=0):
-        """
-        Servo config on this pin.
-        
-        # TODO use send_sysex for this.
-        # TODO document
-        # TODO should this move to board?
-        """
-        pulse_min = chr(min_pulse % 128)
-        pulse_min += chr(min_pulse >> 7)
-        pulse_max = chr(max_pulse % 128)
-        pulse_max += chr(max_pulse >> 7)
-        angle_byte = chr(angle % 128)
-        angle_byte += chr(angle >> 7)
-        
-        self.board.sp.write(chr(START_SYSEX))
-        self.board.sp.write(chr(SERVO_CONFIG))
-        self.board.sp.write(chr(self.pin_number))
-        self.board.sp.write(pulse_min)
-        self.board.sp.write(pulse_max)
-        self.board.sp.write(chr(END_SYSEX))
