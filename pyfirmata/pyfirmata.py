@@ -378,7 +378,7 @@ class Port(object):
             for pin in self.pins:
                 if pin.mode is INPUT:
                     pin_nr = pin.pin_number - self.port_number * 8
-                    pin.value = (mask & (1 << pin_nr)) > 1
+                    pin.value = (mask & (1 << pin_nr)) > 0
 
 class Pin(object):
     """ A Pin representation """
