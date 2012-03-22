@@ -109,28 +109,30 @@ class Board(object):
         self.analog = []
         for i in board_layout['analog']:
             self.analog.append(Pin(self, i))
-        # Only create digital ports if the Firmata can use them (ie. not on the Mega...)
-        # TODO Why is (TOTAL_FIRMATA_PINS + 7) / 8 used in Firmata?
-        if board_layout['use_ports']:
-            self.digital = []
-            self.digital_ports = []
-            for i in range(len(board_layout['digital']) / 7):
-                self.digital_ports.append(Port(self, i))
-            # Allow to access the Pin instances directly
-            for port in self.digital_ports:
-                self.digital += port.pins
-            for i in board_layout['pwm']:
-                self.digital[i].PWM_CAPABLE = True
-        else:
-            self.digital = []
-            for i in board_layout['digital']:
-                self.digital.append(Pin(self.sp, i, type=DIGITAL))
+
+        self.digital = []
+        self.digital_ports = []
+        for i in xrange(0, len(board_layout['digital']), 8):
+            num_pins = len(board_layout['digital'][i:i+8])
+            port_number = i / 8
+            self.digital_ports.append(Port(self, port_number, num_pins))
+
+        # Allow to access the Pin instances directly
+        for port in self.digital_ports:
+            self.digital += port.pins
+        
+        # Setup PWM pins
+        for i in board_layout['pwm']:
+            self.digital[i].PWM_CAPABLE = True
+
         # Disable certain ports like Rx/Tx and crystal ports
         for i in board_layout['disabled']:
             self.digital[i].mode = UNAVAILABLE
+
         # Create a dictionary of 'taken' pins. Used by the get_pin method
         self.taken = { 'analog' : dict(map(lambda p: (p.pin_number, False), self.analog)),
                        'digital' : dict(map(lambda p: (p.pin_number, False), self.digital)) }
+
         # Setup default handlers for standard incoming commands
         self.add_cmd_handler(ANALOG_MESSAGE, self._handle_analog_message)
         self.add_cmd_handler(DIGITAL_MESSAGE, self._handle_digital_message)
@@ -327,13 +329,13 @@ class Board(object):
 
 class Port(object):
     """ An 8-bit port on the board """
-    def __init__(self, board, port_number):
+    def __init__(self, board, port_number, num_pins=8):
         self.board = board
         self.port_number = port_number
         self.reporting = False
         
         self.pins = []
-        for i in range(8):
+        for i in range(num_pins):
             pin_nr = i + self.port_number * 8
             self.pins.append(Pin(self.board, pin_nr, type=DIGITAL, port=self))
             
