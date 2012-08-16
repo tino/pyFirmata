@@ -75,7 +75,7 @@ def to_two_bytes(integer):
     """
     if integer > 32767:
         raise ValueError("Can't handle values bigger than 32767 (max for 2 bits)")
-    return chr(integer % 128), chr(integer >> 7)
+    return bytearray([integer % 128, integer >> 7])
     
 def from_two_bytes(bytes):
     """

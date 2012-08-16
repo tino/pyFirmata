@@ -97,7 +97,7 @@ class Board(object):
         self.exit()
         
     def send_as_two_bytes(self, val):
-        self.sp.write(chr(val % 128) + chr(val >> 7))
+        self.sp.write(bytearray([val % 128, val >> 7]))
 
     def setup_layout(self, board_layout):
         """
@@ -202,21 +202,13 @@ class Board(object):
         Sends a SysEx msg.
         
         :arg sysex_cmd: A sysex command byte
-        :arg data: A list of 7-bit bytes of arbitrary data (bytes may be 
-            already converted to chr's)
+        : arg data: a bytearray of 7-bit bytes of arbitrary data
         """
-        self.sp.write(chr(START_SYSEX))
-        self.sp.write(chr(sysex_cmd))
-        for byte in data:
-            try:
-                byte = chr(byte)
-            except TypeError:
-                pass # byte is already a chr
-            except ValueError:
-                raise ValueError('Sysex data can be 7-bit bytes only. '
-                    'Consider using utils.to_two_bytes for bigger bytes.')
-            self.sp.write(byte)
-        self.sp.write(chr(END_SYSEX))
+        msg = bytearray([START_SYSEX, sysex_cmd])
+        msg += data
+        msg += bytearray([END_SYSEX])
+        self.sp.write(msg)
+
         
     def bytes_available(self):
         return self.sp.inWaiting()
@@ -345,18 +337,18 @@ class Port(object):
     def enable_reporting(self):
         """ Enable reporting of values for the whole port """
         self.reporting = True
-        msg = chr(REPORT_DIGITAL + self.port_number)
-        msg += chr(1)
+        msg = bytearray([REPORT_DIGITAL + port.port_number, 1])
         self.board.sp.write(msg)
+
         for pin in self.pins:
             if pin.mode == INPUT:
                 pin.reporting = True # TODO Shouldn't this happen at the pin?
+
         
     def disable_reporting(self):
         """ Disable the reporting of the port """
         self.reporting = False
-        msg = chr(REPORT_DIGITAL + self.port_number)
-        msg += chr(0)
+        msg = bytearray([REPORT_DIGITAL + self.port_number, 0])
         self.board.sp.write(msg)
                 
     def write(self):
@@ -367,9 +359,7 @@ class Port(object):
                 if pin.value == 1:
                     pin_nr = pin.pin_number - self.port_number * 8
                     mask |= 1 << pin_nr
-        msg = chr(DIGITAL_MESSAGE + self.port_number)
-        msg += chr(mask % 128)
-        msg += chr(mask >> 7)
+        msg = bytearray([DIGITAL_MESSAGE + self.port_number, mask % 128, mask >> 7])
         self.board.sp.write(msg)
         
     def _update(self, mask):
@@ -415,11 +405,8 @@ class Pin(object):
             return
         
         # Set mode with SET_PIN_MODE message
-        self._mode = mode
-        command = chr(SET_PIN_MODE)
-        command += chr(self.pin_number)
-        command += chr(mode)
-        self.board.sp.write(command)
+        self._mode = mode        
+        self.sp.write(bytearray([SET_PIN_MODE, self.pin_number, mode]))
         if mode == INPUT:
             self.enable_reporting()
         
@@ -438,8 +425,7 @@ class Pin(object):
             raise IOError("{0} is not an input and can therefore not report".format(self))
         if self.type == ANALOG:
             self.reporting = True
-            msg = chr(REPORT_ANALOG + self.pin_number)
-            msg += chr(1)
+            msg = bytearray([REPORT_ANALOG + self.pin_number, 1])
             self.board.sp.write(msg)
         else:
             self.port.enable_reporting() # TODO This is not going to work for non-optimized boards like Mega
@@ -448,8 +434,7 @@ class Pin(object):
         """ Disable the reporting of an input pin """
         if self.type == ANALOG:
             self.reporting = False
-            msg = chr(REPORT_ANALOG + self.pin_number)
-            msg += chr(0)
+            msg = bytearray([REPORT_ANALOG + self.pin_number, 0])
             self.board.sp.write(msg)
         else:
             self.port.disable_reporting() # TODO This is not going to work for non-optimized boards like Mega
@@ -482,19 +467,13 @@ class Pin(object):
                 if self.port:
                     self.port.write()
                 else:
-                    msg = chr(DIGITAL_MESSAGE)
-                    msg += chr(self.pin_number)
-                    msg += chr(value)
+                    msg = bytearray([DIGITAL_MESSAGE, self.pin_number, value])
                     self.board.sp.write(msg)
             elif self.mode is PWM:
                 value = int(round(value * 255))
-                msg = chr(ANALOG_MESSAGE + self.pin_number)
-                msg += chr(value % 128)
-                msg += chr(value >> 7)
+                msg = bytearray([ANALOG_MESSAGE + self.pin_number, value % 128, value >> 7])
                 self.board.sp.write(msg)
             elif self.mode is SERVO:
                 value = int(value)
-                msg = chr(ANALOG_MESSAGE + self.pin_number)
-                msg += chr(value % 128)
-                msg += chr(value >> 7)
+                msg = bytearray([ANALOG_MESSAGE + self.pin_number, value % 128, value >> 7])
                 self.board.sp.write(msg)
