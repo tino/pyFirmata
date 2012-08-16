@@ -86,7 +86,7 @@ class Board(object):
         # probably isn't any Firmata installed
         
     def __str__(self):
-        return "Board %s on %s" % (self.name, self.sp.port)
+        return "Board{0.name} on {0.sp.port}".format(self)
         
     def __del__(self):
         ''' 
@@ -112,7 +112,7 @@ class Board(object):
 
         self.digital = []
         self.digital_ports = []
-        for i in xrange(0, len(board_layout['digital']), 8):
+        for i in range(0, len(board_layout['digital']), 8):
             num_pins = len(board_layout['digital'][i:i+8])
             port_number = i / 8
             self.digital_ports.append(Port(self, port_number, num_pins))
@@ -170,11 +170,11 @@ class Board(object):
         part = getattr(self, a_d)
         pin_nr = int(bits[1])
         if pin_nr >= len(part):
-            raise InvalidPinDefError('Invalid pin definition: %s at position 3 on %s' % (pin_def, self.name))
+            raise InvalidPinDefError('Invalid pin definition: {0} at position 3 on {1}'.format(pin_def, self.name))
         if getattr(part[pin_nr], 'mode', None)  == UNAVAILABLE:
-            raise InvalidPinDefError('Invalid pin definition: UNAVAILABLE pin %s at position on %s' % (pin_def, self.name))
+            raise InvalidPinDefError('Invalid pin definition: UNAVAILABLE pin {0} at position on {1}'.format(pin_def, self.name))
         if self.taken[a_d][pin_nr]:
-            raise PinAlreadyTakenError('%s pin %s is already taken on %s' % (a_d, bits[1], self.name))
+            raise PinAlreadyTakenError('{0} pin {1} is already taken on {2}'.format(a_d, bits[1], self.name))
         # ok, should be available
         pin = part[pin_nr]
         self.taken[a_d][pin_nr] = True
@@ -277,7 +277,7 @@ class Board(object):
         ``min_pulse`` and ``max_pulse`` default to the arduino defaults.
         """
         if pin > len(self.digital) or self.digital[pin].mode == UNAVAILABLE:
-            raise IOError("Pin %s is not a valid servo pin")
+            raise IOError("Pin {0} is not a valid servo pin".format(pin))
         data = itertools.chain([pin], to_two_bytes(min_pulse),
                                         to_two_bytes(max_pulse))
         self.send_sysex(SERVO_CONFIG, data)
@@ -340,7 +340,7 @@ class Port(object):
             self.pins.append(Pin(self.board, pin_nr, type=DIGITAL, port=self))
             
     def __str__(self):
-        return "Digital Port %i on %s" % (self.port_number, self.board)
+        return "Digital Port {0.port_number} on {0.board}".format(self)
         
     def enable_reporting(self):
         """ Enable reporting of values for the whole port """
@@ -396,20 +396,20 @@ class Pin(object):
         
     def __str__(self):
         type = {ANALOG : 'Analog', DIGITAL : 'Digital'}[self.type]
-        return "%s pin %d" % (type, self.pin_number)
+        return "{0} pin {1}".format(type, self.pin_number)
 
     def _set_mode(self, mode):
         if mode is UNAVAILABLE:
             self._mode = UNAVAILABLE
             return
         if self._mode is UNAVAILABLE:
-            raise IOError("%s can not be used through Firmata" % self)
+            raise IOError("{0} can not be used through Firmata".format(self))
         if mode is PWM and not self.PWM_CAPABLE:
-            raise IOError("%s does not have PWM capabilities" % self)
+            raise IOError("{0} does not have PWM capabilities".format(self))
         if mode == SERVO:
             if self.type != DIGITAL:
-                raise IOError("Only digital pins can drive servos! %s is not"
-                    "digital" % self)
+                raise IOError("Only digital pins can drive servos! {0} is not"
+                    "digital".format(self))
             self._mode = SERVO
             self.board.servo_config(self.pin_number)
             return
@@ -435,7 +435,7 @@ class Pin(object):
     def enable_reporting(self):
         """ Set an input pin to report values """
         if self.mode is not INPUT:
-            raise IOError, "%s is not an input and can therefore not report" % self
+            raise IOError("{0} is not an input and can therefore not report".format(self))
         if self.type == ANALOG:
             self.reporting = True
             msg = chr(REPORT_ANALOG + self.pin_number)
@@ -460,7 +460,7 @@ class Pin(object):
         boards :meth:`Board.iterate` method. Value is alway in the range 0.0 - 1.0
         """
         if self.mode == UNAVAILABLE:
-            raise IOError, "Cannot read pin %s"% self.__str__()
+            raise IOError("Cannot read pin {0}".format(self.__str__()))
         return self.value
         
     def write(self, value):
@@ -473,9 +473,9 @@ class Pin(object):
         
         """
         if self.mode is UNAVAILABLE:
-            raise IOError, "%s can not be used through Firmata" % self
+            raise IOError("{0} can not be used through Firmata".format(self))
         if self.mode is INPUT:
-            raise IOError, "%s is set up as an INPUT and can therefore not be written to" % self
+            raise IOError("{0} is set up as an INPUT and can therefore not be written to".format(self))
         if value is not self.value:
             self.value = value
             if self.mode is OUTPUT:

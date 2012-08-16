@@ -24,9 +24,9 @@ def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.us
             else:
                 boards.append(board)
     if len(boards) == 0:
-        raise IOError, "No boards found in %s with identifier %s" % (base_dir, identifier)
+        raise IOError("No boards found in {0} with identifier {1}".format(base_dir, identifier))
     elif len(boards) > 1:
-        raise IOError, "More than one board found!"
+        raise IOError("More than one board found!")
     return boards[0]
 
 class Iterator(threading.Thread):
@@ -40,11 +40,11 @@ class Iterator(threading.Thread):
                 while self.board.bytes_available():
                     self.board.iterate()
                 time.sleep(0.001)
-            except (AttributeError, serial.SerialException, OSError), e:
+            except (AttributeError, serial.SerialException, OSError) as e:
                 # this way we can kill the thread by setting the board object
                 # to None, or when the serial port is closed by board.exit()
                 break
-            except Exception, e:
+            except Exception as e:
                 # catch 'error: Bad file descriptor'
                 # iterate may be called while the serial port is being closed,
                 # causing an "error: (9, 'Bad file descriptor')"
@@ -74,7 +74,7 @@ def to_two_bytes(integer):
     
     """
     if integer > 32767:
-        raise ValueError, "Can't handle values bigger than 32767 (max for 2 bits)"
+        raise ValueError("Can't handle values bigger than 32767 (max for 2 bits)")
     return chr(integer % 128), chr(integer >> 7)
     
 def from_two_bytes(bytes):
