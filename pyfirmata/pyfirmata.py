@@ -114,7 +114,7 @@ class Board(object):
         self.digital_ports = []
         for i in range(0, len(board_layout['digital']), 8):
             num_pins = len(board_layout['digital'][i:i+8])
-            port_number = i / 8
+            port_number = int(i / 8)
             self.digital_ports.append(Port(self, port_number, num_pins))
 
         # Allow to access the Pin instances directly
@@ -358,7 +358,10 @@ class Port(object):
             if pin.mode == OUTPUT:
                 if pin.value == 1:
                     pin_nr = pin.pin_number - self.port_number * 8
-                    mask |= 1 << pin_nr
+                    mask |= 1 << int(pin_nr)
+#        print("type mask", type(mask))
+#        print("type self.portnumber", type(self.port_number))
+#        print("type pinnr", type(pin_nr))
         msg = bytearray([DIGITAL_MESSAGE + self.port_number, mask % 128, mask >> 7])
         self.board.sp.write(msg)
         
