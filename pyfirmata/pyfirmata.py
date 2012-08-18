@@ -1,7 +1,7 @@
 import serial
 import inspect
 import time
-import itertools
+
 from util import two_byte_iter_to_str, to_two_bytes
 
 # Message command bytes - straight from Firmata.h
@@ -197,7 +197,7 @@ class Board(object):
         while time.time() < cont:
             time.sleep(0)
             
-    def send_sysex(self, sysex_cmd, data=[]):
+    def send_sysex(self, sysex_cmd, data):
         """
         Sends a SysEx msg.
         
@@ -270,8 +270,10 @@ class Board(object):
         """
         if pin > len(self.digital) or self.digital[pin].mode == UNAVAILABLE:
             raise IOError("Pin {0} is not a valid servo pin".format(pin))
-        data = itertools.chain([pin], to_two_bytes(min_pulse),
-                                        to_two_bytes(max_pulse))
+        
+        data = bytearray([pin])
+        data += to_two_bytes(min_pulse)
+        data += to_two_bytes(max_pulse)
         self.send_sysex(SERVO_CONFIG, data)
         
         # set pin._mode to SERVO so that it sends analog messages
