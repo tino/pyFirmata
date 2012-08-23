@@ -1,9 +1,10 @@
 import threading
-import serial
 import time
 import os
-import pyfirmata
-from boards import BOARDS
+
+import serial
+
+from .boards import BOARDS
 
 def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.usbserial',):
     """

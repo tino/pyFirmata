@@ -1,10 +1,11 @@
-import serial
 import inspect
 import time
 
-from util import two_byte_iter_to_str, to_two_bytes
+import serial
 
-# Message command bytes - straight from Firmata.h
+from .util import two_byte_iter_to_str, to_two_bytes
+
+# Message command bytes (0x80(128) to 0xFF(255)) - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
 ANALOG_MESSAGE = 0xE0       # send data for an analog pin (or PWM)
 DIGITAL_PULSE = 0x91        # SysEx command to send a digital pulse
