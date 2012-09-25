@@ -1,3 +1,5 @@
+from __future__ import division
+from __future__ import unicode_literals
 import inspect
 import time
 
@@ -187,7 +189,7 @@ class Board(object):
                 pin.mode = PWM
             elif bits[2] == 's':
                 pin.mode = SERVO
-            elif bits[2] is not 'o':
+            elif bits[2] != 'o':
                 pin.mode = INPUT
         else:
             pin.enable_reporting()
@@ -209,8 +211,8 @@ class Board(object):
         : arg data: a bytearray of 7-bit bytes of arbitrary data
         """
         msg = bytearray([START_SYSEX, sysex_cmd])
-        msg += data
-        msg += bytearray([END_SYSEX])
+        msg.extend(data)
+        msg.append(END_SYSEX)
         self.sp.write(msg)
 
         
@@ -226,7 +228,7 @@ class Board(object):
         byte = self.sp.read()
         if not byte:
             return
-        data = ord(byte)
+        data = byte
         received_data = []
         handler = None
         if data < START_SYSEX:
@@ -237,23 +239,23 @@ class Board(object):
                 return
             received_data.append(data & 0x0F)
             while len(received_data) < handler.bytes_needed:
-                received_data.append(ord(self.sp.read()))
+                received_data.append(self.sp.read())
         elif data == START_SYSEX:
-            data = ord(self.sp.read())
+            data = self.sp.read()
             handler = self._command_handlers.get(data)
             if not handler:
                 return
-            data = ord(self.sp.read())
+            data = self.sp.read()
             while data != END_SYSEX:
                 received_data.append(data)
-                data = ord(self.sp.read())
+                data = self.sp.read()
         else:
             try:
                 handler = self._command_handlers[data]
             except KeyError:
                 return
             while len(received_data) < handler.bytes_needed:
-                received_data.append(ord(self.sp.read()))
+                received_data.append(self.sp.read())
         # Handle the data
         try:
             handler(*received_data)
@@ -343,7 +345,7 @@ class Port(object):
     def enable_reporting(self):
         """ Enable reporting of values for the whole port """
         self.reporting = True
-        msg = bytearray([REPORT_DIGITAL + port.port_number, 1])
+        msg = bytearray([REPORT_DIGITAL + self.port_number, 1])
         self.board.sp.write(msg)
 
         for pin in self.pins:
@@ -414,8 +416,8 @@ class Pin(object):
             return
         
         # Set mode with SET_PIN_MODE message
-        self._mode = mode        
-        self.sp.write(bytearray([SET_PIN_MODE, self.pin_number, mode]))
+        self._mode = mode
+        self.board.sp.write(bytearray([SET_PIN_MODE, self.pin_number, mode]))
         if mode == INPUT:
             self.enable_reporting()
         

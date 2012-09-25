@@ -34,12 +34,12 @@ class MockupSerial(deque):
                 try:
                     val.append(self.popleft())
                 except IndexError:
-                    val.append('')
+                    val.append(None)
         else:
             try:
                 val = self.popleft()
             except IndexError:
-                val = ''
+                val = None
         return val
             
     def write(self, value):
