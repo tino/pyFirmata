@@ -225,7 +225,7 @@ class Board(object):
         byte = self.sp.read()
         if not byte:
             return
-        data = ord(byte)
+        data = byte
         received_data = []
         handler = None
         if data < START_SYSEX:
@@ -236,23 +236,23 @@ class Board(object):
                 return
             received_data.append(data & 0x0F)
             while len(received_data) < handler.bytes_needed:
-                received_data.append(ord(self.sp.read()))
+                received_data.append(self.sp.read())
         elif data == START_SYSEX:
-            data = ord(self.sp.read())
+            data = self.sp.read()
             handler = self._command_handlers.get(data)
             if not handler:
                 return
-            data = ord(self.sp.read())
+            data = self.sp.read()
             while data != END_SYSEX:
                 received_data.append(data)
-                data = ord(self.sp.read())
+                data = self.sp.read()
         else:
             try:
                 handler = self._command_handlers[data]
             except KeyError:
                 return
             while len(received_data) < handler.bytes_needed:
-                received_data.append(ord(self.sp.read()))
+                received_data.append(self.sp.read())
         # Handle the data
         try:
             handler(*received_data)
