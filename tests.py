@@ -340,12 +340,12 @@ if __name__ == '__main__':
         help="Also run the mockup tests")
     options, args = parser.parse_args()
     if not options.mockup:
-        print "Running normal suite. Also consider running the mockup (-m, --mockup) suite"
+        print("Running normal suite. Also consider running the mockup (-m, --mockup) suite")
         unittest.TextTestRunner(verbosity=3).run(default)
         from pyfirmata import util
-        print "Running doctests for pyfirmata.util. (No output = No errors)"
+        print("Running doctests for pyfirmata.util. (No output = No errors)")
         doctest.testmod(util)
-        print "Done running doctests"
+        print("Done running doctests")
     if options.mockup:
-        print "Running the mockup test suite"
+        print("Running the mockup test suite")
         unittest.TextTestRunner(verbosity=2).run(mockup_suite)
