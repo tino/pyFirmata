@@ -50,6 +50,9 @@ SERVO = 4          # digital pin in SERVO mode
 DIGITAL = OUTPUT   # same as OUTPUT below
 # ANALOG is already defined above
 
+# Time to wait after initializing serial, used in Board.__init__
+BOARD_SETUP_WAIT_TIME = 5
+
 class PinAlreadyTakenError(Exception):
     pass
 
@@ -77,7 +80,7 @@ class Board(object):
         # Alas, Firmata blinks it's version before printing it to serial
         # For 2.3, even 5 seconds might not be enough.
         # TODO Find a more reliable way to wait until the board is ready
-        self.pass_time(5)
+        self.pass_time(BOARD_SETUP_WAIT_TIME)
         self.name = name
         if not self.name:
             self.name = port
