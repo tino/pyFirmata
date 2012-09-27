@@ -40,8 +40,12 @@ class MockupSerial(deque):
                 val = self.popleft()
             except IndexError:
                 val = None
-        return val
-            
+
+        if val is not None:
+            return bytearray([val])
+        else:
+            return
+
     def write(self, value):
         """
         Appends items flat to the deque. So iterables will be unpacked.
