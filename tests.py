@@ -31,13 +31,13 @@ class BoardBaseTest(unittest.TestCase):
 
 class TestBoardMessages(BoardBaseTest):
     # TODO Test layout of Board Mega
-    def assert_serial(self, *bytes):
+    def assert_serial(self, *incoming_bytes):
         serial_msg = bytearray()
         res = self.board.sp.read()
         while res is not None:
-            serial_msg.append(res)
+            serial_msg += res
             res = self.board.sp.read()
-        self.assertEqual(bytearray(bytes), serial_msg)
+        self.assertEqual(bytearray(incoming_bytes), serial_msg)
 
     # First test the handlers
     def test_handle_analog_message(self):
