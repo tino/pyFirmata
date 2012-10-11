@@ -1,5 +1,7 @@
 from collections import deque
+
 import pyfirmata
+
 
 class MockupSerial(deque):
     """ 
@@ -32,14 +34,18 @@ class MockupSerial(deque):
                 try:
                     val.append(self.popleft())
                 except IndexError:
-                    val.append('')
+                    val.append(None)
         else:
             try:
                 val = self.popleft()
             except IndexError:
-                val = ''
-        return val
-            
+                val = None
+
+        if val is not None:
+            return bytearray([val])
+        else:
+            return
+
     def write(self, value):
         """
         Appends items flat to the deque. So iterables will be unpacked.
@@ -48,6 +54,7 @@ class MockupSerial(deque):
             self.extend(value)
         else:
             self.append(value)
+
             
     def close(self):
         self.clear()
@@ -62,20 +69,25 @@ class MockupBoard(pyfirmata.Board):
         self.setup_layout(layout)
         self.values_dict = values_dict
         self.id = 1
-        
+        self.name = "MockupBoard"
+        self.add_cmd_handler(pyfirmata.ANALOG_MESSAGE, self._handle_analog_message)
+        self.add_cmd_handler(pyfirmata.DIGITAL_MESSAGE, self._handle_digital_message)
+        self.add_cmd_handler(pyfirmata.REPORT_VERSION, self._handle_report_version)
+        self.add_cmd_handler(pyfirmata.REPORT_FIRMWARE, self._handle_report_firmware)
+
+
     def reset_taken(self):
-        for key in self.taken['analog']:
-            self.taken['analog'][key] = False
-        for key in self.taken['digital']:
-            self.taken['digital'][key] = False
+        for pin in self.pins:
+            self.pins[pin].taken = False
         
     def update_values_dict(self):
-        for port in self.digital_ports:
-            port.values_dict = self.values_dict
-            port.update_values_dict()
-        for pin in self.analog:
-            pin.values_dict = self.values_dict
-        
+        for port in self.ports:
+            self.ports[port].values_dict = self.values_dict
+            self.ports[port].update_values_dict()
+        for pin in self.pins:
+            self.pins[pin].values_dict = self.values_dict
+
+
 class MockupPort(pyfirmata.Port):
     def __init__(self, board, port_number):
         self.board = board
@@ -87,13 +99,16 @@ class MockupPort(pyfirmata.Port):
             pin_nr = i + self.port_number * 8
             self.pins.append(MockupPin(self.board, pin_nr, type=pyfirmata.DIGITAL, port=self))
 
+
     def update_values_dict(self):
         for pin in self.pins:
             pin.values_dict = self.values_dict
         
+
 class MockupPin(pyfirmata.Pin):
     def __init__(self, *args, **kwargs):
         self.values_dict = kwargs.get('values_dict', {})
+
         try:
             del kwargs['values_dict']
         except KeyError:
@@ -124,13 +139,11 @@ class MockupPin(pyfirmata.Pin):
         
     def write(self, value):
         if self.mode == pyfirmata.UNAVAILABLE:
-            raise IOError, "Cannot read from pin %d" \
-                           % (self.pin_number)
+            raise IOError("Cannot read from pin {0}".format(self.pin_number))
         if self.mode == pyfirmata.INPUT:
-            raise IOError, "%s pin %d is not an output" \
-                            % (self.port and "Digital" or "Analog", self.get_pin_number())
+            raise IOError("{0} pin {1} is not an output".format(self.port and "Digital" or "Analog", self.get_pin_number()))
         if not self.port:
-            raise AttributeError, "AnalogPin instance has no attribute 'write'"
+            raise AttributeError("AnalogPin instance has no attribute 'write'")
         # if value != self.read():
         self.value = value
         
