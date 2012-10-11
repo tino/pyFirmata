@@ -208,7 +208,7 @@ class Board(object):
         new_mode = bits[2]
 
         # Do some tests before we attempt to grab a pin number
-        if a_d not in {'a', 'd'}:
+        if a_d not in ['a', 'd']:
             raise InvalidPinDefError("Command does not start with 'a' or 'd'")
         if a_d == 'a' and pin_nr not in self.analog_pins:
             raise InvalidPinDefError("There is no analog pin with number {0}".format(pin_nr))
