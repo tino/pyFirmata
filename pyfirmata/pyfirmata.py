@@ -208,7 +208,7 @@ class Board(object):
         new_mode = bits[2]
 
         # Do some tests before we attempt to grab a pin number
-        if a_d not in {'a', 'd'}:
+        if a_d not in ['a', 'd']:
             raise InvalidPinDefError("Command does not start with 'a' or 'd'")
         if a_d == 'a' and pin_nr not in self.analog_pins:
             raise InvalidPinDefError("There is no analog pin with number {0}".format(pin_nr))
@@ -484,9 +484,9 @@ class Pin(object):
     def _set_mode(self, new_mode):
         """Setter function for the pin mode"""
         # Some sanity checks
-        if new_mode not in {UNAVAILABLE, INPUT, OUTPUT, ANALOG, PWM, SERVO, I2C}:
+        if new_mode not in [UNAVAILABLE, INPUT, OUTPUT, ANALOG, PWM, SERVO, I2C]:
             raise InvalidPinDefError("Mode {0} is not recognized".format(new_mode))
-        if self._mode in {UNAVAILABLE}:
+        if self._mode in [UNAVAILABLE]:
             raise InvalidPinDefError("Pin {0} is UNAVAILABLE".format(self.pin_number))
         if self.taken == True:
             print("WARNING: Pin {0} is already taken".format(self.pin_number))
