@@ -1,3 +1,6 @@
+import os
+import sys
+
 from boards import BOARDS
 from serial.serialutil import SerialException
 from pyfirmata import Board
@@ -14,12 +17,10 @@ class ArduinoBoard(Board):
             logging.error(
                 'No device found at "%s". Make sure your Arduino is connected.' % args[0]
                 )
-    def __str__(self):
-        return 'Arduino %s on %s' % (self.name, self.sp.port)
 
     @property
     def board_type(self):
-        return ""
+        raise Exception("ArduinoBoard class must implement board_type() method.")
 
 
 class Arduino(ArduinoBoard):
@@ -38,6 +39,10 @@ class ArduinoMega(Board):
     """
     A board that will set itself up as an Arduino Mega.
     """
+
+    def __str__(self):
+        return 'Arduino Mega %s on %s' % (self.name, self.sp.port)
+
     @property
     def board_type(self):
         return "ArduinoMega"
