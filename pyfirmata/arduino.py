@@ -1,15 +1,35 @@
 import os
 import sys
+import re
+import logging
 
 from boards import BOARDS
 from serial.serialutil import SerialException
 from pyfirmata import Board
 
 
+def guess_port():
+    """
+    Tries to guess port from system platform.
+    Inspired form https://github.com/rwldrn/johnny-five
+    """
+    ports = os.listdir("/dev")
+    prefix = "cu" if sys.platform == "darwin" else "tty"
+    pattern = '^%s\.(usb|acm).+$' % (prefix)
+    port = ""
+    for p in ports:
+        if re.match(pattern, p):
+            port = p
+            continue
+    return "/dev/%s" % port
+
+
 # shortcut classes
 class ArduinoBoard(Board):
     def __init__(self, *args, **kwargs):
         args = list(args)
+        if len(args) == 0 or args[0] == None:
+            args.append(guess_port())
         args.append(BOARDS[self.board_type])
         try:
             super(ArduinoBoard, self).__init__(*args, **kwargs)
