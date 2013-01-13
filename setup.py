@@ -1,16 +1,15 @@
 #!/usr/bin/env python
- 
-from distutils.core import setup
 
-import pyfirmata
+from distutils.core import setup
 
 setup(
     name='pyFirmata',
-    version=pyfirmata.__version__,
+    version='0.9.5',  # Don't forget to change pyfirmata.__version__!
     description="A Python interface for the Firmata procotol",
     author='Tino de Bruijn',
     author_email='tinodb@gmail.com',
     packages=['pyfirmata'],
     include_package_data=True,
+    install_requires=['pyserial'],
     zip_safe=False,
 )
