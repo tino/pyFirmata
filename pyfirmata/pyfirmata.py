@@ -49,6 +49,7 @@ DIGITAL = OUTPUT   # same as OUTPUT below
 
 # Time to wait after initializing serial, used in Board.__init__
 BOARD_SETUP_WAIT_TIME = 5
+FIRMATA_VERSION_REPORT_TIMEOUT = 5
 
 class PinAlreadyTakenError(Exception):
     pass
@@ -85,8 +86,17 @@ class Board(object):
         # Iterate over the first messages to get firmware data
         while self.bytes_available():
             self.iterate()
-        # TODO Test whether we got a firmware name and version, otherwise there 
-        # probably isn't any Firmata installed
+
+        if not self.firmata_version:
+          self.sp.write(chr(REPORT_VERSION))
+          start_time = time.time()
+          while not self.firmata_version:
+              self.iterate()
+
+              current_time = time.time()
+              if current_time - start_time > FIRMATA_VERSION_REPORT_TIMEOUT:
+                self.firmata_version = None
+                break # Version wasn't reported, let the user figure out what to do
         
     def __str__(self):
         return "Board %s on %s" % (self.name, self.sp.port)
@@ -233,6 +243,7 @@ class Board(object):
         byte = self.sp.read()
         if not byte:
             return
+
         data = ord(byte)
         received_data = []
         handler = None
