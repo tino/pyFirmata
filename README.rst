@@ -2,6 +2,16 @@
 pyFirmata
 =========
 
+Master tests:
+
+.. image:: https://travis-ci.org/tino/pyFirmata.png?branch=master
+    :target: https://travis-ci.org/tino/pyFirmata
+
+Python 3 tests:
+
+.. image:: https://travis-ci.org/tino/pyFirmata.png?branch=py3
+    :target: https://travis-ci.org/tino/pyFirmata
+
 Installation
 ============
 
