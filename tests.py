@@ -334,6 +334,17 @@ class RegressionTests(BoardBaseTest):
         self.assertEqual(self.board.digital[12].value, False)
         self.assertEqual(self.board.digital[13].value, None)
 
+    def test_proper_exit_conditions(self):
+        """
+        Test that the exit method works properly if we didn't make it all
+        the way through `setup_layout`.
+        """
+        del self.board.digital
+        try:
+            self.board.exit()
+        except AttributeError:
+            self.fail("exit() raised an AttributeError unexpectedly!")
+
 
 board_messages = unittest.TestLoader().loadTestsFromTestCase(TestBoardMessages)
 board_layout = unittest.TestLoader().loadTestsFromTestCase(TestBoardLayout)
