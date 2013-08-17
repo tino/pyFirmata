@@ -368,3 +368,4 @@ if __name__ == '__main__':
     if options.mockup:
         print "Running the mockup test suite"
         unittest.TextTestRunner(verbosity=2).run(mockup_suite)
+    unittest.TextTestRunner(verbosity=3).run(regression)
