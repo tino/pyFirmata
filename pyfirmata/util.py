@@ -33,7 +33,7 @@ class Iterator(threading.Thread):
     def __init__(self, board):
         super(Iterator, self).__init__()
         self.board = board
-        
+
     def run(self):
         while 1:
             try:
@@ -56,11 +56,11 @@ class Iterator(threading.Thread):
                 except (TypeError, IndexError):
                     pass
                 raise
-                
+
 def to_two_bytes(integer):
     """
     Breaks an integer into two 7 bit bytes.
-    
+
     >>> for i in range(32768):
     ...     val = to_two_bytes(i)
     ...     assert len(val) == 2
@@ -71,16 +71,16 @@ def to_two_bytes(integer):
     Traceback (most recent call last):
         ...
     ValueError: Can't handle values bigger than 32767 (max for 2 bits)
-    
+
     """
     if integer > 32767:
         raise ValueError, "Can't handle values bigger than 32767 (max for 2 bits)"
     return chr(integer % 128), chr(integer >> 7)
-    
+
 def from_two_bytes(bytes):
     """
     Return an integer from two 7 bit bytes.
-    
+
     >>> for i in range(32766, 32768):
     ...     val = to_two_bytes(i)
     ...     ret = from_two_bytes(val)
@@ -107,18 +107,18 @@ def from_two_bytes(bytes):
         except TypeError:
             pass
         return msb << 7 | lsb
-    
+
 def two_byte_iter_to_str(bytes):
     """
     Return a string made from a list of two byte chars.
-    
+
     >>> string, s = 'StandardFirmata', []
     >>> for i in string:
     ...   s.append(i)
     ...   s.append('\\x00')
     >>> two_byte_iter_to_str(s)
     'StandardFirmata'
-    
+
     >>> string, s = 'StandardFirmata', []
     >>> for i in string:
     ...   s.append(ord(i))
@@ -136,11 +136,11 @@ def two_byte_iter_to_str(bytes):
             msb = 0x00
         chars.append(chr(from_two_bytes((lsb, msb))))
     return ''.join(chars)
-    
+
 def str_to_two_byte_iter(string):
     """
     Return a iter consisting of two byte chars from a string.
-    
+
     >>> string, iter = 'StandardFirmata', []
     >>> for i in string:
     ...   iter.append(i)
@@ -157,7 +157,7 @@ def break_to_bytes(value):
     Breaks a value into values of less than 255 that form value when multiplied.
     (Or almost do so with primes)
     Returns a tuple
-    
+
     >>> break_to_bytes(200)
     (200,)
     >>> break_to_bytes(800)
