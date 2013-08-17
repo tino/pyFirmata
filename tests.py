@@ -169,7 +169,12 @@ class TestBoardMessages(BoardBaseTest):
         sysex = (chr(0xF0), chr(0x79), chr(1), chr(2), chr(3), chr(0xF7))
         self.assert_serial(*sysex)
 
-    def test_send_sysex_to_big_data(self):
+    def test_send_sysex_string(self):
+        self.board.send_sysex(0x79, ["test"])
+        sysex = (chr(0xF0), chr(0x79), 't', 'e', 's', 't', chr(0xF7))
+        self.assert_serial(*sysex)
+
+    def test_send_sysex_too_big_data(self):
         self.assertRaises(ValueError, self.board.send_sysex, 0x79, [256, 1])
 
     def test_receive_sysex_message(self):
