@@ -60,9 +60,7 @@ class NoInputWarning(RuntimeWarning):
     pass
 
 class Board(object):
-    """
-    Base class for any board
-    """
+    """The Base class for any board."""
     firmata_version = None
     firmware = None
     firmware_version = None
@@ -74,7 +72,7 @@ class Board(object):
     def __init__(self, port, layout, baudrate=57600, name=None):
         self.sp = serial.Serial(port, baudrate)
         # Allow 5 secs for Arduino's auto-reset to happen
-        # Alas, Firmata blinks it's version before printing it to serial
+        # Alas, Firmata blinks its version before printing it to serial
         # For 2.3, even 5 seconds might not be enough.
         # TODO Find a more reliable way to wait until the board is ready
         self.pass_time(BOARD_SETUP_WAIT_TIME)
@@ -92,11 +90,11 @@ class Board(object):
         return "Board %s on %s" % (self.name, self.sp.port)
 
     def __del__(self):
-        '''
+        """
         The connection with the a board can get messed up when a script is
         closed without calling board.exit() (which closes the serial
         connection). Therefore also do it here and hope it helps.
-        '''
+        """
         self.exit()
 
     def send_as_two_bytes(self, val):
@@ -104,7 +102,7 @@ class Board(object):
 
     def setup_layout(self, board_layout):
         """
-        Setup the Pin instances based on the given board-layout. Maybe it will
+        Setup the Pin instances based on the given board layout. Maybe it will
         be possible to do this automatically in the future, by polling the
         board for its type.
         """
@@ -143,9 +141,7 @@ class Board(object):
         self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
 
     def add_cmd_handler(self, cmd, func):
-        """
-        Adds a command handler for a command.
-        """
+        """Adds a command handler for a command."""
         len_args = len(inspect.getargspec(func)[0])
         def add_meta(f):
             def decorator(*args, **kwargs):
@@ -161,9 +157,14 @@ class Board(object):
         Returns the activated pin given by the pin definition.
         May raise an ``InvalidPinDefError`` or a ``PinAlreadyTakenError``.
 
-        :arg pin_def: Pin definition as described in TODO,
+        :arg pin_def: Pin definition as described below,
             but without the arduino name. So for example ``a:1:i``.
 
+        'a' analog pin     Pin number   'i' for input 
+        'd' digital pin    Pin number   'o' for output
+                                        'p' for pwm (Pulse-width modulation)
+
+        All seperated by ``:``. 
         """
         if type(pin_def) == list:
             bits = pin_def
@@ -193,9 +194,7 @@ class Board(object):
         return pin
 
     def pass_time(self, t):
-        """
-        Non-blocking time-out for ``t`` seconds.
-        """
+        """Non-blocking time-out for ``t`` seconds."""
         cont = time.time() + t
         while time.time() < cont:
             time.sleep(0)
@@ -227,8 +226,8 @@ class Board(object):
     def iterate(self):
         """
         Reads and handles data from the microcontroller over the serial port.
-        This method should be called in a main loop, or in an
-        :class:`Iterator` instance to keep this boards pin values up to date
+        This method should be called in a main loop or in an :class:`Iterator`
+        instance to keep this boards pin values up to date.
         """
         byte = self.sp.read()
         if not byte:
@@ -269,7 +268,7 @@ class Board(object):
 
     def get_firmata_version(self):
         """
-        Returns a version tuple (major, mino) for the firmata firmware on the
+        Returns a version tuple (major, minor) for the firmata firmware on the
         board.
         """
         return self.firmata_version
@@ -291,7 +290,7 @@ class Board(object):
         self.digital[pin].write(angle)
 
     def exit(self):
-        """ Call this to exit cleanly. """
+        """Call this to exit cleanly."""
         # First detach all servo's, otherwise it somehow doesn't want to close...
         if hasattr(self, 'digital'):
             for pin in self.digital:
@@ -313,7 +312,7 @@ class Board(object):
     def _handle_digital_message(self, port_nr, lsb, msb):
         """
         Digital messages always go by the whole port. This means we have a
-        bitmask wich we update the port.
+        bitmask which we update the port.
         """
         mask = (msb << 7) + lsb
         try:
@@ -331,7 +330,7 @@ class Board(object):
         self.firmware = two_byte_iter_to_str(data[2:])
 
 class Port(object):
-    """ An 8-bit port on the board """
+    """An 8-bit port on the board."""
     def __init__(self, board, port_number, num_pins=8):
         self.board = board
         self.port_number = port_number
@@ -346,7 +345,7 @@ class Port(object):
         return "Digital Port %i on %s" % (self.port_number, self.board)
 
     def enable_reporting(self):
-        """ Enable reporting of values for the whole port """
+        """Enable reporting of values for the whole port."""
         self.reporting = True
         msg = chr(REPORT_DIGITAL + self.port_number)
         msg += chr(1)
@@ -356,14 +355,14 @@ class Port(object):
                 pin.reporting = True # TODO Shouldn't this happen at the pin?
 
     def disable_reporting(self):
-        """ Disable the reporting of the port """
+        """Disable the reporting of the port."""
         self.reporting = False
         msg = chr(REPORT_DIGITAL + self.port_number)
         msg += chr(0)
         self.board.sp.write(msg)
 
     def write(self):
-        """Set the output pins of the port to the correct state"""
+        """Set the output pins of the port to the correct state."""
         mask = 0
         for pin in self.pins:
             if pin.mode == OUTPUT:
@@ -376,9 +375,7 @@ class Port(object):
         self.board.sp.write(msg)
 
     def _update(self, mask):
-        """
-        Update the values for the pins marked as input with the mask.
-        """
+        """Update the values for the pins marked as input with the mask."""
         if self.reporting:
             for pin in self.pins:
                 if pin.mode is INPUT:
@@ -386,7 +383,7 @@ class Port(object):
                     pin.value = (mask & (1 << pin_nr)) > 0
 
 class Pin(object):
-    """ A Pin representation """
+    """A Pin representation"""
     def __init__(self, board, pin_number, type=ANALOG, port=None):
         self.board = board
         self.pin_number = pin_number
@@ -406,13 +403,13 @@ class Pin(object):
             self._mode = UNAVAILABLE
             return
         if self._mode is UNAVAILABLE:
-            raise IOError("%s can not be used through Firmata" % self)
+            raise IOError("%s can not be used through Firmata." % self)
         if mode is PWM and not self.PWM_CAPABLE:
-            raise IOError("%s does not have PWM capabilities" % self)
+            raise IOError("%s does not have PWM capabilities." % self)
         if mode == SERVO:
             if self.type != DIGITAL:
                 raise IOError("Only digital pins can drive servos! %s is not"
-                    "digital" % self)
+                    "digital." % self)
             self._mode = SERVO
             self.board.servo_config(self.pin_number)
             return
@@ -432,11 +429,11 @@ class Pin(object):
     mode = property(_get_mode, _set_mode)
     """
     Mode of operation for the pin. Can be one of the pin modes: INPUT, OUTPUT,
-    ANALOG, PWM or SERVO (or UNAVAILABLE)
+    ANALOG, PWM. or SERVO (or UNAVAILABLE).
     """
 
     def enable_reporting(self):
-        """ Set an input pin to report values """
+        """Set an input pin to report values."""
         if self.mode is not INPUT:
             raise IOError, "%s is not an input and can therefore not report" % self
         if self.type == ANALOG:
@@ -448,7 +445,7 @@ class Pin(object):
             self.port.enable_reporting() # TODO This is not going to work for non-optimized boards like Mega
 
     def disable_reporting(self):
-        """ Disable the reporting of an input pin """
+        """Disable the reporting of an input pin."""
         if self.type == ANALOG:
             self.reporting = False
             msg = chr(REPORT_ANALOG + self.pin_number)
@@ -460,7 +457,8 @@ class Pin(object):
     def read(self):
         """
         Returns the output value of the pin. This value is updated by the
-        boards :meth:`Board.iterate` method. Value is alway in the range 0.0 - 1.0
+        boards :meth:`Board.iterate` method. Value is always in the range from
+        0.0 to 1.0.
         """
         if self.mode == UNAVAILABLE:
             raise IOError, "Cannot read pin %s"% self.__str__()
@@ -476,7 +474,7 @@ class Pin(object):
 
         """
         if self.mode is UNAVAILABLE:
-            raise IOError, "%s can not be used through Firmata" % self
+            raise IOError, "%s can not be used through Firmata." % self
         if self.mode is INPUT:
             raise IOError, "%s is set up as an INPUT and can therefore not be written to" % self
         if value is not self.value:
