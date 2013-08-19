@@ -48,6 +48,12 @@ If you use a pin more often, it can be worth it to use the ``get_pin`` method of
     >>> pin3 = board.get_pin('d:3:p')
     >>> pin3.write(0.6)
 
+Examples
+========
+
+The ``examples/`` folder contains a few example scripts for the usage of 
+pyfirmata. Please follow the comments in the files for the setup.
+
 Board layout
 ============
 
