@@ -68,8 +68,8 @@ digital pin 3 as pwm.::
 Board layout
 ============
 
-If you want to use a board with a different layout than the standard Arduino,
-or the Arduino Mega (for wich there exist the shortcut classes 
+If you want to use a board with a different layout than the standard Arduino
+or the Arduino Mega (for which there exist the shortcut classes 
 ``pyfirmata.Arduino`` and ``pyfirmata.ArduinoMega``), instantiate the Board 
 class with a dictionary as the ``layout`` argument. This is the layout dict 
 for the Mega for example::
