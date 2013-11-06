@@ -22,6 +22,8 @@ QUERY_FIRMWARE = 0x79       # query the firmware name
 
 # extended command set using sysex (0-127/0x00-0x7F)
 # 0x00-0x0F reserved for user-defined commands */
+CAPABILITY_QUERY = 0x6B     # ask for supported modes and resolution of all pins
+CAPABILITY_RESPONSE = 0x6C  # reply with supported modes and resolution
 SERVO_CONFIG = 0x70         # set max angle, minPulse, maxPulse, freq
 STRING_DATA = 0x71          # a string message with 14-bits per char
 SHIFT_DATA = 0x75           # a bitstream to/from a shift register
@@ -42,6 +44,8 @@ OUTPUT = 1         # as defined in wiring.h
 ANALOG = 2         # analog pin in analogInput mode
 PWM = 3            # digital pin in PWM output mode
 SERVO = 4          # digital pin in SERVO mode
+SHIFT = 5          # shiftIn/shiftOut mode
+I2C = 6            # pin included in I2C setup
 
 # Pin types
 DIGITAL = OUTPUT   # same as OUTPUT below
@@ -69,7 +73,7 @@ class Board(object):
     _stored_data = []
     _parsing_sysex = False
 
-    def __init__(self, port, layout, baudrate=57600, name=None):
+    def __init__(self, port, layout=None, baudrate=57600, name=None):
         self.sp = serial.Serial(port, baudrate)
         # Allow 5 secs for Arduino's auto-reset to happen
         # Alas, Firmata blinks its version before printing it to serial
@@ -106,29 +110,91 @@ class Board(object):
         be possible to do this automatically in the future, by polling the
         board for its type.
         """
-        # Create pin instances based on board layout
         self.analog = []
-        for i in board_layout['analog']:
-            self.analog.append(Pin(self, i))
 
         self.digital = []
         self.digital_ports = []
-        for i in xrange(0, len(board_layout['digital']), 8):
-            num_pins = len(board_layout['digital'][i:i+8])
-            port_number = i / 8
-            self.digital_ports.append(Port(self, port_number, num_pins))
 
-        # Allow to access the Pin instances directly
-        for port in self.digital_ports:
-            self.digital += port.pins
-
-        # Setup PWM pins
-        for i in board_layout['pwm']:
-            self.digital[i].PWM_CAPABLE = True
-
-        # Disable certain ports like Rx/Tx and crystal ports
-        for i in board_layout['disabled']:
-            self.digital[i].mode = UNAVAILABLE
+        if board_layout:
+          # Create pin instances based on board layout
+          for i in board_layout['analog']:
+              self.analog.append(Pin(self, i))
+  
+          for i in xrange(0, len(board_layout['digital']), 8):
+              num_pins = len(board_layout['digital'][i:i+8])
+              port_number = i / 8
+              self.digital_ports.append(Port(self, port_number, num_pins))
+  
+          # Allow to access the Pin instances directly
+          for port in self.digital_ports:
+              self.digital += port.pins
+  
+          # Setup PWM pins
+          for i in board_layout['pwm']:
+              self.digital[i].PWM_CAPABLE = True
+  
+          # Disable certain ports like Rx/Tx and crystal ports
+          for i in board_layout['disabled']:
+              self.digital[i].mode = UNAVAILABLE
+        else:
+          # Perform capability query
+          self.send_sysex(CAPABILITY_QUERY)
+          
+          # Where is the sysex handler?
+          s = self.sp.read(2)
+          if s != (chr(START_SYSEX) + chr(CAPABILITY_RESPONSE)):
+            raise RuntimeError('Capability query returned unexpected '
+              'value: %r' % (s,))
+            pinnum = 0
+            while True:
+              s = self.sp.read(1)
+              if s == chr(END_SYSEX):
+                break
+              elif s == chr(INPUT):
+                # What fresh hell is this? Insert ATtinyX313, watch it break
+                # I blame the protocol -IVA
+                # TODO: Fix the protocol to add port reporting
+                if len(self.digital_ports) <= (pinnum // 8):
+                  self.digital_ports.append(Port(self, pinnum // 8))
+                port = self.digital_ports[pinnum // 8]
+                pin = port.pins[pinnum % 8]
+                pin.type = DIGITAL
+                pin._mode = INPUT
+                self.digital += pin
+                self.sp.read(1)
+              elif s == chr(OUTPUT):
+                # TODO: Refactor with above
+                if len(self.digital_ports) <= (pinnum // 8):
+                  self.digital_ports.append(Port(self, pinnum // 8))
+                port = self.digital_ports[pinnum // 8]
+                pin = port.pins[pinnum % 8]
+                pin.type = DIGITAL
+                pin._mode = OUTPUT
+                self.digital += pin
+                self.sp.read(1)
+              elif s == chr(ANALOG):
+                self.analog.append(Pin(self, pinnum))
+                # We should do something with this...
+                self.sp.read(1)
+              elif s == chr(PWM):
+                self.digital[pinnum].PWM_CAPABLE = True
+                # And another missed opportunity...
+                self.sp.read(1)
+              elif s == char(SERVO):
+                # I have no idea what should be done here, but oh well...
+                self.digital[pinnum].SERVO_CAPABLE = True
+                self.sp.read(1)
+              elif s == char(SHIFT):
+                # Ditto
+                self.sp.read(1)
+              elif s == char(I2C):
+                # We don't need to care, but still need to consume a byte
+                self.sp.read(1)
+              else:
+                # This would be a decent place to emit a warning
+                self.sp.read(1)
+              # Increment the pin number for the next loop
+              pinnum += 1
 
         # Create a dictionary of 'taken' pins. Used by the get_pin method
         self.taken = { 'analog' : dict(map(lambda p: (p.pin_number, False), self.analog)),
