@@ -12,5 +12,12 @@ BOARDS = {
         'pwm' : tuple(x for x in range(2,14)),
         'use_ports' : True,
         'disabled' : (0, 1) # Rx, Tx, Crystal
+    },
+    'arduino_due' : {
+        'digital' : tuple(x for x in range(54)),
+        'analog' : tuple(x for x in range(12)),
+        'pwm' : tuple(x for x in range(2,14)),
+        'use_ports' : True,
+        'disabled' : (0, 1) # Rx, Tx, Crystal
     }
 }
