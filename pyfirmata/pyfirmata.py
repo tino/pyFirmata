@@ -80,13 +80,15 @@ class Board(object):
 
     def __init__(self, port, layout=None, baudrate=57600, name=None):
         self.sp = serial.Serial(port, baudrate)
-        # Allow 5 secs for Arduino's auto-reset to happen
-        # Alas, Firmata blinks its version before printing it to serial
-        # For 2.3, even 5 seconds might not be enough.
+        self._layout = layout
+        self.name = name
+
+        ''' Allow 5 secs for Arduino's auto-reset to happen
+        Alas, Firmata blinks its version before printing it to serial
+        For 2.3, even 5 seconds might not be enough. '''
 
         # TODO Find a more reliable way to wait until the board is ready
         self.pass_time(BOARD_SETUP_WAIT_TIME)
-        self.name = name
         if not self.name:
             self.name = port
 
@@ -156,7 +158,7 @@ class Board(object):
         self.add_cmd_handler(DIGITAL_MESSAGE, self._handle_digital_message)
         self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
         self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
-        self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_reponse)
+        self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_response)
 
     def auto_setup(self):
         """
@@ -360,7 +362,7 @@ class Board(object):
         self.firmware_version = (major, minor)
         self.firmware = two_byte_iter_to_str(data[2:])
 
-    def _handle_report_capability_reponse(self, *data):
+    def _handle_report_capability_response(self, *data):
         # TODO
         print data
 

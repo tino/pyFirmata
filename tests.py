@@ -85,6 +85,37 @@ class TestBoardMessages(BoardBaseTest):
         self.assertEqual(self.board.firmware, 'Firmware_name')
         self.assertEqual(self.board.firmware_version, (2, 1))
 
+    def test_handle_capability_response(self):
+        test_layout = {
+            'digital': (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13),
+            'analog': (1, 2, 3, 4, 5),
+            #'pwm': (3, 5, 6, 9, 10, 11),
+        }
+
+        data_digital_pin = [
+                0x00, # INPUT
+                0x01,
+                0x01, # OUTPUT
+                0x01,
+                0x7F, # END_SYSEX (Pin delimiter)
+        ]
+        data_analog_pin = [
+                0x02, # ANALOG
+                0x0A,
+                0x7F, # END_SYSEX (Pin delimiter)
+        ]
+
+        data_arduino = list(
+            [0x6C] # CAPABILITY_RESPONSE
+            + (14 * data_digital_pin)
+            + (6 * data_analog_pin)
+        )
+
+        self.board._handle_report_capability_response(*data_arduino)
+        for key in test_layout.keys():
+            print self.board._layout[key], test_layout[key]
+            self.assertEqual(self.board._layout[key], test_layout[key])
+
     # type                command  channel    first byte            second byte
     # ---------------------------------------------------------------------------
     # analog I/O message    0xE0   pin #      LSB(bits 0-6)         MSB(bits 7-13)
