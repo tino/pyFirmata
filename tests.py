@@ -2,6 +2,8 @@ import unittest
 import doctest
 import serial
 from itertools import chain
+import platform
+
 import pyfirmata
 from pyfirmata import mockup
 from pyfirmata.boards import BOARDS
@@ -23,6 +25,21 @@ class BoardBaseTest(unittest.TestCase):
         pyfirmata.pyfirmata.BOARD_SETUP_WAIT_TIME = 0
         self.board = pyfirmata.Board('', BOARDS['arduino'])
         self.board._stored_data = [] # FIXME How can it be that a fresh instance sometimes still contains data?
+
+
+class CapabilityQueryTest(unittest.TestCase):
+
+    def setUp(self):
+        system = platform.system()
+        if system == 'Linux':
+            # Rough estimation about where the device is. May fail.
+            device = '/dev/ttyUSB0'
+            board = pyfirmata.Board(device) # No Layout
+        else:
+            raise RuntimeError('System not supported.')
+
+    def test_foobar(self):
+        pass
 
 
 class TestBoardMessages(BoardBaseTest):
@@ -349,6 +366,8 @@ class RegressionTests(BoardBaseTest):
 board_messages = unittest.TestLoader().loadTestsFromTestCase(TestBoardMessages)
 board_layout = unittest.TestLoader().loadTestsFromTestCase(TestBoardLayout)
 regression = unittest.TestLoader().loadTestsFromTestCase(RegressionTests)
+with_arduino = unittest.TestLoader().loadTestsFromTestCase(CapabilityQueryTest)
+
 default = unittest.TestSuite([board_messages, board_layout, regression])
 mockup_suite = unittest.TestLoader().loadTestsFromTestCase(TestMockupBoardLayout)
 
@@ -357,7 +376,11 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-m", "--mockup", dest="mockup", action="store_true",
         help="Also run the mockup tests")
+    parser.add_option("-a", "--arduino", dest="arduino", action="store_true",
+        help="Run board dependent tests. Needs an Arduino connected on USB. \
+                This Arduino must be running a Firmata >2.3 Sketch")
     options, args = parser.parse_args()
+
     if not options.mockup:
         print "Running normal suite. Also consider running the mockup (-m, --mockup) suite"
         unittest.TextTestRunner(verbosity=3).run(default)
@@ -365,7 +388,13 @@ if __name__ == '__main__':
         print "Running doctests for pyfirmata.util. (No output = No errors)"
         doctest.testmod(util)
         print "Done running doctests"
+
     if options.mockup:
         print "Running the mockup test suite"
         unittest.TextTestRunner(verbosity=2).run(mockup_suite)
-    unittest.TextTestRunner(verbosity=3).run(regression)
+
+    if options.arduino:
+        print "Running the Arduino dependent test suite"
+        unittest.TextTestRunner(verbosity=2).run(with_arduino)
+
+unittest.TextTestRunner(verbosity=3).run(regression)
