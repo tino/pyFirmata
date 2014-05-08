@@ -160,11 +160,11 @@ class Board(object):
         :arg pin_def: Pin definition as described below,
             but without the arduino name. So for example ``a:1:i``.
 
-        'a' analog pin     Pin number   'i' for input 
+        'a' analog pin     Pin number   'i' for input
         'd' digital pin    Pin number   'o' for output
                                         'p' for pwm (Pulse-width modulation)
 
-        All seperated by ``:``. 
+        All seperated by ``:``.
         """
         if type(pin_def) == list:
             bits = pin_def
