@@ -381,20 +381,21 @@ if __name__ == '__main__':
                 This Arduino must be running a Firmata >2.3 Sketch")
     options, args = parser.parse_args()
 
-    if not options.mockup:
-        print "Running normal suite. Also consider running the mockup (-m, --mockup) suite"
-        unittest.TextTestRunner(verbosity=3).run(default)
-        from pyfirmata import util
-        print "Running doctests for pyfirmata.util. (No output = No errors)"
-        doctest.testmod(util)
-        print "Done running doctests"
-
-    if options.mockup:
-        print "Running the mockup test suite"
-        unittest.TextTestRunner(verbosity=2).run(mockup_suite)
-
     if options.arduino:
         print "Running the Arduino dependent test suite"
         unittest.TextTestRunner(verbosity=2).run(with_arduino)
 
-unittest.TextTestRunner(verbosity=3).run(regression)
+    else:
+        if not options.mockup:
+            print "Running normal suite. Also consider running the mockup (-m, --mockup) suite"
+            unittest.TextTestRunner(verbosity=3).run(default)
+            from pyfirmata import util
+            print "Running doctests for pyfirmata.util. (No output = No errors)"
+            doctest.testmod(util)
+            print "Done running doctests"
+
+        if options.mockup:
+            print "Running the mockup test suite"
+            unittest.TextTestRunner(verbosity=2).run(mockup_suite)
+
+        unittest.TextTestRunner(verbosity=3).run(regression)
