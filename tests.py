@@ -86,35 +86,92 @@ class TestBoardMessages(BoardBaseTest):
         self.assertEqual(self.board.firmware_version, (2, 1))
 
     def test_handle_capability_response(self):
+        """
+        Capability Response codes:
+
+        # INPUT:  0, 1
+        # OUTPUT: 1, 1
+        # ANALOG: 2, 10
+        # PWM:    3, 8
+        # SERV0:  4, 14
+        # I2C:    6, 1
+
+        Arduino's Example: (ATMega328P-PU)
+
+        (127,
+         127,
+         0, 1, 1, 1, 4, 14, 127,
+         0, 1, 1, 1, 3, 8, 4, 14, 127,
+         0, 1, 1, 1, 4, 14, 127,
+         0, 1, 1, 1, 3, 8, 4, 14, 127,
+         0, 1, 1, 1, 3, 8, 4, 14, 127,
+         0, 1, 1, 1, 4, 14, 127,
+         0, 1, 1, 1, 4, 14, 127,
+         0, 1, 1, 1, 3, 8, 4, 14, 127,
+         0, 1, 1, 1, 3, 8, 4, 14, 127,
+         0, 1, 1, 1, 3, 8, 4, 14, 127,
+         0, 1, 1, 1, 4, 14, 127,
+         0, 1, 1, 1, 4, 14, 127,
+         0, 1, 1, 1, 2, 10, 127,
+         0, 1, 1, 1, 2, 10, 127,
+         0, 1, 1, 1, 2, 10, 127,
+         0, 1, 1, 1, 2, 10, 127,
+         0, 1, 1, 1, 2, 10, 6, 1, 127,
+         0, 1, 1, 1, 2, 10, 6, 1, 127)
+         """
+
         test_layout = {
-            'digital': (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13),
-            'analog': (1, 2, 3, 4, 5),
-            #'pwm': (3, 5, 6, 9, 10, 11),
+            'digital': (1),
+            'analog': (2),
+            'pwm': (0),
+            #'i2c': (2), # TODO 2.3 specs
         }
 
-        data_digital_pin = [
+        # Eg: (127)
+        unavailible_pin = [
+            0x7F, # END_SYSEX (Pin delimiter)
+        ]
+
+        # Eg: (0, 1, 1, 1, 3, 8, 4, 14, 127)
+        digital_pin = [
                 0x00, # INPUT
                 0x01,
                 0x01, # OUTPUT
                 0x01,
+                0x03, # PWM
+                0x08,
                 0x7F, # END_SYSEX (Pin delimiter)
         ]
-        data_analog_pin = [
+
+        # Eg. (0, 1, 1, 1, 4, 14, 127)
+        analog_pin = [
+                0x00, # INPUT
+                0x01,
+                0x01, # OUTPUT
+                0x01,
                 0x02, # ANALOG
                 0x0A,
+                0x06, # I2C
+                0x01,
                 0x7F, # END_SYSEX (Pin delimiter)
         ]
 
         data_arduino = list(
             [0x6C] # CAPABILITY_RESPONSE
-            + (14 * data_digital_pin)
-            + (6 * data_analog_pin)
+            + unavailible_pin
+            + digital_pin
+            + analog_pin
         )
 
         self.board._handle_report_capability_response(*data_arduino)
         for key in test_layout.keys():
             print self.board._layout[key], test_layout[key]
             self.assertEqual(self.board._layout[key], test_layout[key])
+
+    def test_handle_pin_state_response(self):
+        # 2.2 specs
+        pass
+
 
     # type                command  channel    first byte            second byte
     # ---------------------------------------------------------------------------

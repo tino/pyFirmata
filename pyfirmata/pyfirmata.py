@@ -159,6 +159,7 @@ class Board(object):
         self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
         self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
         self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_response)
+        self.add_cmd_handler(PIN_STATE_RESPONSE, self._handle_pin_state_response)
 
     def auto_setup(self):
         """
@@ -363,8 +364,13 @@ class Board(object):
         self.firmware = two_byte_iter_to_str(data[2:])
 
     def _handle_report_capability_response(self, *data):
-        # TODO
+        # TODO 2.2 specs
         print data
+
+    def _handle_pin_state_response(self, *data):
+        # TODO: 2.2 specs
+        print data
+
 
 class Port(object):
     """An 8-bit port on the board."""
