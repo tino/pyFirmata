@@ -87,10 +87,12 @@ class TestBoardMessages(BoardBaseTest):
 
     def test_handle_capability_response(self):
         test_layout = {
-            'digital': (1),
-            'analog': (2),
-            'pwm': (0),
+            'digital': (0, 1, 2),
+            'analog': (0, 1),
+            'pwm': (1, 2),
+            #'servo': (2), # TODO 2.2 specs
             #'i2c': (2), # TODO 2.3 specs
+            'disabled': (0,),
         }
 
         # Eg: (127)
@@ -125,13 +127,12 @@ class TestBoardMessages(BoardBaseTest):
         data_arduino = list(
             [0x6C] # CAPABILITY_RESPONSE
             + unavailible_pin
-            + digital_pin
-            + analog_pin
+            + digital_pin * 2
+            + analog_pin * 2
         )
 
         self.board._handle_report_capability_response(*data_arduino)
         for key in test_layout.keys():
-            print self.board._layout[key], test_layout[key]
             self.assertEqual(self.board._layout[key], test_layout[key])
 
     def test_handle_pin_state_response(self):

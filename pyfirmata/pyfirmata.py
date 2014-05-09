@@ -370,13 +370,16 @@ class Board(object):
         pin_spec_list = []
 
         for c in data:
+            if c == CAPABILITY_RESPONSE:
+                continue
+
             charbuffer.append(c)
             if c == 0x7F:
                 # A copy of charbuffer
                 pin_spec_list.append(charbuffer[:])
                 charbuffer = []
 
-        self.layout = pinList2boardDict(pin_spec_list)
+        self._layout = pinList2boardDict(pin_spec_list)
 
     def _handle_pin_state_response(self, *data):
         # TODO: 2.2 specs

@@ -62,6 +62,7 @@ class MockupBoard(pyfirmata.Board):
         self.setup_layout(layout)
         self.values_dict = values_dict
         self.id = 1
+        self._layout = layout
 
     def reset_taken(self):
         for key in self.taken['analog']:
