@@ -3,6 +3,7 @@ import inspect
 import time
 import itertools
 from util import two_byte_iter_to_str, to_two_bytes
+from boards import pinList2boardDict
 
 # Message command bytes - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -172,7 +173,8 @@ class Board(object):
         while self.bytes_available():
             self.iterate()
 
-        # TODO
+        #handle_report_capability_response will write self.layout
+        self.setup_layout(self.layout)
 
     def add_cmd_handler(self, cmd, func):
         """Adds a command handler for a command."""
@@ -364,8 +366,17 @@ class Board(object):
         self.firmware = two_byte_iter_to_str(data[2:])
 
     def _handle_report_capability_response(self, *data):
-        # TODO 2.2 specs
-        print data
+        charbuffer = []
+        pin_spec_list = []
+
+        for c in data:
+            charbuffer.append(c)
+            if c == 0x7F:
+                # A copy of charbuffer
+                pin_spec_list.append(charbuffer[:])
+                charbuffer = []
+
+        self.layout = pinList2boardDict(pin_spec_list)
 
     def _handle_pin_state_response(self, *data):
         # TODO: 2.2 specs

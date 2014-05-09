@@ -14,3 +14,25 @@ BOARDS = {
         'disabled' : (0, 1) # Rx, Tx, Crystal
     }
 }
+
+def pinList2boardDict(pinlist):
+    """
+    Capability Response codes:
+        INPUT:  0, 1
+        OUTPUT: 1, 1
+        ANALOG: 2, 10
+        PWM:    3, 8
+        SERV0:  4, 14
+        I2C:    6, 1
+    """
+
+    boardDict = {
+        'digital' : (),
+        'analog' : (),
+        'pwm' : (),
+        'i2c' : (),
+        'use_ports' : True,
+        'disabled' : (),
+    }
+
+    return boardDict

@@ -6,7 +6,7 @@ import platform
 
 import pyfirmata
 from pyfirmata import mockup
-from pyfirmata.boards import BOARDS
+from pyfirmata.boards import BOARDS, pinList2boardDict
 from pyfirmata.util import str_to_two_byte_iter, to_two_bytes
 
 # Messages todo left:
@@ -86,40 +86,6 @@ class TestBoardMessages(BoardBaseTest):
         self.assertEqual(self.board.firmware_version, (2, 1))
 
     def test_handle_capability_response(self):
-        """
-        Capability Response codes:
-
-        # INPUT:  0, 1
-        # OUTPUT: 1, 1
-        # ANALOG: 2, 10
-        # PWM:    3, 8
-        # SERV0:  4, 14
-        # I2C:    6, 1
-
-        Arduino's Example: (ATMega328P-PU)
-
-        (127,
-         127,
-         0, 1, 1, 1, 4, 14, 127,
-         0, 1, 1, 1, 3, 8, 4, 14, 127,
-         0, 1, 1, 1, 4, 14, 127,
-         0, 1, 1, 1, 3, 8, 4, 14, 127,
-         0, 1, 1, 1, 3, 8, 4, 14, 127,
-         0, 1, 1, 1, 4, 14, 127,
-         0, 1, 1, 1, 4, 14, 127,
-         0, 1, 1, 1, 3, 8, 4, 14, 127,
-         0, 1, 1, 1, 3, 8, 4, 14, 127,
-         0, 1, 1, 1, 3, 8, 4, 14, 127,
-         0, 1, 1, 1, 4, 14, 127,
-         0, 1, 1, 1, 4, 14, 127,
-         0, 1, 1, 1, 2, 10, 127,
-         0, 1, 1, 1, 2, 10, 127,
-         0, 1, 1, 1, 2, 10, 127,
-         0, 1, 1, 1, 2, 10, 127,
-         0, 1, 1, 1, 2, 10, 6, 1, 127,
-         0, 1, 1, 1, 2, 10, 6, 1, 127)
-         """
-
         test_layout = {
             'digital': (1),
             'analog': (2),
@@ -389,6 +355,38 @@ class TestBoardLayout(BoardBaseTest):
         self.assertEqual(pin.pin_number, 5)
         self.assertEqual(pin.reporting, True)
         self.assertEqual(pin.value, None)
+
+    def test_pinList2boardDict(self):
+        # Arduino's Example: (ATMega328P-PU)
+        pinList = [
+            [127],
+            [127],
+            [0, 1, 1, 1, 4, 14, 127],
+            [0, 1, 1, 1, 3, 8, 4, 14, 127],
+            [0, 1, 1, 1, 4, 14, 127],
+            [0, 1, 1, 1, 3, 8, 4, 14, 127],
+            [0, 1, 1, 1, 3, 8, 4, 14, 127],
+            [0, 1, 1, 1, 4, 14, 127],
+            [0, 1, 1, 1, 4, 14, 127],
+            [0, 1, 1, 1, 3, 8, 4, 14, 127],
+            [0, 1, 1, 1, 3, 8, 4, 14, 127],
+            [0, 1, 1, 1, 3, 8, 4, 14, 127],
+            [0, 1, 1, 1, 4, 14, 127],
+            [0, 1, 1, 1, 4, 14, 127],
+            [0, 1, 1, 1, 2, 10, 127],
+            [0, 1, 1, 1, 2, 10, 127],
+            [0, 1, 1, 1, 2, 10, 127],
+            [0, 1, 1, 1, 2, 10, 127],
+            [0, 1, 1, 1, 2, 10, 6, 1, 127],
+            [0, 1, 1, 1, 2, 10, 6, 1, 127],
+        ]
+
+        boardDict = pinList2boardDict(pinList)
+        test_layout = BOARDS['arduino']
+
+        for key in test_layout.keys():
+            print boardDict[key], test_layout[key]
+            self.assertEqual(boardDict[key], test_layout[key])
 
     def tearDown(self):
         self.board.exit()
