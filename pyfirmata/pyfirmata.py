@@ -173,8 +173,8 @@ class Board(object):
         while self.bytes_available():
             self.iterate()
 
-        #handle_report_capability_response will write self.layout
-        self.setup_layout(self.layout)
+        #handle_report_capability_response will write self._layout
+        self.setup_layout(self._layout)
 
     def add_cmd_handler(self, cmd, func):
         """Adds a command handler for a command."""

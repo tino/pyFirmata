@@ -27,21 +27,6 @@ class BoardBaseTest(unittest.TestCase):
         self.board._stored_data = [] # FIXME How can it be that a fresh instance sometimes still contains data?
 
 
-class CapabilityQueryTest(unittest.TestCase):
-
-    def setUp(self):
-        system = platform.system()
-        if system == 'Linux':
-            # Rough estimation about where the device is. May fail.
-            device = '/dev/ttyUSB0'
-            board = pyfirmata.Board(device) # No Layout
-        else:
-            raise RuntimeError('System not supported.')
-
-    def test_foobar(self):
-        pass
-
-
 class TestBoardMessages(BoardBaseTest):
     # TODO Test layout of Board Mega
     def assert_serial(self, *list_of_chrs):
@@ -404,6 +389,22 @@ class TestMockupBoardLayout(TestBoardLayout, TestBoardMessages):
         self.board = mockup.MockupBoard('test', BOARDS['arduino'])
 
 
+class TestArduinoDetection(TestBoardLayout, TestBoardMessages):
+    """
+    Subclassing from TestBoardLayout and TestBoardMessages,
+    in order to have the same tests. But it overwrites setUp(),
+    this way a real any Arduino can be tested.
+    """
+    def setUp(self):
+        system = platform.system()
+        if system == 'Linux':
+            # Rough estimation about where the device is. May fail.
+            device = '/dev/ttyUSB0'
+            self.board = pyfirmata.Board(device) # No Layout
+        else:
+            raise RuntimeError('System not supported.')
+
+
 class RegressionTests(BoardBaseTest):
 
     def test_correct_digital_input_first_pin_issue_9(self):
@@ -453,10 +454,10 @@ class RegressionTests(BoardBaseTest):
 board_messages = unittest.TestLoader().loadTestsFromTestCase(TestBoardMessages)
 board_layout = unittest.TestLoader().loadTestsFromTestCase(TestBoardLayout)
 regression = unittest.TestLoader().loadTestsFromTestCase(RegressionTests)
-with_arduino = unittest.TestLoader().loadTestsFromTestCase(CapabilityQueryTest)
 
-default = unittest.TestSuite([board_messages, board_layout, regression])
+default = unittest.TestSuite([board_messages, board_layout])
 mockup_suite = unittest.TestLoader().loadTestsFromTestCase(TestMockupBoardLayout)
+arduino_detection = unittest.TestLoader().loadTestsFromTestCase(TestArduinoDetection)
 
 if __name__ == '__main__':
     from optparse import OptionParser
@@ -470,19 +471,16 @@ if __name__ == '__main__':
 
     if options.arduino:
         print "Running the Arduino dependent test suite"
-        unittest.TextTestRunner(verbosity=2).run(with_arduino)
-
+        unittest.TextTestRunner(verbosity=2).run(arduino_detection)
+    elif options.mockup:
+        print "Running the mockup test suite"
+        unittest.TextTestRunner(verbosity=2).run(mockup_suite)
     else:
-        if not options.mockup:
-            print "Running normal suite. Also consider running the mockup (-m, --mockup) suite"
-            unittest.TextTestRunner(verbosity=3).run(default)
-            from pyfirmata import util
-            print "Running doctests for pyfirmata.util. (No output = No errors)"
-            doctest.testmod(util)
-            print "Done running doctests"
+        print "Running normal suite. Also consider running the mockup (-m, --mockup) suite"
+        unittest.TextTestRunner(verbosity=3).run(default)
+        from pyfirmata import util
+        print "Running doctests for pyfirmata.util. (No output = No errors)"
+        doctest.testmod(util)
+        print "Done running doctests"
 
-        if options.mockup:
-            print "Running the mockup test suite"
-            unittest.TextTestRunner(verbosity=2).run(mockup_suite)
-
-        unittest.TextTestRunner(verbosity=3).run(regression)
+    unittest.TextTestRunner(verbosity=3).run(regression)
