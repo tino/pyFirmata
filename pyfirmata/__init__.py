@@ -1,5 +1,6 @@
 from pyfirmata import *
 from boards import BOARDS
+from boards import pinList2boardDict
 
 __version__ = '0.9.5'  # Don't forget to change in setup.py!
 
