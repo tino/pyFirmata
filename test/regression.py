@@ -1,4 +1,5 @@
 import abc
+import unittest
 
 import pyfirmata
 
@@ -7,6 +8,10 @@ class RegressionTests(object):
 
     @abc.abstractmethod
     def setUp(self):
+        pass
+
+    @abc.abstractmethod
+    def tearDown(self):
         pass
 
     def test_correct_digital_input_first_pin_issue_9(self):

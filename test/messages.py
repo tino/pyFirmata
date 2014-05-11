@@ -1,28 +1,20 @@
-import unittest
 import abc
+from itertools import chain
 
-# Messages todo left:
+import pyfirmata
+from pyfirmata.util import to_two_bytes, str_to_two_byte_iter
 
-# type                command  channel    first byte            second byte
-# ---------------------------------------------------------------------------
-# set pin mode(I/O)     0xF4              pin # (0-127)         pin state(0=in)
-# system reset          0xFF
 
-class TestBoardMessages(object):
+class TestBoardHandlers(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def setUp(self):
         pass
 
-    # TODO Test layout of Board Mega
-    def assert_serial(self, *list_of_chrs):
-        res = self.board.sp.read()
-        serial_msg = res
-        while res:
-            res = self.board.sp.read()
-            serial_msg += res
-        self.assertEqual(''.join(list(list_of_chrs)), serial_msg)
+    @abc.abstractmethod
+    def tearDown(self):
+        pass
 
     # First test the handlers
     def test_handle_analog_message(self):
@@ -111,6 +103,29 @@ class TestBoardMessages(object):
         # 2.2 specs
         pass
 
+
+# Messages todo left:
+
+# type                command  channel    first byte            second byte
+# ---------------------------------------------------------------------------
+# set pin mode(I/O)     0xF4              pin # (0-127)         pin state(0=in)
+# system reset          0xFF
+
+class TestBoardMessages(object):
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def setUp(self):
+        pass
+
+    # TODO Test layout of Board Mega
+    def assert_serial(self, *list_of_chrs):
+        res = self.board.sp.read()
+        serial_msg = res
+        while res:
+            res = self.board.sp.read()
+            serial_msg += res
+        self.assertEqual(''.join(list(list_of_chrs)), serial_msg)
 
     # type                command  channel    first byte            second byte
     # ---------------------------------------------------------------------------

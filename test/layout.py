@@ -1,4 +1,5 @@
 import abc
+import unittest
 
 import pyfirmata
 from pyfirmata.boards import BOARDS, pinList2boardDict
@@ -9,6 +10,10 @@ class TestBoardLayout(object):
 
     @abc.abstractmethod
     def setUp(self):
+        pass
+
+    @abc.abstractmethod
+    def tearDown(self):
         pass
 
     def test_layout_arduino(self):
@@ -74,10 +79,4 @@ class TestBoardLayout(object):
         test_layout = BOARDS['arduino']
 
         for key in test_layout.keys():
-            print boardDict[key], test_layout[key]
             self.assertEqual(boardDict[key], test_layout[key])
-
-    def tearDown(self):
-        self.board.exit()
-        pyfirmata.serial.Serial = serial.Serial
-

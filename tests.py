@@ -13,7 +13,10 @@ class DefaultRegresstion(BoardBaseTest, RegressionTests):
 class DefaultLayout(BoardBaseTest, TestBoardLayout):
     pass
 
-class DefaultMessages(BoardBaseTest, TestBoardLayout):
+class DefaultMessages(BoardBaseTest, TestBoardMessages):
+    pass
+
+class DefaultHandlers(BoardBaseTest, TestBoardHandlers):
     pass
 
 # Mockup
@@ -23,7 +26,10 @@ class MockupRegresstion(MockupBoard, RegressionTests):
 class MockupLayout(MockupBoard, TestBoardLayout):
     pass
 
-class MockupMessages(MockupBoard, TestBoardLayout):
+class MockupMessages(MockupBoard, TestBoardMessages):
+    pass
+
+class MockupHandlers(MockupBoard, TestBoardHandlers):
     pass
 
 # Arduino
@@ -31,11 +37,20 @@ class ArduinoRegresstion(ArduinoDetection, RegressionTests):
     pass
 
 class ArduinoLayout(ArduinoDetection, TestBoardLayout):
-    pass
 
-class ArduinoMessages(ArduinoDetection, TestBoardLayout):
-    pass
+    @unittest.skip('Makes no sense, since we are detecting the laytout')
+    def test_layout_arduino(self):
+        pass
 
+    @unittest.skip('Makes no sense, since we are detecting the laytout')
+    def test_layout_arduino_mega(self):
+        pass
+
+#class ArduinoMessages(ArduinoDetection, TestBoardMessages):
+#    pass
+
+class ArduinoHandlers(ArduinoDetection, TestBoardHandlers):
+    pass
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -51,14 +66,29 @@ if __name__ == '__main__':
 
     if options.arduino:
         print "Running the Arduino dependent test suite"
-        test_list += [ArduinoLayout, ArduinoMessages, ArduinoRegresstion]
+        test_list += [
+            ArduinoLayout,
+            #ArduinoMessages,
+            ArduinoRegresstion,
+            ArduinoHandlers,
+        ]
 
     elif options.mockup:
         print "Running the mockup test suite"
-        test_list += [MockupLayout, MockupMessages, MockupRegresstion]
+        test_list += [
+                MockupLayout,
+                MockupMessages,
+                MockupRegresstion,
+                MockupHandlers
+        ]
     else:
         print "Running normal suite. Also consider running the mockup (-m, --mockup) suite"
-        test_list += [DefaultLayout, DefaultMessages, DefaultRegresstion]
+        test_list += [
+            DefaultLayout,
+            DefaultMessages,
+            DefaultRegresstion,
+            DefaultHandlers,
+        ]
 
     suites_list = []
     for test_class in test_list:

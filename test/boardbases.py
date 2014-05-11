@@ -1,3 +1,4 @@
+import serial
 import unittest
 import platform
 
@@ -16,6 +17,10 @@ class BoardBaseTest(unittest.TestCase):
         self.board = pyfirmata.Board('', BOARDS['arduino'])
         self.board._stored_data = [] # FIXME How can it be that a fresh instance sometimes still contains data?
 
+    def tearDown(self):
+        self.board.exit()
+        pyfirmata.serial.Serial = serial.Serial
+
 
 class MockupBoard(unittest.TestCase):
     """
@@ -26,6 +31,10 @@ class MockupBoard(unittest.TestCase):
     def setUp(self):
         self.board = mockup.MockupBoard('test', BOARDS['arduino'])
 
+    def tearDown(self):
+        self.board.exit()
+        pyfirmata.serial.Serial = serial.Serial
+
 
 class ArduinoDetection(unittest.TestCase):
     """
@@ -33,6 +42,7 @@ class ArduinoDetection(unittest.TestCase):
     in order to have the same tests. But it overwrites setUp(),
     this way a real any Arduino can be tested.
     """
+
     def setUp(self):
         system = platform.system()
         if system == 'Linux':
@@ -42,7 +52,9 @@ class ArduinoDetection(unittest.TestCase):
         else:
             raise RuntimeError('System not supported.')
 
-    def test_incoming_analog_message(self):
-        pass
+    def tearDown(self):
+        self.board.exit()
+        pyfirmata.serial.Serial = serial.Serial
 
-
+    def tearDown(self):
+        self.board.exit()

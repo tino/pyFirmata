@@ -58,7 +58,7 @@ DIGITAL = OUTPUT   # same as OUTPUT below
 # ANALOG is already defined above
 
 # Time to wait after initializing serial, used in Board.__init__
-BOARD_SETUP_WAIT_TIME = 5
+BOARD_SETUP_WAIT_TIME = 4
 
 class PinAlreadyTakenError(Exception):
     pass
