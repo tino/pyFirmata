@@ -5,22 +5,6 @@ class MockupSerial(deque):
     """
     A Mockup object for python's Serial. Functions as a fifo-stack. Push to
     it with ``write``, read from it with ``read``.
-
-    >>> s = MockupSerial('someport', 4800)
-    >>> s.read()
-    ''
-    >>> s.write(chr(100))
-    >>> s.write('blaat')
-    >>> s.write(100000)
-    >>> s.read(2)
-    ['d', 'blaat']
-    >>> s.read()
-    100000
-    >>> s.read()
-    ''
-    >>> s.read(2)
-    ['', '']
-    >>> s.close()
     """
     def __init__(self, port, baudrate, timeout=0.02):
         self.port = port or 'somewhere'
@@ -142,7 +126,3 @@ class Iterator(object):
         pass
     def stop(self):
         pass
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

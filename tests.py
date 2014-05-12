@@ -1,9 +1,8 @@
 import unittest
-import doctest
 from optparse import OptionParser
 
 import pyfirmata
-from  test import *
+from test import *
 
 
 # Default
@@ -61,7 +60,7 @@ if __name__ == '__main__':
                 This Arduino must be running a Firmata >2.3 Sketch")
     options, args = parser.parse_args()
 
-    test_list = []
+    test_list = [UtilTest, TestMockupSerial]
     loader = unittest.TestLoader()
 
     if options.arduino:
