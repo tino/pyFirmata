@@ -1,3 +1,4 @@
+import time
 import serial
 import unittest
 import platform
@@ -8,6 +9,10 @@ from pyfirmata.boards import BOARDS
 
 
 class BoardBaseTest(unittest.TestCase):
+
+    FIRMWARE_NAME = "Firmware_name"
+    FIRMWARE_VERSION = (2, 1)
+
     def setUp(self):
         # Test with the MockupSerial so no real connection is needed
         pyfirmata.pyfirmata.serial.Serial = mockup.MockupSerial
@@ -28,6 +33,10 @@ class MockupBoard(unittest.TestCase):
     TestBoardMessages as it should pass the same tests, but with the
     MockupBoard.
     """
+
+    FIRMWARE_NAME = "Firmware_name"
+    FIRMWARE_VERSION = (2, 1)
+
     def setUp(self):
         self.board = mockup.MockupBoard('test', BOARDS['arduino'])
 
@@ -43,6 +52,9 @@ class ArduinoDetection(unittest.TestCase):
     this way a real any Arduino can be tested.
     """
 
+    FIRMWARE_NAME = "StandardFirmata"
+    FIRMWARE_VERSION = (2, 3)
+
     def setUp(self):
         system = platform.system()
         if system == 'Linux':
@@ -54,7 +66,5 @@ class ArduinoDetection(unittest.TestCase):
 
     def tearDown(self):
         self.board.exit()
-        pyfirmata.serial.Serial = serial.Serial
+        time.sleep(0.1)
 
-    def tearDown(self):
-        self.board.exit()

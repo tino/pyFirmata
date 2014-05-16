@@ -33,7 +33,7 @@ def pinList2boardDict(pinlist):
         'analog': [],
         'pwm': [],
         'servo': [], # 2.2 specs
-        'i2c': [], # 2.3 specs
+        #'i2c': [], # 2.3 specs
         'disabled': [],
     }
     for i, pin in enumerate(pinlist):
@@ -59,8 +59,10 @@ def pinList2boardDict(pinlist):
                 if pin[j:j+2] == [4, 14]:
                     boardDict['servo'] += [i]
 
+                # Desable I2C
                 if pin[j:j+2] == [6, 1]:
-                    boardDict['i2c'] += [i]
+                    #boardDict['i2c'] += [i]
+                    pass
 
     # We have to deal with analog pins:
     # - (14, 15, 16, 17, 18, 19)
@@ -73,6 +75,8 @@ def pinList2boardDict(pinlist):
     #+ (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
 
     boardDict['digital'] = [n for n, _ in enumerate(diff)]
+    # TODO: set 'servo' right
+    boardDict['servo'] = [n for n, _ in enumerate(boardDict['servo'])]
 
     # Turn lists into tuples
     boardDict = {

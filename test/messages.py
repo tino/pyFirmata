@@ -1,4 +1,5 @@
 import abc
+import time
 from itertools import chain
 
 import pyfirmata
@@ -43,11 +44,12 @@ class TestBoardHandlers(object):
         self.assertEqual(self.board.firmata_version, (2, 1))
 
     def test_handle_report_firmware(self):
+
         self.assertEqual(self.board.firmware, None)
-        data = [2, 1] + str_to_two_byte_iter('Firmware_name')
+        data = list(self.FIRMWARE_VERSION) + str_to_two_byte_iter(self.FIRMWARE_NAME)
         self.board._handle_report_firmware(*data)
-        self.assertEqual(self.board.firmware, 'Firmware_name')
-        self.assertEqual(self.board.firmware_version, (2, 1))
+        self.assertEqual(self.board.firmware, self.FIRMWARE_NAME)
+        self.assertEqual(self.board.firmware_version, self.FIRMWARE_VERSION)
 
     def test_handle_capability_response(self):
         test_layout = {
@@ -118,11 +120,15 @@ class TestBoardMessages(object):
     def setUp(self):
         pass
 
+    @abc.abstractmethod
+    def tearDown(self):
+        pass
+
     # TODO Test layout of Board Mega
     def assert_serial(self, *list_of_chrs):
-        res = self.board.sp.read()
-        serial_msg = res
-        while res:
+        #res = self.board.sp.read()
+        serial_msg = ''
+        while self.board.sp.inWaiting():
             res = self.board.sp.read()
             serial_msg += res
         self.assertEqual(''.join(list(list_of_chrs)), serial_msg)
@@ -134,7 +140,14 @@ class TestBoardMessages(object):
         self.assertEqual(self.board.analog[4].read(), None)
         self.assertEqual(self.board.analog[4].reporting, False)
         # Should do nothing as the pin isn't set to report
-        self.board.sp.write([chr(pyfirmata.ANALOG_MESSAGE + 4), chr(127), chr(7)])
+        bytes_written = self.board.sp.write([
+            chr(pyfirmata.ANALOG_MESSAGE + 4),
+            chr(127),
+            chr(7)
+        ])
+        time.sleep(0.1)
+        if not self.board.bytes_available():
+            raise Exception('Not data available')
         self.board.iterate()
         self.assertEqual(self.board.analog[4].read(), None)
         self.board.analog[4].enable_reporting()
@@ -167,10 +180,11 @@ class TestBoardMessages(object):
     # 1  major version (0-127)
     # 2  minor version (0-127)
     def test_incoming_report_version(self):
+        n1, n2 = self.FIRMWARE_VERSION
         self.assertEqual(self.board.firmata_version, None)
-        self.board.sp.write([chr(pyfirmata.REPORT_VERSION), chr(2), chr(1)])
+        self.board.sp.write([chr(pyfirmata.REPORT_VERSION), chr(n1), chr(n2)])
         self.board.iterate()
-        self.assertEqual(self.board.firmata_version, (2, 1))
+        self.assertEqual(self.board.firmata_version, self.FIRMWARE_VERSION)
 
     # Receive Firmware Name and Version (after query)
     # 0  START_SYSEX (0xF0)
@@ -182,23 +196,26 @@ class TestBoardMessages(object):
     # x  ...for as many bytes as it needs)
     # 6  END_SYSEX (0xF7)
     def test_incoming_report_firmware(self):
+        n1, n2 = self.FIRMWARE_VERSION
         self.assertEqual(self.board.firmware, None)
         self.assertEqual(self.board.firmware_version, None)
         msg = [chr(pyfirmata.START_SYSEX),
                chr(pyfirmata.REPORT_FIRMWARE),
-               chr(2),
-               chr(1)] + str_to_two_byte_iter('Firmware_name') + \
+               chr(n1),
+               chr(n2)] + str_to_two_byte_iter(self.FIRMWARE_NAME) + \
               [chr(pyfirmata.END_SYSEX)]
         self.board.sp.write(msg)
         self.board.iterate()
-        self.assertEqual(self.board.firmware, 'Firmware_name')
-        self.assertEqual(self.board.firmware_version, (2, 1))
+        self.assertEqual(self.board.firmware, self.FIRMWARE_NAME)
+        self.assertEqual(self.board.firmware_version, self.FIRMWARE_VERSION)
 
     # type                command  channel    first byte            second byte
     # ---------------------------------------------------------------------------
     # report analog pin     0xC0   pin #      disable/enable(0/1)   - n/a -
     def test_report_analog(self):
         self.board.analog[1].enable_reporting()
+        if not self.board.bytes_available():
+            raise Exception('Not data available')
         self.assert_serial(chr(0xC0 + 1), chr(1))
         self.assertTrue(self.board.analog[1].reporting)
         self.board.analog[1].disable_reporting()
@@ -226,6 +243,7 @@ class TestBoardMessages(object):
         # 0x79 is queryFirmware, but that doesn't matter for now
         self.board.send_sysex(0x79, [1, 2, 3])
         sysex = (chr(0xF0), chr(0x79), chr(1), chr(2), chr(3), chr(0xF7))
+        time.sleep(0.1)
         self.assert_serial(*sysex)
 
     def test_send_sysex_string(self):
@@ -237,11 +255,11 @@ class TestBoardMessages(object):
         self.assertRaises(ValueError, self.board.send_sysex, 0x79, [256, 1])
 
     def test_receive_sysex_message(self):
+        n1, n2 = self.FIRMWARE_VERSION
         sysex = (chr(0xF0), chr(0x79), chr(2), chr(1), 'a', '\x00', 'b',
             '\x00', 'c', '\x00', chr(0xF7))
         self.board.sp.write(sysex)
-        while len(self.board.sp):
-            self.board.iterate()
+        self.board.iterate()
         self.assertEqual(self.board.firmware_version, (2, 1))
         self.assertEqual(self.board.firmware, 'abc')
 

@@ -159,14 +159,14 @@ class Board(object):
         self.add_cmd_handler(DIGITAL_MESSAGE, self._handle_digital_message)
         self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
         self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
-        self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_response)
         self.add_cmd_handler(PIN_STATE_RESPONSE, self._handle_pin_state_response)
+        #self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_response)
 
     def auto_setup(self):
         """
         Automatic setup based on Firmata's "Capability Query"
         """
-        self._set_default_handlers()
+        self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_response)
         self.send_sysex(CAPABILITY_QUERY)
         self.pass_time(0.1) # Serial SYNC
 
@@ -174,7 +174,10 @@ class Board(object):
             self.iterate()
 
         #handle_report_capability_response will write self._layout
-        self.setup_layout(self._layout)
+        if self._layout:
+            self.setup_layout(self._layout)
+        else:
+            raise IOError("Board detection failed.")
 
     def add_cmd_handler(self, cmd, func):
         """Adds a command handler for a command."""
@@ -332,6 +335,12 @@ class Board(object):
             for pin in self.digital:
                 if pin.mode == SERVO:
                     pin.mode = OUTPUT
+
+        if hasattr(self, 'analog'):
+            for pin in self.analog:
+                if pin.reporting:
+                    pin.disable_reporting()
+
         if hasattr(self, 'sp'):
             self.sp.close()
 
