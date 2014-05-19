@@ -19,6 +19,7 @@ if __name__ == '__main__':
     if options.arduino:
         print "Running the Arduino dependent test suite"
         test_list += [
+            ArduinoHardware,
         ]
 
     elif options.mockup:

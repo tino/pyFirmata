@@ -3,7 +3,7 @@ from layout import TestBoardLayout
 from messages import TestBoardMessages, TestBoardHandlers
 from boardbases import BoardBaseTest, ArduinoDetection, MockupBoard
 from util import UtilTest, TestMockupSerial
-
+from hardware import TestHardwareBoard
 
 # Default
 class DefaultRegresstion(BoardBaseTest, RegressionTests):
@@ -31,4 +31,5 @@ class MockupMessages(MockupBoard, TestBoardMessages):
 class MockupHandlers(MockupBoard, TestBoardHandlers):
     pass
 
-
+class ArduinoHardware(ArduinoDetection, TestHardwareBoard):
+    pass
