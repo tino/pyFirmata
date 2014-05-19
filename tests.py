@@ -4,68 +4,6 @@ from optparse import OptionParser
 import pyfirmata
 from test import *
 
-
-# Default
-class DefaultRegresstion(BoardBaseTest, RegressionTests):
-    pass
-
-class DefaultLayout(BoardBaseTest, TestBoardLayout):
-    pass
-
-class DefaultMessages(BoardBaseTest, TestBoardMessages):
-    pass
-
-class DefaultHandlers(BoardBaseTest, TestBoardHandlers):
-    pass
-
-# Mockup
-class MockupRegresstion(MockupBoard, RegressionTests):
-    pass
-
-class MockupLayout(MockupBoard, TestBoardLayout):
-    pass
-
-class MockupMessages(MockupBoard, TestBoardMessages):
-    pass
-
-class MockupHandlers(MockupBoard, TestBoardHandlers):
-    pass
-
-# Arduino
-class ArduinoRegresstion(ArduinoDetection, RegressionTests):
-    pass
-
-class ArduinoLayout(ArduinoDetection, TestBoardLayout):
-
-    @unittest.skip('Makes no sense, since we are detecting the laytout')
-    def test_layout_arduino(self):
-        pass
-
-    @unittest.skip('Makes no sense, since we are detecting the laytout')
-    def test_layout_arduino_mega(self):
-        pass
-
-class ArduinoMessages(ArduinoDetection, TestBoardMessages):
-
-    @unittest.skip('This test causes a loop')
-    def test_incoming_analog_message(self):
-        pass
-
-    @unittest.skip('This test causes a loop')
-    def test_report_digital(self):
-        pass
-
-    @unittest.skip('Makes no sense, since we are detecting the laytout')
-    def test_receive_sysex_message(self):
-        pass
-
-    @unittest.skip('This test causes a loop')
-    def test_incoming_report_firmware(self):
-        pass
-
-class ArduinoHandlers(ArduinoDetection, TestBoardHandlers):
-    pass
-
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-m", "--mockup", dest="mockup", action="store_true",
@@ -81,10 +19,6 @@ if __name__ == '__main__':
     if options.arduino:
         print "Running the Arduino dependent test suite"
         test_list += [
-            #ArduinoLayout,
-            ArduinoMessages,
-            #ArduinoRegresstion,
-            #ArduinoHandlers,
         ]
 
     elif options.mockup:
