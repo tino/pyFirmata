@@ -64,7 +64,10 @@ class ArduinoDetection(unittest.TestCase):
         else:
             raise RuntimeError('System not supported.')
 
+        self.it = pyfirmata.util.Iterator(self.board)
+
     def tearDown(self):
+        self.it.stop()
         self.board.exit()
-        time.sleep(0.1)
+        time.sleep(0.01)
 

@@ -22,7 +22,7 @@ if __name__ == '__main__':
             ArduinoHardware,
         ]
 
-    elif options.mockup:
+    if options.mockup:
         print "Running the mockup test suite"
         test_list += [
                 MockupLayout,
