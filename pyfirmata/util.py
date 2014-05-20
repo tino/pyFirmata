@@ -33,9 +33,14 @@ class Iterator(threading.Thread):
     def __init__(self, board):
         super(Iterator, self).__init__()
         self.board = board
+        self.stop_event = threading.Event()
+        self.stop_event.clear()
+
+    def stop(self):
+        self.stop_event.set()
 
     def run(self):
-        while 1:
+        while not self.stop_event.is_set():
             try:
                 while self.board.bytes_available():
                     self.board.iterate()
