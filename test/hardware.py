@@ -88,19 +88,24 @@ class TestHardwareBoard(object):
             time.sleep(0.1)
             pin.write(0)
 
-
     def test_firmata_version(self):
         self.it.start()
         version = self.board.get_firmata_version()
         self.assertEqual(version, self.FIRMWARE_VERSION)
 
-    def test_report_analog(self):
+
+    def test_pwm_pins(self):
+        pwm_pins = [p for p in self.board.digital if p.PWM_CAPABLE]
+        pins_n = [p.pin_number for p in pwm_pins]
+        self.assertEqual(pins_n, [3, 5, 6, 9, 10, 11])
+        for pin in pwm_pins:
+            pin.mode = pyfirmata.PWM
+
+        # Look the the LEDs
+        for frequency in range(0, 1000, 10) + range(0, 1000, 10)[::-1]:
+            for p in pwm_pins:
+                p.write(float(frequency)/1000.0)
+            time.sleep(0.01)
+
+    def test_servo(self):
         pass
-
-    def test_report_digital(self):
-        pass
-
-    def test_incoming_digital_message(self):
-        pass
-
-
