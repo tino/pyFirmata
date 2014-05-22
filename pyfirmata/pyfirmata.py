@@ -310,6 +310,12 @@ class Board(object):
         Returns a version tuple (major, minor) for the firmata firmware on the
         board.
         """
+        if not self.firmata_version:
+            self.sp.write(chr(REPORT_VERSION))
+            self.pass_time(0.01)
+            while self.bytes_available():
+                self.iterate()
+
         return self.firmata_version
 
     def servo_config(self, pin, min_pulse=544, max_pulse=2400, angle=0):
