@@ -2,7 +2,7 @@ import abc
 import time
 
 import pyfirmata
-from pyfirmata import OUTPUT, INPUT
+from pyfirmata import OUTPUT, INPUT, SERVO
 
 class TestHardwareBoard(object):
     __metaclass__ = abc.ABCMeta
@@ -108,4 +108,14 @@ class TestHardwareBoard(object):
             time.sleep(0.01)
 
     def test_servo(self):
-        pass
+        # Sweep Example
+        pin_d3 = self.board.digital[3]
+        pin_d2.mode = SERVO
+
+        for pos in xrange(180):
+            pin_d3.write(pos)
+            time.sleep(0.015)
+
+        for pos in xrange(180, 0, -1):
+            pin_d3.write(pos)
+            time.sleep(0.015)
