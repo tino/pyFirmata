@@ -110,7 +110,7 @@ class TestHardwareBoard(object):
     def test_servo(self):
         # Sweep Example
         pin_d3 = self.board.digital[3]
-        pin_d2.mode = SERVO
+        pin_d3.mode = SERVO
 
         for pos in xrange(180):
             pin_d3.write(pos)

@@ -3,7 +3,7 @@ BOARDS = {
         'digital' : tuple(x for x in range(14)),
         'analog' : tuple(x for x in range(6)),
         'pwm' : (3, 5, 6, 9, 10, 11),
-        #'servo' : (), # 2.2 specs
+        'servo' : tuple(x for x in range(14)),
         #'i2c' : (), # 2.3 specs
         'disabled' : (0, 1) # Rx, Tx, Crystal
     },
@@ -11,6 +11,7 @@ BOARDS = {
         'digital' : tuple(x for x in range(54)),
         'analog' : tuple(x for x in range(16)),
         'pwm' : tuple(x for x in range(2,14)),
+        # TODO: Servos on Mega
         #'servo' : (), # 2.2 specs
         #'i2c' : (), # 2.3 specs
         'disabled' : (0, 1) # Rx, Tx, Crystal
@@ -75,8 +76,8 @@ def pinList2boardDict(pinlist):
     #+ (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
 
     boardDict['digital'] = [n for n, _ in enumerate(diff)]
-    # TODO: set 'servo' right
-    boardDict['servo'] = [n for n, _ in enumerate(boardDict['servo'])]
+    # Based on lib Arduino 0017
+    boardDict['servo'] = boardDict['digital']
 
     # Turn lists into tuples
     boardDict = {
