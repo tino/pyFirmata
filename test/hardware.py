@@ -103,7 +103,8 @@ class TestHardwareBoard(object):
 
         # Look the the LEDs
         for frequency in range(0, 1000, 10) + range(0, 1000, 10)[::-1]:
-            for p in pwm_pins:
+            # pin 3 is wired to a Servo
+            for p in pwm_pins[1:]:
                 p.write(float(frequency)/1000.0)
             time.sleep(0.01)
 
@@ -119,3 +120,18 @@ class TestHardwareBoard(object):
         for pos in xrange(180, 0, -1):
             pin_d3.write(pos)
             time.sleep(0.015)
+
+    def test_servo_config(self):
+        pin_d3 = self.board.digital[3]
+        #pin_d3.mode = SERVO
+
+        self.board.servo_config(3, 1000, 2000)
+        time.sleep(0.1)
+
+        for pos in xrange(180):
+            pin_d3.write(pos)
+            time.sleep(0.005)
+
+        for pos in xrange(180, 0, -1):
+            pin_d3.write(pos)
+            time.sleep(0.005)
