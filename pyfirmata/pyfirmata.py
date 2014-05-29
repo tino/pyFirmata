@@ -3,6 +3,7 @@ import inspect
 import time
 import itertools
 from util import two_byte_iter_to_str, to_two_bytes
+from boards import pinList2boardDict
 
 # Message command bytes - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -22,6 +23,15 @@ QUERY_FIRMWARE = 0x79       # query the firmware name
 
 # extended command set using sysex (0-127/0x00-0x7F)
 # 0x00-0x0F reserved for user-defined commands */
+
+EXTENDED_ANALOG = 0x6F         # analog write (PWM, Servo, etc) to any pin
+PIN_STATE_QUERY = 0x6D         # ask for a pin's current mode and value
+PIN_STATE_RESPONSE = 0x6E      # reply with pin's current mode and value
+CAPABILITY_QUERY = 0x6B        # ask for supported modes and resolution of all pins
+CAPABILITY_RESPONSE = 0x6C     # reply with supported modes and resolution
+ANALOG_MAPPING_QUERY = 0x69    # ask for mapping of analog to pin numbers
+ANALOG_MAPPING_RESPONSE = 0x6A # reply with mapping info
+
 SERVO_CONFIG = 0x70         # set max angle, minPulse, maxPulse, freq
 STRING_DATA = 0x71          # a string message with 14-bits per char
 SHIFT_DATA = 0x75           # a bitstream to/from a shift register
@@ -48,7 +58,7 @@ DIGITAL = OUTPUT   # same as OUTPUT below
 # ANALOG is already defined above
 
 # Time to wait after initializing serial, used in Board.__init__
-BOARD_SETUP_WAIT_TIME = 5
+BOARD_SETUP_WAIT_TIME = 4
 
 class PinAlreadyTakenError(Exception):
     pass
@@ -69,20 +79,29 @@ class Board(object):
     _stored_data = []
     _parsing_sysex = False
 
-    def __init__(self, port, layout, baudrate=57600, name=None):
+    def __init__(self, port, layout=None, baudrate=57600, name=None):
         self.sp = serial.Serial(port, baudrate)
-        # Allow 5 secs for Arduino's auto-reset to happen
-        # Alas, Firmata blinks its version before printing it to serial
-        # For 2.3, even 5 seconds might not be enough.
+        self._layout = layout
+        self.name = name
+
+        ''' Allow 5 secs for Arduino's auto-reset to happen
+        Alas, Firmata blinks its version before printing it to serial
+        For 2.3, even 5 seconds might not be enough. '''
+
         # TODO Find a more reliable way to wait until the board is ready
         self.pass_time(BOARD_SETUP_WAIT_TIME)
-        self.name = name
         if not self.name:
             self.name = port
-        self.setup_layout(layout)
+
+        if layout:
+            self.setup_layout(layout)
+        else:
+            self.auto_setup()
+
         # Iterate over the first messages to get firmware data
         while self.bytes_available():
             self.iterate()
+
         # TODO Test whether we got a firmware name and version, otherwise there
         # probably isn't any Firmata installed
 
@@ -102,9 +121,7 @@ class Board(object):
 
     def setup_layout(self, board_layout):
         """
-        Setup the Pin instances based on the given board layout. Maybe it will
-        be possible to do this automatically in the future, by polling the
-        board for its type.
+        Setup the Pin instances based on the given board layout.
         """
         # Create pin instances based on board layout
         self.analog = []
@@ -134,11 +151,33 @@ class Board(object):
         self.taken = { 'analog' : dict(map(lambda p: (p.pin_number, False), self.analog)),
                        'digital' : dict(map(lambda p: (p.pin_number, False), self.digital)) }
 
+        self._set_default_handlers()
+
+    def _set_default_handlers(self):
         # Setup default handlers for standard incoming commands
         self.add_cmd_handler(ANALOG_MESSAGE, self._handle_analog_message)
         self.add_cmd_handler(DIGITAL_MESSAGE, self._handle_digital_message)
         self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
         self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
+        self.add_cmd_handler(PIN_STATE_RESPONSE, self._handle_pin_state_response)
+        #self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_response)
+
+    def auto_setup(self):
+        """
+        Automatic setup based on Firmata's "Capability Query"
+        """
+        self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_response)
+        self.send_sysex(CAPABILITY_QUERY)
+        self.pass_time(0.1) # Serial SYNC
+
+        while self.bytes_available():
+            self.iterate()
+
+        #handle_report_capability_response will write self._layout
+        if self._layout:
+            self.setup_layout(self._layout)
+        else:
+            raise IOError("Board detection failed.")
 
     def add_cmd_handler(self, cmd, func):
         """Adds a command handler for a command."""
@@ -160,11 +199,11 @@ class Board(object):
         :arg pin_def: Pin definition as described below,
             but without the arduino name. So for example ``a:1:i``.
 
-        'a' analog pin     Pin number   'i' for input 
+        'a' analog pin     Pin number   'i' for input
         'd' digital pin    Pin number   'o' for output
                                         'p' for pwm (Pulse-width modulation)
 
-        All seperated by ``:``. 
+        All seperated by ``:``.
         """
         if type(pin_def) == list:
             bits = pin_def
@@ -271,6 +310,12 @@ class Board(object):
         Returns a version tuple (major, minor) for the firmata firmware on the
         board.
         """
+        if not self.firmata_version:
+            self.sp.write(chr(REPORT_VERSION))
+            self.pass_time(0.01)
+            while self.bytes_available():
+                self.iterate()
+
         return self.firmata_version
 
     def servo_config(self, pin, min_pulse=544, max_pulse=2400, angle=0):
@@ -296,6 +341,12 @@ class Board(object):
             for pin in self.digital:
                 if pin.mode == SERVO:
                     pin.mode = OUTPUT
+
+        if hasattr(self, 'analog'):
+            for pin in self.analog:
+                if pin.reporting:
+                    pin.disable_reporting()
+
         if hasattr(self, 'sp'):
             self.sp.close()
 
@@ -328,6 +379,27 @@ class Board(object):
         minor = data[1]
         self.firmware_version = (major, minor)
         self.firmware = two_byte_iter_to_str(data[2:])
+
+    def _handle_report_capability_response(self, *data):
+        charbuffer = []
+        pin_spec_list = []
+
+        for c in data:
+            if c == CAPABILITY_RESPONSE:
+                continue
+
+            charbuffer.append(c)
+            if c == 0x7F:
+                # A copy of charbuffer
+                pin_spec_list.append(charbuffer[:])
+                charbuffer = []
+
+        self._layout = pinList2boardDict(pin_spec_list)
+
+    def _handle_pin_state_response(self, *data):
+        # TODO: 2.2 specs
+        print data
+
 
 class Port(object):
     """An 8-bit port on the board."""
