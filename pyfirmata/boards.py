@@ -80,11 +80,12 @@ def pinList2boardDict(pinlist):
     boardDict['servo'] = boardDict['digital']
 
     # Turn lists into tuples
-    boardDict = {
-            key: tuple(value)
+    # Using dict for Python 2.6 compatibility
+    boardDict = dict([
+            (key, tuple(value))
             for key, value
             in boardDict.items()
-    }
+    ])
 
     return boardDict
 
