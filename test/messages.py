@@ -56,7 +56,7 @@ class TestBoardHandlers(object):
             'digital': (0, 1, 2),
             'analog': (0, 1),
             'pwm': (1, 2),
-            #'servo': (2), # TODO 2.2 specs
+            'servo': (0, 1, 2),
             #'i2c': (2), # TODO 2.3 specs
             'disabled': (0,),
         }
@@ -145,7 +145,6 @@ class TestBoardMessages(object):
             chr(127),
             chr(7)
         ])
-        time.sleep(0.1)
         if not self.board.bytes_available():
             raise Exception('Not data available')
         self.board.iterate()
@@ -243,7 +242,6 @@ class TestBoardMessages(object):
         # 0x79 is queryFirmware, but that doesn't matter for now
         self.board.send_sysex(0x79, [1, 2, 3])
         sysex = (chr(0xF0), chr(0x79), chr(1), chr(2), chr(3), chr(0xF7))
-        time.sleep(0.1)
         self.assert_serial(*sysex)
 
     def test_send_sysex_string(self):
