@@ -25,8 +25,8 @@ class UtilTest(unittest.TestCase):
             self.assertEqual(len(val), 2)
 
         self.assertEqual(to_two_bytes(32767), ('\x7f', '\xff'))
-        with self.assertRaises(ValueError):
-            to_two_bytes(32768)
+        # Python2.6 does not supports AssertRaises() as Context Manager
+        self.assertRaises(ValueError, to_two_bytes, 32768)
 
     def test_from_two_bytes(self):
         for i in range(32766, 32768):
