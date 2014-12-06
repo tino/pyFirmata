@@ -25,6 +25,7 @@ class ArduinoMega(Board):
     def __init__(self, *args, **kwargs):
         args = list(args)
         args.append(BOARDS['arduino_mega'])
+        self.name = 'arduino-mega'
         super(ArduinoMega, self).__init__(*args, **kwargs)
 
     def __str__(self):
