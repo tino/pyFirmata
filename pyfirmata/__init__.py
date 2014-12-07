@@ -5,7 +5,6 @@ __version__ = '0.9.5'  # Don't forget to change in setup.py!
 
 # shortcut classes
 
-# Arduino is-a Board
 class Arduino(Board):
     """
     A board that will set itself up as a normal Arduino.
@@ -14,7 +13,6 @@ class Arduino(Board):
         args = list(args)
         args.append(BOARDS['arduino'])
         super(Arduino, self).__init__(*args, **kwargs)
-        # forced name to 'arduino'
         self.name = 'arduino'
 
     def __str__(self):
