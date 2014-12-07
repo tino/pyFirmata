@@ -12,5 +12,12 @@ BOARDS = {
         'pwm' : tuple(x for x in range(2,14)),
         'use_ports' : True,
         'disabled' : (0, 1) # Rx, Tx, Crystal
+    },
+    'spark_core' : {
+        'digital' : tuple(x for x in range(20)),
+        'analog' : tuple(x for x in range(10, 18)),
+        'pwm' : (0, 1, 10, 11, 14, 15, 16, 17),
+        'use_ports' : True,
+        'disabled' : (8, 9, 18, 19) # Rx, Tx, Crystal
     }
 }

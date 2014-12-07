@@ -24,7 +24,6 @@ class BoardBaseTest(unittest.TestCase):
         self.board = pyfirmata.Board('', BOARDS['arduino'])
         self.board._stored_data = [] # FIXME How can it be that a fresh instance sometimes still contains data?
 
-
 class TestBoardMessages(BoardBaseTest):
     # TODO Test layout of Board Mega
     def assert_serial(self, *list_of_chrs):
@@ -261,6 +260,13 @@ class TestBoardLayout(BoardBaseTest):
         mega = pyfirmata.Board('', BOARDS['arduino_mega'])
         self.assertEqual(len(BOARDS['arduino_mega']['digital']), len(mega.digital))
         self.assertEqual(len(BOARDS['arduino_mega']['analog']), len(mega.analog))
+
+    def test_layout_spark_core(self):
+        pyfirmata.pyfirmata.serial.Serial = mockup.MockupSerial
+        spark = pyfirmata.Board('', BOARDS['spark_core'])
+        print len(BOARDS['spark_core']['digital']), spark.digital, spark.analog
+        self.assertEqual(len(BOARDS['spark_core']['digital']), len(spark.digital))
+        self.assertEqual(len(BOARDS['spark_core']['analog']), len(spark.analog))
 
     def test_pwm_layout(self):
         pins = []
