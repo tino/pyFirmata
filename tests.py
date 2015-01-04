@@ -25,7 +25,7 @@ class BoardBaseTest(unittest.TestCase):
         # each test
         pyfirmata.pyfirmata.BOARD_SETUP_WAIT_TIME = 0
         self.board = pyfirmata.Board('', BOARDS['arduino'])
-        self.board._stored_data = [] 
+        self.board._stored_data = []
         # FIXME How can it be that a fresh instance sometimes still contains data?
 
 
@@ -340,7 +340,7 @@ from pyfirmata.util import (to_two_bytes, from_two_bytes, two_byte_iter_to_str,
 
 
 class UtilTests(unittest.TestCase):
-    
+
     def test_to_two_bytes(self):
         for i in range(32768):
             val = to_two_bytes(i)
@@ -382,18 +382,12 @@ board_messages = unittest.TestLoader().loadTestsFromTestCase(TestBoardMessages)
 board_layout = unittest.TestLoader().loadTestsFromTestCase(TestBoardLayout)
 regression = unittest.TestLoader().loadTestsFromTestCase(RegressionTests)
 util = unittest.TestLoader().loadTestsFromTestCase(UtilTests)
-default = unittest.TestSuite([board_messages, board_layout, regression, util])
 mockup_suite = unittest.TestLoader().loadTestsFromTestCase(TestMockupBoardLayout)
+default = unittest.TestSuite([board_messages, board_layout, regression, util,
+                             mockup_suite])
 
 if __name__ == '__main__':
     from optparse import OptionParser
     parser = OptionParser()
-    parser.add_option("-m", "--mockup", dest="mockup", action="store_true",
-        help="Also run the mockup tests")
     options, args = parser.parse_args()
-    if not options.mockup:
-        print("Running normal suite. Also consider running the mockup (-m, --mockup) suite")
-        unittest.TextTestRunner(verbosity=3).run(default)
-    if options.mockup:
-        print("Running the mockup test suite")
-        unittest.TextTestRunner(verbosity=2).run(mockup_suite)
+    unittest.TextTestRunner(verbosity=3).run(default)
