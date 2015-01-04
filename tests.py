@@ -1,13 +1,16 @@
-from __future__ import division
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
 import unittest
-import doctest
-import serial
 from itertools import chain
+
+import serial
+
 import pyfirmata
 from pyfirmata import mockup
 from pyfirmata.boards import BOARDS
-from pyfirmata.util import str_to_two_byte_iter, to_two_bytes
+from pyfirmata.util import (break_to_bytes, from_two_bytes,
+                            str_to_two_byte_iter, to_two_bytes,
+                            two_byte_iter_to_str)
 
 # Messages todo left:
 
@@ -15,6 +18,7 @@ from pyfirmata.util import str_to_two_byte_iter, to_two_bytes
 # ---------------------------------------------------------------------------
 # set pin mode(I/O)     0xF4              pin # (0-127)         pin state(0=in)
 # system reset          0xFF
+
 
 class BoardBaseTest(unittest.TestCase):
 
@@ -52,10 +56,10 @@ class TestBoardMessages(BoardBaseTest):
         # A digital message sets the value for a whole port. We will set pin
         # 5 (That is on port 0) to 1 to test if this is working.
         self.board.digital_ports[0].reporting = True
-        self.board.digital[5]._mode = 0 # Set it to input
+        self.board.digital[5]._mode = 0  # Set it to input
         # Create the mask
         mask = 0
-        mask |= 1 << 5 # set the bit for pin 5 to to 1
+        mask |= 1 << 5  # set the bit for pin 5 to to 1
         self.assertEqual(self.board.digital[5].read(), None)
         self.board._handle_digital_message(0, mask % 128, mask >> 7)
         self.assertEqual(self.board.digital[5].read(), True)
@@ -98,10 +102,10 @@ class TestBoardMessages(BoardBaseTest):
         # A digital message sets the value for a whole port. We will set pin
         # 9 (on port 1) to 1 to test if this is working.
         self.board.digital[9].mode = pyfirmata.INPUT
-        self.board.sp.clear() # clear mode sent over the wire.
+        self.board.sp.clear()  # clear mode sent over the wire.
         # Create the mask
         mask = 0
-        mask |= 1 << (9 - 8) # set the bit for pin 9 to to 1
+        mask |= 1 << (9 - 8)  # set the bit for pin 9 to to 1
         self.assertEqual(self.board.digital[9].read(), None)
         self.board.sp.write([pyfirmata.DIGITAL_MESSAGE + 1, mask % 128, mask >> 7])
         self.board.iterate()
@@ -156,7 +160,7 @@ class TestBoardMessages(BoardBaseTest):
     # report digital port   0xD0   port       disable/enable(0/1)   - n/a -
     def test_report_digital(self):
         # This should enable reporting of whole port 1
-        self.board.digital[8]._mode = pyfirmata.INPUT # Outputs can't report
+        self.board.digital[8]._mode = pyfirmata.INPUT  # Outputs can't report
         self.board.digital[8].enable_reporting()
         self.assert_serial(0xD0 + 1, 1)
         self.assertTrue(self.board.digital_ports[1].reporting)
@@ -198,7 +202,7 @@ class TestBoardMessages(BoardBaseTest):
         # This should set analog port 4 to 1
         self.board.sp.write([pyfirmata.ANALOG_MESSAGE + 4, 127, 7])
         # Crap
-        self.board.sp.write([10-i for i in range(10)])
+        self.board.sp.write([10 - i for i in range(10)])
         while len(self.board.sp):
             self.board.iterate()
         self.assertEqual(self.board.analog[4].read(), 1.0)
@@ -235,7 +239,7 @@ class TestBoardMessages(BoardBaseTest):
         data = chain([0xF0, 0x70, 2], to_two_bytes(600),
             to_two_bytes(2000), [0xF7])
         angle_set = [0xE0 + 2, 90 % 128,
-            90 >> 7] # Angle set happens through analog message
+            90 >> 7]  # Angle set happens through analog message
         data = list(data) + angle_set
         self.assert_serial(*data)
 
@@ -310,7 +314,7 @@ class RegressionTests(BoardBaseTest):
         """
         pin = self.board.get_pin('d:8:i')
         mask = 0
-        mask |= 1 << 0 # set pin 0 high
+        mask |= 1 << 0  # set pin 0 high
         self.board._handle_digital_message(pin.port.port_number,
             mask % 128, mask >> 7)
         self.assertEqual(pin.value, True)
@@ -319,8 +323,8 @@ class RegressionTests(BoardBaseTest):
         """
         Test if digital inputs are correctly updated.
         """
-        for i in range(8, 16): # pins of port 1
-            if not bool(i%2) and i != 14: # all even pins
+        for i in range(8, 16):  # pins of port 1
+            if not bool(i % 2) and i != 14:  # all even pins
                 self.board.digital[i].mode = pyfirmata.INPUT
                 self.assertEqual(self.board.digital[i].value, None)
         mask = 0
@@ -334,9 +338,6 @@ class RegressionTests(BoardBaseTest):
         self.assertEqual(self.board.digital[11].value, None)
         self.assertEqual(self.board.digital[12].value, False)
         self.assertEqual(self.board.digital[13].value, None)
-
-from pyfirmata.util import (to_two_bytes, from_two_bytes, two_byte_iter_to_str,
-    str_to_two_byte_iter, break_to_bytes)
 
 
 class UtilTests(unittest.TestCase):
@@ -361,15 +362,15 @@ class UtilTests(unittest.TestCase):
     def test_two_byte_iter_to_str(self):
         string, s = 'StandardFirmata', []
         for i in string:
-          s.append(i)
-          s.append('\x00')
+            s.append(i)
+            s.append('\x00')
         self.assertEqual(two_byte_iter_to_str(s), 'StandardFirmata')
 
     def test_str_to_two_byte_iter(self):
         string, itr = 'StandardFirmata', bytearray()
         for i in string:
-          itr.append(ord(i))
-          itr.append(0)
+            itr.append(ord(i))
+            itr.append(0)
         self.assertEqual(itr, str_to_two_byte_iter(string))
 
     def test_break_to_bytes(self):
