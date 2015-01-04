@@ -1,11 +1,11 @@
-from __future__ import division
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
 import inspect
 import time
 
 import serial
 
-from .util import two_byte_iter_to_str, to_two_bytes
+from .util import to_two_bytes, two_byte_iter_to_str
 
 # Message command bytes (0x80(128) to 0xFF(255)) - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -53,14 +53,18 @@ DIGITAL = OUTPUT   # same as OUTPUT below
 # Time to wait after initializing serial, used in Board.__init__
 BOARD_SETUP_WAIT_TIME = 5
 
+
 class PinAlreadyTakenError(Exception):
     pass
+
 
 class InvalidPinDefError(Exception):
     pass
 
+
 class NoInputWarning(RuntimeWarning):
     pass
+
 
 class Board(object):
     """The Base class for any board."""
@@ -91,7 +95,7 @@ class Board(object):
 
     def __str__(self):
         return "Board{0.name} on {0.sp.port}".format(self)
-        
+
     def __del__(self):
         """
         The connection with the a board can get messed up when a script is
@@ -117,7 +121,7 @@ class Board(object):
         self.digital = []
         self.digital_ports = []
         for i in range(0, len(board_layout['digital']), 8):
-            num_pins = len(board_layout['digital'][i:i+8])
+            num_pins = len(board_layout['digital'][i:i + 8])
             port_number = int(i / 8)
             self.digital_ports.append(Port(self, port_number, num_pins))
 
@@ -134,8 +138,8 @@ class Board(object):
             self.digital[i].mode = UNAVAILABLE
 
         # Create a dictionary of 'taken' pins. Used by the get_pin method
-        self.taken = { 'analog' : dict(map(lambda p: (p.pin_number, False), self.analog)),
-                       'digital' : dict(map(lambda p: (p.pin_number, False), self.digital)) }
+        self.taken = {'analog': dict(map(lambda p: (p.pin_number, False), self.analog)),
+                      'digital': dict(map(lambda p: (p.pin_number, False), self.digital))}
 
         # Setup default handlers for standard incoming commands
         self.add_cmd_handler(ANALOG_MESSAGE, self._handle_analog_message)
@@ -146,10 +150,11 @@ class Board(object):
     def add_cmd_handler(self, cmd, func):
         """Adds a command handler for a command."""
         len_args = len(inspect.getargspec(func)[0])
+
         def add_meta(f):
             def decorator(*args, **kwargs):
                 f(*args, **kwargs)
-            decorator.bytes_needed = len_args - 1 # exclude self
+            decorator.bytes_needed = len_args - 1  # exclude self
             decorator.__name__ = f.__name__
             return decorator
         func = add_meta(func)
@@ -163,11 +168,11 @@ class Board(object):
         :arg pin_def: Pin definition as described below,
             but without the arduino name. So for example ``a:1:i``.
 
-        'a' analog pin     Pin number   'i' for input 
+        'a' analog pin     Pin number   'i' for input
         'd' digital pin    Pin number   'o' for output
                                         'p' for pwm (Pulse-width modulation)
 
-        All seperated by ``:``. 
+        All seperated by ``:``.
         """
         if type(pin_def) == list:
             bits = pin_def
@@ -178,7 +183,7 @@ class Board(object):
         pin_nr = int(bits[1])
         if pin_nr >= len(part):
             raise InvalidPinDefError('Invalid pin definition: {0} at position 3 on {1}'.format(pin_def, self.name))
-        if getattr(part[pin_nr], 'mode', None)  == UNAVAILABLE:
+        if getattr(part[pin_nr], 'mode', None) == UNAVAILABLE:
             raise InvalidPinDefError('Invalid pin definition: UNAVAILABLE pin {0} at position on {1}'.format(pin_def, self.name))
         if self.taken[a_d][pin_nr]:
             raise PinAlreadyTakenError('{0} pin {1} is already taken on {2}'.format(a_d, bits[1], self.name))
@@ -201,7 +206,7 @@ class Board(object):
         cont = time.time() + t
         while time.time() < cont:
             time.sleep(0)
-            
+
     def send_sysex(self, sysex_cmd, data):
         """
         Sends a SysEx msg.
@@ -214,7 +219,6 @@ class Board(object):
         msg.append(END_SYSEX)
         self.sp.write(msg)
 
-        
     def bytes_available(self):
         return self.sp.inWaiting()
 
@@ -275,7 +279,7 @@ class Board(object):
         """
         if pin > len(self.digital) or self.digital[pin].mode == UNAVAILABLE:
             raise IOError("Pin {0} is not a valid servo pin".format(pin))
-        
+
         data = bytearray([pin])
         data += to_two_bytes(min_pulse)
         data += to_two_bytes(max_pulse)
@@ -326,6 +330,7 @@ class Board(object):
         self.firmware_version = (major, minor)
         self.firmware = two_byte_iter_to_str(data[2:])
 
+
 class Port(object):
     """An 8-bit port on the board."""
     def __init__(self, board, port_number, num_pins=8):
@@ -340,7 +345,7 @@ class Port(object):
 
     def __str__(self):
         return "Digital Port {0.port_number} on {0.board}".format(self)
-        
+
     def enable_reporting(self):
         """Enable reporting of values for the whole port."""
         self.reporting = True
@@ -349,9 +354,8 @@ class Port(object):
 
         for pin in self.pins:
             if pin.mode == INPUT:
-                pin.reporting = True # TODO Shouldn't this happen at the pin?
+                pin.reporting = True  # TODO Shouldn't this happen at the pin?
 
-        
     def disable_reporting(self):
         """Disable the reporting of the port."""
         self.reporting = False
@@ -380,6 +384,7 @@ class Port(object):
                     pin_nr = pin.pin_number - self.port_number * 8
                     pin.value = (mask & (1 << pin_nr)) > 0
 
+
 class Pin(object):
     """A Pin representation"""
     def __init__(self, board, pin_number, type=ANALOG, port=None):
@@ -393,7 +398,7 @@ class Pin(object):
         self.value = None
 
     def __str__(self):
-        type = {ANALOG : 'Analog', DIGITAL : 'Digital'}[self.type]
+        type = {ANALOG: 'Analog', DIGITAL: 'Digital'}[self.type]
         return "{0} pin {1}".format(type, self.pin_number)
 
     def _set_mode(self, mode):
@@ -436,7 +441,8 @@ class Pin(object):
             msg = bytearray([REPORT_ANALOG + self.pin_number, 1])
             self.board.sp.write(msg)
         else:
-            self.port.enable_reporting() # TODO This is not going to work for non-optimized boards like Mega
+            self.port.enable_reporting()
+            # TODO This is not going to work for non-optimized boards like Mega
 
     def disable_reporting(self):
         """Disable the reporting of an input pin."""
@@ -445,7 +451,8 @@ class Pin(object):
             msg = bytearray([REPORT_ANALOG + self.pin_number, 0])
             self.board.sp.write(msg)
         else:
-            self.port.disable_reporting() # TODO This is not going to work for non-optimized boards like Mega
+            self.port.disable_reporting()
+            # TODO This is not going to work for non-optimized boards like Mega
 
     def read(self):
         """

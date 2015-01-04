@@ -9,6 +9,7 @@ import serial
 import pyfirmata
 from .boards import BOARDS
 
+
 def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.usbserial',):
     """
     Helper function to get the one and only board connected to the computer
@@ -32,6 +33,7 @@ def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.us
     elif len(boards) > 1:
         raise IOError("More than one board found!")
     return boards[0]
+
 
 class Iterator(threading.Thread):
     def __init__(self, board):
@@ -61,6 +63,7 @@ class Iterator(threading.Thread):
                     pass
                 raise
 
+
 def to_two_bytes(integer):
     """
     Breaks an integer into two 7 bit bytes.
@@ -68,6 +71,7 @@ def to_two_bytes(integer):
     if integer > 32767:
         raise ValueError("Can't handle values bigger than 32767 (max for 2 bits)")
     return bytearray([integer % 128, integer >> 7])
+
 
 def from_two_bytes(bytes):
     """
@@ -90,6 +94,7 @@ def from_two_bytes(bytes):
             pass
         return msb << 7 | lsb
 
+
 def two_byte_iter_to_str(bytes):
     """
     Return a string made from a list of two byte chars.
@@ -104,7 +109,8 @@ def two_byte_iter_to_str(bytes):
             msb = 0x00
         chars.append(from_two_bytes([lsb, msb]))
     return chars.decode()
-    
+
+
 def str_to_two_byte_iter(string):
     """
     Return a iter consisting of two byte chars from a string.
@@ -115,6 +121,7 @@ def str_to_two_byte_iter(string):
         bytes.append(char)
         bytes.append(0)
     return bytes
+
 
 def break_to_bytes(value):
     """
