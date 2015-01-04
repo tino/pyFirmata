@@ -1,7 +1,8 @@
 from .pyfirmata import *
 from .boards import BOARDS
 
-__version__ = '0.9.5'  # Don't forget to change in setup.py!
+__version__ = '1.0.0'  # Don't forget to change in setup.py!
+
 
 # shortcut classes
 
@@ -16,7 +17,8 @@ class Arduino(Board):
 
     def __str__(self):
         return "Arduino {0.name} on {0.sp.port}".format(self)
-    
+
+
 class ArduinoMega(Board):
     """
     A board that will set itself up as an Arduino Mega.
