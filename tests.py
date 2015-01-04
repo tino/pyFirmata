@@ -38,7 +38,7 @@ class TestBoardMessages(BoardBaseTest):
     def assert_serial(self, *incoming_bytes):
         serial_msg = bytearray()
         res = self.board.sp.read()
-        while res is not None:
+        while res:
             serial_msg += res
             res = self.board.sp.read()
         self.assertEqual(bytearray(incoming_bytes), serial_msg)
@@ -301,6 +301,31 @@ class TestBoardLayout(BoardBaseTest):
         pyfirmata.serial.Serial = serial.Serial
 
 
+class TestMockupSerial(unittest.TestCase):
+
+    def setUp(self):
+        self.s = mockup.MockupSerial('someport', 4800)
+
+    def test_only_bytes(self):
+        self.s.write(0xA0)
+        self.s.write(100)
+        self.assertRaises(TypeError, self.s.write, 'blaat')
+
+    def test_write_read(self):
+        self.s.write(0xA1)
+        self.s.write([1, 3, 5])
+        self.assertEqual(self.s.read(2), bytearray([0xA1, 0x01]))
+        self.assertEqual(len(self.s), 2)
+        self.assertEqual(self.s.read(), bytearray([3]))
+        self.assertEqual(self.s.read(), bytearray([5]))
+        self.assertEqual(len(self.s), 0)
+        self.assertEqual(self.s.read(), bytearray())
+        self.assertEqual(self.s.read(2), bytearray())
+
+    def test_none(self):
+        self.assertEqual(self.s.read(), bytearray())
+
+
 class TestMockupBoardLayout(TestBoardLayout, TestBoardMessages):
     """
     TestMockupBoardLayout is subclassed from TestBoardLayout and
@@ -397,16 +422,5 @@ class UtilTests(unittest.TestCase):
         self.assertEqual(break_to_bytes(802), (2, 2, 200))
 
 
-board_messages = unittest.TestLoader().loadTestsFromTestCase(TestBoardMessages)
-board_layout = unittest.TestLoader().loadTestsFromTestCase(TestBoardLayout)
-regression = unittest.TestLoader().loadTestsFromTestCase(RegressionTests)
-util = unittest.TestLoader().loadTestsFromTestCase(UtilTests)
-mockup_suite = unittest.TestLoader().loadTestsFromTestCase(TestMockupBoardLayout)
-default = unittest.TestSuite([board_messages, board_layout, regression, util,
-                             mockup_suite])
-
 if __name__ == '__main__':
-    from optparse import OptionParser
-    parser = OptionParser()
-    options, args = parser.parse_args()
-    unittest.TextTestRunner(verbosity=3).run(default)
+    unittest.main(verbosity=2)

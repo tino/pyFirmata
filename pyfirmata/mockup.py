@@ -7,23 +7,8 @@ class MockupSerial(deque):
     """
     A Mockup object for python's Serial. Functions as a fifo-stack. Push to
     it with ``write``, read from it with ``read``.
-
-    >>> s = MockupSerial('someport', 4800)
-    >>> s.read()
-    ''
-    >>> s.write(chr(100))
-    >>> s.write('blaat')
-    >>> s.write(100000)
-    >>> s.read(2)
-    ['d', 'blaat']
-    >>> s.read()
-    100000
-    >>> s.read()
-    ''
-    >>> s.read(2)
-    ['', '']
-    >>> s.close()
     """
+
     def __init__(self, port, baudrate, timeout=0.02):
         self.port = port or 'somewhere'
 
@@ -34,25 +19,25 @@ class MockupSerial(deque):
                 try:
                     val.append(self.popleft())
                 except IndexError:
-                    val.append(None)
+                    break
         else:
             try:
                 val = self.popleft()
             except IndexError:
-                val = None
+                val = bytearray()
 
-        if val is not None:
-            return bytearray([val])
-        else:
-            return
+        val = [val] if not hasattr(val, '__iter__') else val
+        return bytearray(val)
 
     def write(self, value):
         """
-        Appends items flat to the deque. So iterables will be unpacked.
+        Appends bytes flat to the deque. So iterables will be unpacked.
         """
         if hasattr(value, '__iter__'):
+            bytearray(value)
             self.extend(value)
         else:
+            bytearray([value])
             self.append(value)
 
     def close(self):
