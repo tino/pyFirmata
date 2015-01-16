@@ -363,21 +363,21 @@ class Board(object):
         self.firmware_version = (major, minor)
         self.firmware = two_byte_iter_to_str(data[2:])
 
-def _handle_report_capability_response(self, *data):
-    charbuffer = []
-    pin_spec_list = []
+    def _handle_report_capability_response(self, *data):
+        charbuffer = []
+        pin_spec_list = []
 
-    for c in data:
-        if c == CAPABILITY_RESPONSE:
-            continue
+        for c in data:
+            if c == CAPABILITY_RESPONSE:
+                continue
 
-        charbuffer.append(c)
-        if c == 0x7F:
-            # A copy of charbuffer
-            pin_spec_list.append(charbuffer[:])
-            charbuffer = []
+            charbuffer.append(c)
+            if c == 0x7F:
+                # A copy of charbuffer
+                pin_spec_list.append(charbuffer[:])
+                charbuffer = []
 
-    self._layout = pinList2boardDict(pin_spec_list)
+        self._layout = pinList2boardDict(pin_spec_list)
 
 
 class Port(object):
