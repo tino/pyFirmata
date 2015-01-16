@@ -177,7 +177,6 @@ class TestBoardMessages(BoardBaseTest):
 
         self.board._handle_report_capability_response(*data_arduino)
         for key in test_layout.keys():
-            print self.board._layout[key], test_layout[key]
             self.assertEqual(self.board._layout[key], test_layout[key])
 
     # type                command  channel    first byte            second byte
