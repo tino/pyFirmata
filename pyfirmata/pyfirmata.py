@@ -5,8 +5,7 @@ import time
 
 import serial
 
-from .util import to_two_bytes, two_byte_iter_to_str
-from .boards import pinList2boardDict
+from .util import to_two_bytes, two_byte_iter_to_str, pin_list_to_board_dict
 
 # Message command bytes (0x80(128) to 0xFF(255)) - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -27,13 +26,13 @@ QUERY_FIRMWARE = 0x79       # query the firmware name
 # extended command set using sysex (0-127/0x00-0x7F)
 # 0x00-0x0F reserved for user-defined commands */
 
-EXTENDED_ANALOG = 0x6F         # analog write (PWM, Servo, etc) to any pin
-PIN_STATE_QUERY = 0x6D         # ask for a pin's current mode and value
-PIN_STATE_RESPONSE = 0x6E      # reply with pin's current mode and value
-CAPABILITY_QUERY = 0x6B        # ask for supported modes and resolution of all pins
-CAPABILITY_RESPONSE = 0x6C     # reply with supported modes and resolution
-ANALOG_MAPPING_QUERY = 0x69    # ask for mapping of analog to pin numbers
-ANALOG_MAPPING_RESPONSE = 0x6A # reply with mapping info
+EXTENDED_ANALOG = 0x6F          # analog write (PWM, Servo, etc) to any pin
+PIN_STATE_QUERY = 0x6D          # ask for a pin's current mode and value
+PIN_STATE_RESPONSE = 0x6E       # reply with pin's current mode and value
+CAPABILITY_QUERY = 0x6B         # ask for supported modes and resolution of all pins
+CAPABILITY_RESPONSE = 0x6C      # reply with supported modes and resolution
+ANALOG_MAPPING_QUERY = 0x69     # ask for mapping of analog to pin numbers
+ANALOG_MAPPING_RESPONSE = 0x6A  # reply with mapping info
 
 SERVO_CONFIG = 0x70         # set max angle, minPulse, maxPulse, freq
 STRING_DATA = 0x71          # a string message with 14-bits per char
@@ -169,12 +168,12 @@ class Board(object):
         """
         self._set_default_handlers()
         self.send_sysex(CAPABILITY_QUERY)
-        self.pass_time(0.1) # Serial SYNC
+        self.pass_time(0.1)  # Serial SYNC
 
         while self.bytes_available():
                 self.iterate()
 
-        #handle_report_capability_response will write self._layout
+        # handle_report_capability_response will write self._layout
         if self._layout:
             self.setup_layout(self._layout)
         else:
@@ -377,7 +376,7 @@ class Board(object):
                 pin_spec_list.append(charbuffer[:])
                 charbuffer = []
 
-        self._layout = pinList2boardDict(pin_spec_list)
+        self._layout = pin_list_to_board_dict(pin_spec_list)
 
 
 class Port(object):
