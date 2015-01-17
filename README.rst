@@ -6,15 +6,11 @@ pyFirmata is a Python interface for the `Firmata`_ protocol.
 
 .. _Firmata: http://firmata.org
 
-Master tests:
+Test status:
 
 .. image:: https://travis-ci.org/tino/pyFirmata.png?branch=master
     :target: https://travis-ci.org/tino/pyFirmata
 
-Python 3 tests:
-
-.. image:: https://travis-ci.org/tino/pyFirmata.png?branch=py3
-    :target: https://travis-ci.org/tino/pyFirmata
 
 Installation
 ============
@@ -23,16 +19,15 @@ The preferred way to install is with pip_::
 
     pip install pyfirmata
 
-If you install from source with ``python setup.py install``, don't forget to
-install `pyserial`_ as well.::
+You can also install from source with ``python setup.py install``. You will need to have `setuptools`_ installed::
 
     git clone https://github.com/tino/pyFirmata
     cd pyFirmata
-    pip install pyserial
     python setup.py install
 
 .. _pip: http://www.pip-installer.org/en/latest/
-.. _pyserial:http://pyserial.sourceforge.net/
+.. _setuptools: https://pypi.python.org/pypi/setuptools
+
 
 Usage
 =====
@@ -43,7 +38,7 @@ Basic usage::
     >>> board = Arduino('/dev/tty.usbserial-A6008rIF')
     >>> board.digital[13].write(1)
 
-To use analog ports, it is probably handy to start an iterator thread. 
+To use analog ports, it is probably handy to start an iterator thread.
 Otherwise the board will keep sending data to your serial, until it overflows::
 
     >>> it = util.Iterator(board)
@@ -69,9 +64,9 @@ Board layout
 ============
 
 If you want to use a board with a different layout than the standard Arduino
-or the Arduino Mega (for which there exist the shortcut classes 
-``pyfirmata.Arduino`` and ``pyfirmata.ArduinoMega``), instantiate the Board 
-class with a dictionary as the ``layout`` argument. This is the layout dict 
+or the Arduino Mega (for which there exist the shortcut classes
+``pyfirmata.Arduino`` and ``pyfirmata.ArduinoMega``), instantiate the Board
+class with a dictionary as the ``layout`` argument. This is the layout dict
 for the Mega for example::
 
     >>> mega = {
