@@ -82,9 +82,6 @@ Todo
 
 The next things on my list are to implement the new protocol changes in firmata:
 
-- Capability Query, which would eliminate the need to instantiate a board with
-  the layout dict, as it will be able to determine the layout itself
-  (http://firmata.org/wiki/Proposals#Capability_Query_.28added_in_version_2.2.29)
 - Pin State Query, which allows it to populate on-screen controls with an
   accurate representation of the hardware's configuration
   (http://firmata.org/wiki/Proposals#Pin_State_Query_.28added_in_version_2.2.29)
