@@ -168,7 +168,7 @@ class Board(object):
         Automatic setup based on Firmata's "Capability Query"
         """
         self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_response)
-        self.send_sysex(CAPABILITY_QUERY)
+        self.send_sysex(CAPABILITY_QUERY, [])
         self.pass_time(0.1) # Serial SYNC
 
         while self.bytes_available():
