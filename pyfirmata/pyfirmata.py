@@ -93,6 +93,7 @@ class Board(object):
         # TODO Find a more reliable way to wait until the board is ready
         self.pass_time(BOARD_SETUP_WAIT_TIME)
         self.name = name
+        self._layout = layout
         if not self.name:
             self.name = port
 
@@ -166,12 +167,12 @@ class Board(object):
         """
         Automatic setup based on Firmata's "Capability Query"
         """
-        self._set_default_handlers()
-        self.send_sysex(CAPABILITY_QUERY)
-        self.pass_time(0.1)  # Serial SYNC
+        self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_response)
+        self.send_sysex(CAPABILITY_QUERY, [])
+        self.pass_time(0.1) # Serial SYNC
 
         while self.bytes_available():
-                self.iterate()
+            self.iterate()
 
         # handle_report_capability_response will write self._layout
         if self._layout:
