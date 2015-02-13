@@ -94,6 +94,7 @@ class Board(object):
         # TODO Find a more reliable way to wait until the board is ready
         self.pass_time(BOARD_SETUP_WAIT_TIME)
         self.name = name
+        self._layout = layout
         if not self.name:
             self.name = port
 
