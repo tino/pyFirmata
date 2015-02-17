@@ -7,7 +7,7 @@ with open('README.rst') as f:
 
 setup(
     name='pyFirmata',
-    version='1.0.1',  # Use bumpversion!
+    version='1.0.2',  # Use bumpversion!
     description="A Python interface for the Firmata procotol",
     long_description=long_description,
     author='Tino de Bruijn',

@@ -1,7 +1,7 @@
 from .pyfirmata import *
 from .boards import BOARDS
 
-__version__ = '1.0.1'  # Use bumpversion!
+__version__ = '1.0.2'  # Use bumpversion!
 
 
 # shortcut classes
