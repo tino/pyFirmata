@@ -85,8 +85,8 @@ class Board(object):
     _stored_data = []
     _parsing_sysex = False
 
-    def __init__(self, port, layout=None, baudrate=57600, name=None):
-        self.sp = serial.Serial(port, baudrate)
+    def __init__(self, port, layout=None, baudrate=57600, name=None, timeout=None):
+        self.sp = serial.Serial(port, baudrate, timeout=timeout)
         # Allow 5 secs for Arduino's auto-reset to happen
         # Alas, Firmata blinks its version before printing it to serial
         # For 2.3, even 5 seconds might not be enough.
