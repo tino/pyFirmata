@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from setuptools import setup
 
 with open('README.rst') as f:
     long_description = f.read()
 
 setup(
     name='pyFirmata',
-    version='0.9.5',  # Don't forget to change pyfirmata.__version__!
+    version='1.0.3',  # Use bumpversion!
     description="A Python interface for the Firmata procotol",
     long_description=long_description,
     author='Tino de Bruijn',
@@ -24,8 +24,11 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
         'Topic :: Utilities',
         'Topic :: Home Automation',
     ],
