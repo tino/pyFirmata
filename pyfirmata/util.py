@@ -2,7 +2,7 @@ from __future__ import division
 from __future__ import unicode_literals
 import threading
 import time
-import os
+import os, sys
 
 import serial
 
@@ -39,6 +39,7 @@ class Iterator(threading.Thread):
     def __init__(self, board):
         super(Iterator, self).__init__()
         self.board = board
+        self.setDaemon(True)
 
     def run(self):
         while 1:
@@ -62,6 +63,11 @@ class Iterator(threading.Thread):
                 except (TypeError, IndexError):
                     pass
                 raise
+            except(KeyboardInterrupt, SystemExit), e:
+                sys.exit()
+
+    def stop(self):
+        self._Thread_stop()
 
 
 def to_two_bytes(integer):
