@@ -32,7 +32,6 @@ class BoardBaseTest(unittest.TestCase):
         self.board._stored_data = []
         # FIXME How can it be that a fresh instance sometimes still contains data?
 
-
 class TestBoardMessages(BoardBaseTest):
     # TODO Test layout of Board Mega
     def assert_serial(self, *incoming_bytes):

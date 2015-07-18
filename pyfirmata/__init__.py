@@ -6,6 +6,7 @@ __version__ = '1.0.3'  # Use bumpversion!
 
 # shortcut classes
 
+# Arduino is-a Board
 class Arduino(Board):
     """
     A board that will set itself up as a normal Arduino.
@@ -14,10 +15,11 @@ class Arduino(Board):
         args = list(args)
         args.append(BOARDS['arduino'])
         super(Arduino, self).__init__(*args, **kwargs)
+        # forced name to 'arduino'
+        self.name = 'arduino'
 
     def __str__(self):
         return "Arduino {0.name} on {0.sp.port}".format(self)
-
 
 class ArduinoMega(Board):
     """
@@ -27,10 +29,10 @@ class ArduinoMega(Board):
         args = list(args)
         args.append(BOARDS['arduino_mega'])
         super(ArduinoMega, self).__init__(*args, **kwargs)
+        self.name = 'arduino_mega'
 
     def __str__(self):
         return "Arduino Mega {0.name} on {0.sp.port}".format(self)
-
 
 class ArduinoDue(Board):
     """
@@ -43,3 +45,4 @@ class ArduinoDue(Board):
 
     def __str__(self):
         return "Arduino Due {0.name} on {0.sp.port}".format(self)
+
