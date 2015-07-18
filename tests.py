@@ -356,12 +356,6 @@ class TestBoardLayout(BoardBaseTest):
         self.assertEqual(len(BOARDS['arduino_mega']['digital']), len(mega.digital))
         self.assertEqual(len(BOARDS['arduino_mega']['analog']), len(mega.analog))
 
-    def test_layout_spark_core(self):
-        pyfirmata.pyfirmata.serial.Serial = mockup.MockupSerial
-        spark = pyfirmata.Board('', BOARDS['spark_core'])
-        self.assertEqual(len(BOARDS['spark_core']['digital']), len(self.spark.digital))
-        self.assertEqual(len(BOARDS['spark_core']['analog']), len(self.spark.analog))
-
     def test_pwm_layout(self):
         pins = []
         for pin in self.board.digital:
