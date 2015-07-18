@@ -39,7 +39,7 @@ class Iterator(threading.Thread):
     def __init__(self, board):
         super(Iterator, self).__init__()
         self.board = board
-        self.setDaemon(True)
+        self.daemon = True
 
     def run(self):
         while 1:
@@ -63,12 +63,8 @@ class Iterator(threading.Thread):
                 except (TypeError, IndexError):
                     pass
                 raise
-            except(KeyboardInterrupt, SystemExit), e:
+            except (KeyboardInterrupt) as e:
                 sys.exit()
-
-    def stop(self):
-        self._Thread_stop()
-
 
 def to_two_bytes(integer):
     """
