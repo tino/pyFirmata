@@ -21,7 +21,7 @@ BOARDS = {
         'disabled': (0, 1)  # Rx, Tx, Crystal
     },
 
-    'nano': {
+    'arduino_nano': {
         'digital': tuple(x for x in range(14)),
         'analog': tuple(x for x in range(8)),
         'pwm': (3, 5, 6, 9, 10, 11),
