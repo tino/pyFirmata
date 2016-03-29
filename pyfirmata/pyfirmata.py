@@ -274,8 +274,16 @@ class Board(object):
             except KeyError:
                 return
             received_data.append(data & 0x0F)
-            while len(received_data) < handler.bytes_needed:
-                received_data.append(ord(self.sp.read()))
+            try:
+                while len(received_data) < handler.bytes_needed:
+                    received_data.append(ord(self.sp.read()))
+            except TypeError:
+                # We'll probably get a
+                # "TypeError: ord() expected a character, but string of length 0 found"
+                # if any self.sp.read() fails due to a timeout.
+                raise IOError("Failed to read 'channel' data from port, " \
+                                + "read %s bytes expected %s bytes" %
+                                    (len(received_data), handler.bytes_needed))
         elif data == START_SYSEX:
             data = ord(self.sp.read())
             handler = self._command_handlers.get(data)
@@ -290,8 +298,17 @@ class Board(object):
                 handler = self._command_handlers[data]
             except KeyError:
                 return
-            while len(received_data) < handler.bytes_needed:
-                received_data.append(ord(self.sp.read()))
+            try:
+                while len(received_data) < handler.bytes_needed:
+                    received_data.append(ord(self.sp.read()))
+            except TypeError:
+                # We'll probably get a
+                # "TypeError: ord() expected a character, but string of length 0 found"
+                # if any self.sp.read() fails due to a timeout.
+                raise IOError("Failed to read data from port, " \
+                                + "read %s bytes expected %s bytes" %
+                                    (len(received_data), handler.bytes_needed))
+
         # Handle the data
         try:
             handler(*received_data)
