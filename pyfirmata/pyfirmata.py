@@ -5,7 +5,7 @@ import time
 
 import serial
 
-from .util import to_two_bytes, two_byte_iter_to_str, pin_list_to_board_dict
+from .util import from_two_bytes, to_two_bytes, two_byte_iter_to_str, pin_list_to_board_dict
 
 # Message command bytes (0x80(128) to 0xFF(255)) - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -36,6 +36,7 @@ ANALOG_MAPPING_RESPONSE = 0x6A  # reply with mapping info
 
 SERVO_CONFIG = 0x70         # set max angle, minPulse, maxPulse, freq
 STRING_DATA = 0x71          # a string message with 14-bits per char
+PULSE_IN = 0x74             # send a pulse in command (pulseIn Firmata required)
 SHIFT_DATA = 0x75           # a bitstream to/from a shift register
 I2C_REQUEST = 0x76          # send an I2C read/write request
 I2C_REPLY = 0x77            # a reply to an I2C read request
@@ -162,6 +163,7 @@ class Board(object):
         self.add_cmd_handler(DIGITAL_MESSAGE, self._handle_digital_message)
         self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
         self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
+        self.add_cmd_handler(PULSE_IN, self._handle_pulse_in)
 
     def auto_setup(self):
         """
@@ -396,6 +398,20 @@ class Board(object):
 
         self._layout = pin_list_to_board_dict(pin_spec_list)
 
+    #
+    # Handle PULSE_IN sysex responses.
+    # Requires pulseIn compatible Firmata in the arduino board
+    # (see https://github.com/jgautier/arduino-1/tree/pulseIn).
+    # Used with HC-SR04 ultrasonic ranging sensors
+    # (see http://www.micropik.com/PDF/HCSR04.pdf).
+    #
+    def _handle_pulse_in(self, pin_nr, *data):
+        duration = (from_two_bytes(data[1:3]) << 24) \
+                    + (from_two_bytes(data[3:5]) << 16) \
+                    + (from_two_bytes(data[5:7]) << 8) \
+                    + from_two_bytes(data[7:9])
+        self.digital[pin_nr].last_pulse_in_duration = duration
+        # We can calculate the distance using an HC-SR04 as 'duration / 58.2'
 
 class Port(object):
     """An 8-bit port on the board."""
@@ -462,6 +478,7 @@ class Pin(object):
         self._mode = (type == DIGITAL and OUTPUT or INPUT)
         self.reporting = False
         self.value = None
+        self.last_pulse_in_duration = None
 
     def __str__(self):
         type = {ANALOG: 'Analog', DIGITAL: 'Digital'}[self.type]
@@ -559,3 +576,73 @@ class Pin(object):
                 value = int(value)
                 msg = bytearray([ANALOG_MESSAGE + self.pin_number, value % 128, value >> 7])
                 self.board.sp.write(msg)
+
+    def ping(self, trigger_mode=1, trigger_duration=10, echo_timeout=65000):
+        """
+        Trigger the pin and wait for a pulseIn echo.
+
+        Used with HC-SR04 ultrasonic ranging sensors
+        (see http://www.micropik.com/PDF/HCSR04.pdf).
+
+        Note: Requires pulseIn compatible Firmata in the arduino board
+              (see https://github.com/jgautier/arduino-1/tree/pulseIn).
+
+        :arg trigger_mode: Uses value as a boolean,
+                        0 to trigger LOW,
+                        1 to trigger HIGH (default, for HC-SR04 modules).
+        :arg trigger_duration: Duration (us) for the trigger signal.
+        :arg echo_timeout: Time (us) to wait for the echo (pulseIn timeout).
+        """
+        if self.mode is not OUTPUT:
+            raise IOError("{0} should be in OUTPUT mode".format(self))
+        if trigger_mode not in (0, 1):
+            raise IOError("trigger_mode should be 0 or 1")
+
+        # This is the protocol to ask for a pulseIn:
+        #       START_SYSEX(0xF0)           // send_sysex(...)
+        #       puseIn/pulseOut(0x74)       // send_sysex(PULSE_IN, ...)
+        #       pin(0-127)
+        #       value(1 or 0, HIGH or LOW)
+        #       pulseOutDuration 0 (LSB)
+        #       pulseOutDuration 0 (MSB)
+        #       pulseOutDuration 1 (LSB)
+        #       pulseOutDuration 1 (MSB)
+        #       pulseOutDuration 2 (LSB)
+        #       pulseOutDuration 2 (MSB)
+        #       pulseOutDuration 3 (LSB)
+        #       pulseOutDuration 3 (MSB)
+        #       pulseInTimeout 0 (LSB)
+        #       pulseInTimeout 0 (MSB)
+        #       pulseInTimeout 1 (LSB)
+        #       pulseInTimeout 1 (MSB)
+        #       pulseInTimeout 2 (LSB)
+        #       pulseInTimeout 2 (MSB)
+        #       pulseInTimeout 3 (LSB)
+        #       pulseInTimeout 3 (MSB)
+        #       END_SYSEX(0xF7)             // send_sysex(...)
+
+        data = bytearray()
+        data.append(self.pin_number)    # Pin number
+        data.append(trigger_mode)       # Trigger mode (1 or 0, HIGH or LOW)
+        trigger_duration_arr = to_two_bytes((trigger_duration >> 24) & 0xFF) \
+                             + to_two_bytes((trigger_duration >> 16) & 0xFF) \
+                             + to_two_bytes((trigger_duration >> 8) & 0xFF) \
+                             + to_two_bytes(trigger_duration & 0xFF)
+        data.extend(trigger_duration_arr)   # pulseOutDuration
+        echo_timeout_arr = to_two_bytes((echo_timeout >> 24) & 0xFF) \
+                             + to_two_bytes((echo_timeout >> 16) & 0xFF) \
+                             + to_two_bytes((echo_timeout >> 8) & 0xFF) \
+                             + to_two_bytes(echo_timeout & 0xFF)
+        data.extend(echo_timeout_arr)       # pulseInTimeout
+
+        self.last_pulse_in_duration = None
+        self.board.send_sysex(PULSE_IN, data)
+
+        # Wait for the reply...
+        waited_for = 0
+        while self.last_pulse_in_duration is None \
+                    and waited_for < (echo_timeout + trigger_duration) / 1000.0 ** 2:
+            time.sleep(0.01) # Sleep for 10 milliseconds
+            waited_for = waited_for + 0.01
+
+        return self.last_pulse_in_duration
