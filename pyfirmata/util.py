@@ -10,7 +10,7 @@ import pyfirmata
 from .boards import BOARDS
 
 
-def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.usbserial',):
+def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.usbserial', baudrate=57600, name=None, timeout=None,):
     """
     Helper function to get the one and only board connected to the computer
     running this. It assumes a normal arduino layout, but this can be
@@ -23,7 +23,9 @@ def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.us
     for device in os.listdir(base_dir):
         if device.startswith(identifier):
             try:
-                board = pyfirmata.Board(os.path.join(base_dir, device), layout)
+                board = pyfirmata.Board(os.path.join(base_dir, device), 
+                                        layout, baudrate=baudrate, name=name, 
+                                        timeout=timeout)
             except serial.SerialException:
                 pass
             else:
