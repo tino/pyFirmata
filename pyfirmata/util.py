@@ -235,6 +235,8 @@ def ping_time_to_distance(time, calibration=None, distance_units='cm'):
                         Example (for a HC-SR04 ultrasonic ranging sensor):
                         [(680.0, 10.0), (1460.0, 20.0), (2210.0, 30.0)]
     """
+    if not time: 
+        return 0
     if not calibration: # Standard calculation using speed of sound.
         # 1 (second) / 340.29 (speed of sound in m/s) = 0.00293866995 metres
         # distance = duration (microseconds) / 29.38 / 2 (go and back)
