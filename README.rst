@@ -50,6 +50,15 @@ Otherwise the board will keep sending data to your serial, until it overflows::
     >>> board.analog[0].read()
     0.661440304938
 
+A better option is to use a ``with`` block. This way the Iterator is managed 
+automagically, and you don't have to take care of calling ``board.exit()``
+to stop the Iterator thread when you're done::
+
+    >>> with board:
+    >>>     board.analog[0].enable_reporting()
+    >>>     board.analog[0].read()
+    0.661440304938
+
 If you use a pin more often, it can be worth it to use the ``get_pin`` method
 of the board. It let's you specify what pin you need by a string, composed of
 'a' or 'd' (depending on wether you need an analog or digital pin), the pin
@@ -62,6 +71,7 @@ digital pin 3 as pwm.::
     0.661440304938
     >>> pin3 = board.get_pin('d:3:p')
     >>> pin3.write(0.6)
+
 
 Board layout
 ============
@@ -79,6 +89,37 @@ for the Mega for example::
     ...         'use_ports' : True,
     ...         'disabled' : (0, 1, 14, 15) # Rx, Tx, Crystal
     ...         }
+
+Ping (pulseIn) support
+======================
+
+If you want to use ultrasonic ranging sensors that use a pulse to
+measure distances (like the very cheap and common ``HC-SR04``
+- see http://www.micropik.com/PDF/HCSR04.pdf),
+you'll need to use a``pulseIn`` compatible Firmata in your board.
+
+You can download it from the ``pulseIn`` branch
+of the Firmata repository:
+https://github.com/jgautier/arduino-1/tree/pulseIn
+
+Just plug the sensor ``Trig`` and ``Echo`` pins
+to a digital pin on your board.
+
+.. image:: examples/ping.png
+
+And then use the ping method on the pin:
+
+    >>> echo_pin = board.get_pin('d:8:o')
+    >>> echo_pin.ping()
+    1204
+
+You can use the ``ping_time_to_distance`` function to convert
+the ping result (echo time) into distance:
+
+    >>> from pyfirmata.util import ping_time_to_distance
+    >>> echo_pin = board.get_pin('d:8:o')
+    >>> ping_time_to_distance(echo_pin.ping())
+    20.485458055607776
 
 Todo
 ====
