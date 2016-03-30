@@ -5,7 +5,7 @@ import time
 
 import serial
 
-from .util import from_two_bytes, to_two_bytes, two_byte_iter_to_str, pin_list_to_board_dict
+from .util import from_two_bytes, to_two_bytes, two_byte_iter_to_str, pin_list_to_board_dict, Iterator
 
 # Message command bytes (0x80(128) to 0xFF(255)) - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -85,6 +85,7 @@ class Board(object):
     _command = None
     _stored_data = []
     _parsing_sysex = False
+    _iterator = None
 
     def __init__(self, port, layout=None, baudrate=57600, name=None, timeout=None):
         self.sp = serial.Serial(port, baudrate, timeout=timeout)
@@ -117,8 +118,33 @@ class Board(object):
         The connection with the a board can get messed up when a script is
         closed without calling board.exit() (which closes the serial
         connection). Therefore also do it here and hope it helps.
+        (It seems that it doesn't always work, it's better to use
+            the with statement to be sure that exit gets called properly:
+
+            board = Arduino('/dev/...')
+            with board: # an Iterator gets started automagically.
+                # Do something with the board...
+            # board.exit() get's called automagically.
         """
         self.exit()
+
+    def __enter__(self):
+        """
+        Allows you to use the with statement with the board.
+        It will take care of starting an iterator for you.
+        """
+        self._iterator = Iterator(self)
+        self._iterator.start()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """
+        Allows you to use the with statement with the board.
+        This will make sure exit() gets called so the connection with
+        the board doesn't get messed.
+        """
+        self.exit()
+        self._iterator = None
 
     def send_as_two_bytes(self, val):
         self.sp.write(bytearray([val % 128, val >> 7]))
