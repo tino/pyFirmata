@@ -109,7 +109,7 @@ to a digital pin on your board.
 
 And then use the ping method on the pin:
 
-    >>> echo_pin = board.get_pin('d:8:o')
+    >>> echo_pin = board.get_pin('d:7:o')
     >>> echo_pin.ping()
     1204
 
@@ -117,7 +117,7 @@ You can use the ``ping_time_to_distance`` function to convert
 the ping result (echo time) into distance:
 
     >>> from pyfirmata.util import ping_time_to_distance
-    >>> echo_pin = board.get_pin('d:8:o')
+    >>> echo_pin = board.get_pin('d:7:o')
     >>> ping_time_to_distance(echo_pin.ping())
     20.485458055607776
 
