@@ -42,6 +42,16 @@ class Iterator(threading.Thread):
         super(Iterator, self).__init__()
         self.board = board
 
+        # For proper exit even when Board.exit() doesn't get called
+        # we need to flag this thread as 'daemon'.
+        #   "The significance of this flag is that the entire Python
+        #    program exits when only daemon threads are left."
+        # This way Python won't hang at exit, will just warn of
+        # an exception at shutdown.
+        # Anyway it's better to call Board.exit() or use
+        # a "with board: ..." block to avoid this warning.
+        self.daemon = True
+
     def run(self):
         while 1:
             try:
