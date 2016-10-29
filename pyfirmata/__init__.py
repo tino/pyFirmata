@@ -1,4 +1,4 @@
-from .pyfirmata import *
+from .pyfirmata import *  # NOQA
 from .boards import BOARDS
 
 __version__ = '1.0.3'  # Use bumpversion!
@@ -43,6 +43,7 @@ class ArduinoDue(Board):
 
     def __str__(self):
         return "Arduino Due {0.name} on {0.sp.port}".format(self)
+
 
 class ArduinoNano(Board):
     """

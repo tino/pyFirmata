@@ -64,9 +64,9 @@ class Iterator(threading.Thread):
                 except (TypeError, IndexError):
                     pass
                 raise
-
             except (KeyboardInterrupt) as e:
                 sys.exit()
+
 
 def to_two_bytes(integer):
     """
@@ -168,7 +168,7 @@ def pin_list_to_board_dict(pinlist):
         'analog': [],
         'pwm': [],
         'servo': [],  # 2.2 specs
-        #'i2c': [],  # 2.3 specs
+        # 'i2c': [],  # 2.3 specs
         'disabled': [],
     }
     for i, pin in enumerate(pinlist):
@@ -205,8 +205,8 @@ def pin_list_to_board_dict(pinlist):
     board_dict['analog'] = [n for n, _ in enumerate(board_dict['analog'])]
 
     # Digital pin problems:
-    #- (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
-    #+ (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+    # - (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+    # + (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
 
     board_dict['digital'] = [n for n, _ in enumerate(diff)]
     # Based on lib Arduino 0017

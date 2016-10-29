@@ -20,7 +20,6 @@ BOARDS = {
         'use_ports': True,
         'disabled': (0, 1)  # Rx, Tx, Crystal
     },
-
     'arduino_nano': {
         'digital': tuple(x for x in range(14)),
         'analog': tuple(x for x in range(8)),
