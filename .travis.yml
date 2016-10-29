@@ -5,8 +5,14 @@ python:
     - "3.4"
     - "3.5"
 
+
 # install deps
-install: pip install -r requirements.txt
+install:
+    pip install flake8
+    pip install -r requirements.txt
+
+before_script:
+   flake8 --show-source .
 
 # run tests
 script: python tests.py
