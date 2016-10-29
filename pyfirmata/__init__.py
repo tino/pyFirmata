@@ -1,7 +1,8 @@
+from .boards import BOARDS
 from .pyfirmata import *  # NOQA
+
 # TODO: should change above import to an explicit list, but people might rely on
 # it, so do it in a backwards breaking release
-from .boards import BOARDS
 
 __version__ = '1.0.3'  # Use bumpversion!
 

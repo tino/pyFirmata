@@ -5,7 +5,7 @@ import time
 
 import serial
 
-from .util import to_two_bytes, two_byte_iter_to_str, pin_list_to_board_dict
+from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str
 
 # Message command bytes (0x80(128) to 0xFF(255)) - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin

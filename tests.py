@@ -8,9 +8,10 @@ import serial
 import pyfirmata
 from pyfirmata import mockup
 from pyfirmata.boards import BOARDS
-from pyfirmata.util import (break_to_bytes, from_two_bytes,
-                            str_to_two_byte_iter, to_two_bytes,
-                            two_byte_iter_to_str)
+from pyfirmata.util import (
+    break_to_bytes, from_two_bytes, str_to_two_byte_iter, to_two_bytes, two_byte_iter_to_str
+)
+
 
 # Messages todo left:
 
