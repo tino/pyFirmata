@@ -1,12 +1,12 @@
-from __future__ import division
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
+import os
+import sys
 import threading
 import time
-import os, sys
 
 import serial
 
-import pyfirmata
 from .boards import BOARDS
 
 
@@ -19,11 +19,12 @@ def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.us
     IOError if it can't find a board, on a serial, or if it finds more than
     one.
     """
+    from .pyfirmata import Board  # prevent a circular import
     boards = []
     for device in os.listdir(base_dir):
         if device.startswith(identifier):
             try:
-                board = pyfirmata.Board(os.path.join(base_dir, device), layout)
+                board = Board(os.path.join(base_dir, device), layout)
             except serial.SerialException:
                 pass
             else:
