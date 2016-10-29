@@ -8,11 +8,11 @@ python:
 
 # install deps
 install:
-    pip install flake8
-    pip install -r requirements.txt
+    - pip install flake8
+    - pip install -r requirements.txt
 
 before_script:
-   flake8 --show-source .
+   - flake8 --show-source .
 
 # run tests
 script: python tests.py
