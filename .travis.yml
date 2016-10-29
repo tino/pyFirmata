@@ -8,7 +8,7 @@ python:
 
 # install deps
 install:
-    - pip install flake8 isort
+    - pip install flake8 isort coverage coveralls
     - pip install -r requirements.txt
 
 before_script:
@@ -16,4 +16,7 @@ before_script:
    - isort -rc .
 
 # run tests
-script: python tests.py
+script: coverage run --source=pyfirmata tests.py
+
+after_success:
+    - coveralls
