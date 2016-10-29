@@ -8,11 +8,12 @@ python:
 
 # install deps
 install:
-    - pip install flake8
+    - pip install flake8 isort
     - pip install -r requirements.txt
 
 before_script:
    - flake8 --show-source .
+   - isort -c pyfirmata/*.py tests.py
 
 # run tests
 script: python tests.py
