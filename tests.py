@@ -135,41 +135,41 @@ class TestBoardMessages(BoardBaseTest):
             'analog': (0, 1),
             'pwm': (1, 2),
             'servo': (0, 1, 2),
-            # 'i2c': (2), # TODO 2.3 specs
+            # 'i2c': (2),  # TODO 2.3 specs
             'disabled': (0,),
         }
 
         # Eg: (127)
         unavailible_pin = [
-            0x7F, # END_SYSEX (Pin delimiter)
+            0x7F,  # END_SYSEX (Pin delimiter)
         ]
 
         # Eg: (0, 1, 1, 1, 3, 8, 4, 14, 127)
         digital_pin = [
-                0x00, # INPUT
-                0x01,
-                0x01, # OUTPUT
-                0x01,
-                0x03, # PWM
-                0x08,
-                0x7F, # END_SYSEX (Pin delimiter)
+            0x00,  # INPUT
+            0x01,
+            0x01,  # OUTPUT
+            0x01,
+            0x03,  # PWM
+            0x08,
+            0x7F,  # END_SYSEX (Pin delimiter)
         ]
 
         # Eg. (0, 1, 1, 1, 4, 14, 127)
         analog_pin = [
-                0x00, # INPUT
-                0x01,
-                0x01, # OUTPUT
-                0x01,
-                0x02, # ANALOG
-                0x0A,
-                0x06, # I2C
-                0x01,
-                0x7F, # END_SYSEX (Pin delimiter)
+            0x00,  # INPUT
+            0x01,
+            0x01,  # OUTPUT
+            0x01,
+            0x02,  # ANALOG
+            0x0A,
+            0x06,  # I2C
+            0x01,
+            0x7F,  # END_SYSEX (Pin delimiter)
         ]
 
         data_arduino = list(
-            [0x6C] # CAPABILITY_RESPONSE
+            [0x6C]  # CAPABILITY_RESPONSE
             + unavailible_pin
             + digital_pin * 2
             + analog_pin * 2
@@ -273,8 +273,7 @@ class TestBoardMessages(BoardBaseTest):
         self.assertRaises(ValueError, self.board.send_sysex, 0x79, [256, 1])
 
     def test_receive_sysex_message(self):
-        sysex = bytearray([0xF0, 0x79, 2, 1, ord('a'), 0, ord('b'),
-            0, ord('c'), 0, 0xF7])
+        sysex = bytearray([0xF0, 0x79, 2, 1, ord('a'), 0, ord('b'), 0, ord('c'), 0, 0xF7])
         self.board.sp.write(sysex)
         while len(self.board.sp):
             self.board.iterate()
@@ -315,22 +314,24 @@ class TestBoardMessages(BoardBaseTest):
     # 10 angle MSB
     def test_servo_config(self):
         self.board.servo_config(2)
-        data = chain([0xF0, 0x70, 2], to_two_bytes(544),
-            to_two_bytes(2400), [0xF7, 0xE0 + 2, 0, 0])
+        data = chain([0xF0, 0x70, 2],
+                     to_two_bytes(544),
+                     to_two_bytes(2400),
+                     [0xF7, 0xE0 + 2, 0, 0])
         self.assert_serial(*list(data))
 
     def test_servo_config_min_max_pulse(self):
         self.board.servo_config(2, 600, 2000)
-        data = chain([0xF0, 0x70, 2], to_two_bytes(600),
-            to_two_bytes(2000), [0xF7, 0xE0 + 2, 0, 0])
+        data = chain([0xF0, 0x70, 2],
+                     to_two_bytes(600),
+                     to_two_bytes(2000),
+                     [0xF7, 0xE0 + 2, 0, 0])
         self.assert_serial(*data)
 
     def test_servo_config_min_max_pulse_angle(self):
         self.board.servo_config(2, 600, 2000, angle=90)
-        data = chain([0xF0, 0x70, 2], to_two_bytes(600),
-            to_two_bytes(2000), [0xF7])
-        angle_set = [0xE0 + 2, 90 % 128,
-            90 >> 7]  # Angle set happens through analog message
+        data = chain([0xF0, 0x70, 2], to_two_bytes(600), to_two_bytes(2000), [0xF7])
+        angle_set = [0xE0 + 2, 90 % 128, 90 >> 7]  # Angle set happens through analog message
         data = list(data) + angle_set
         self.assert_serial(*data)
 
@@ -340,8 +341,10 @@ class TestBoardMessages(BoardBaseTest):
     def test_set_mode_servo(self):
         p = self.board.digital[2]
         p.mode = pyfirmata.SERVO
-        data = chain([0xF0, 0x70, 2], to_two_bytes(544),
-            to_two_bytes(2400), [0xF7, 0xE0 + 2, 0, 0])
+        data = chain([0xF0, 0x70, 2],
+                     to_two_bytes(544),
+                     to_two_bytes(2400),
+                     [0xF7, 0xE0 + 2, 0, 0])
         self.assert_serial(*data)
 
 
@@ -431,8 +434,7 @@ class RegressionTests(BoardBaseTest):
         pin = self.board.get_pin('d:8:i')
         mask = 0
         mask |= 1 << 0  # set pin 0 high
-        self.board._handle_digital_message(pin.port.port_number,
-            mask % 128, mask >> 7)
+        self.board._handle_digital_message(pin.port.port_number, mask % 128, mask >> 7)
         self.assertEqual(pin.value, True)
 
     def test_handle_digital_inputs(self):
