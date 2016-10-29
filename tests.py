@@ -10,7 +10,7 @@ from pyfirmata import mockup
 from pyfirmata.boards import BOARDS
 from pyfirmata.util import (break_to_bytes, from_two_bytes,
                             str_to_two_byte_iter, to_two_bytes,
-                            two_byte_iter_to_str)
+                            two_byte_iter_to_str, ping_time_to_distance)
 
 # Messages todo left:
 
@@ -504,6 +504,11 @@ class UtilTests(unittest.TestCase):
         self.assertEqual(break_to_bytes(200), (200,))
         self.assertEqual(break_to_bytes(800), (200, 4))
         self.assertEqual(break_to_bytes(802), (2, 2, 200))
+
+    def test_ping_time_to_distance(self):
+        self.assertEqual(round(ping_time_to_distance(600), 2), 10.21)
+        calibration = [(680.0, 10.0), (1460.0, 20.0), (2210.0, 30.0)]
+        self.assertEqual(round(ping_time_to_distance(1000, calibration), 2), 14.10)
 
 
 if __name__ == '__main__':

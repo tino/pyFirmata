@@ -10,7 +10,7 @@ import pyfirmata
 from .boards import BOARDS
 
 
-def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.usbserial',):
+def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.usbserial', baudrate=57600, name=None, timeout=None,):
     """
     Helper function to get the one and only board connected to the computer
     running this. It assumes a normal arduino layout, but this can be
@@ -23,7 +23,9 @@ def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.us
     for device in os.listdir(base_dir):
         if device.startswith(identifier):
             try:
-                board = pyfirmata.Board(os.path.join(base_dir, device), layout)
+                board = pyfirmata.Board(os.path.join(base_dir, device), 
+                                        layout, baudrate=baudrate, name=name, 
+                                        timeout=timeout)
             except serial.SerialException:
                 pass
             else:
@@ -39,6 +41,16 @@ class Iterator(threading.Thread):
     def __init__(self, board):
         super(Iterator, self).__init__()
         self.board = board
+        self.daemon = True
+
+        # For proper exit even when Board.exit() doesn't get called
+        # we need to flag this thread as 'daemon'.
+        #   "The significance of this flag is that the entire Python
+        #    program exits when only daemon threads are left."
+        # This way Python won't hang at exit, will just warn of
+        # an exception at shutdown.
+        # Anyway it's better to call Board.exit() or use
+        # a "with board: ..." block to avoid this warning.
         self.daemon = True
 
     def run(self):
@@ -220,3 +232,35 @@ def pin_list_to_board_dict(pinlist):
     ])
 
     return board_dict
+
+
+def ping_time_to_distance(time, calibration=None, distance_units='cm'):
+    """
+    Calculates the distance (in cm) given the time of a ping echo.
+
+    By default it uses the speed of sound (at sea level = 340.29 m/s)
+    to calculate the distance, but a list of calibrated points can
+    be used to calculate the distance using linear interpolation.
+
+    :arg calibration: A sorted list of (time, distance) tuples to calculate
+                        the distance using linear interpolation between the
+                        two closest points.
+                        Example (for a HC-SR04 ultrasonic ranging sensor):
+                        [(680.0, 10.0), (1460.0, 20.0), (2210.0, 30.0)]
+    """
+    if not time: 
+        return 0
+    if not calibration: # Standard calculation using speed of sound.
+        # 1 (second) / 340.29 (speed of sound in m/s) = 0.00293866995 metres
+        # distance = duration (microseconds) / 29.38 / 2 (go and back)
+        distance = time / 29.3866995 / 2
+    else: # Linear interpolation between two calibration points.
+        a = (0, 0)
+        b = calibration[-1]
+        for c in calibration:
+            if c[0] < time: a = c
+            if c[0] > time: b = c; break
+        if a == b:
+            a = calibration[-2]
+        distance = a[1] + (b[1] - a[1]) * ((time - a[0]) / (b[0] - a[0]))
+    return distance
