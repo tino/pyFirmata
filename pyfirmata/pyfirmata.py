@@ -5,7 +5,7 @@ import time
 
 import serial
 
-from .util import to_two_bytes, two_byte_iter_to_str, pin_list_to_board_dict
+from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str
 
 # Message command bytes (0x80(128) to 0xFF(255)) - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -169,7 +169,7 @@ class Board(object):
         """
         self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_response)
         self.send_sysex(CAPABILITY_QUERY, [])
-        self.pass_time(0.1) # Serial SYNC
+        self.pass_time(0.1)  # Serial SYNC
 
         while self.bytes_available():
             self.iterate()
@@ -215,11 +215,15 @@ class Board(object):
         part = getattr(self, a_d)
         pin_nr = int(bits[1])
         if pin_nr >= len(part):
-            raise InvalidPinDefError('Invalid pin definition: {0} at position 3 on {1}'.format(pin_def, self.name))
+            raise InvalidPinDefError('Invalid pin definition: {0} at position 3 on {1}'
+                                     .format(pin_def, self.name))
         if getattr(part[pin_nr], 'mode', None) == UNAVAILABLE:
-            raise InvalidPinDefError('Invalid pin definition: UNAVAILABLE pin {0} at position on {1}'.format(pin_def, self.name))
+            raise InvalidPinDefError('Invalid pin definition: '
+                                     'UNAVAILABLE pin {0} at position on {1}'
+                                     .format(pin_def, self.name))
         if self.taken[a_d][pin_nr]:
-            raise PinAlreadyTakenError('{0} pin {1} is already taken on {2}'.format(a_d, bits[1], self.name))
+            raise PinAlreadyTakenError('{0} pin {1} is already taken on {2}'
+                                       .format(a_d, bits[1], self.name))
         # ok, should be available
         pin = part[pin_nr]
         self.taken[a_d][pin_nr] = True
@@ -461,7 +465,7 @@ class Pin(object):
         if mode == SERVO:
             if self.type != DIGITAL:
                 raise IOError("Only digital pins can drive servos! {0} is not"
-                    "digital".format(self))
+                              "digital".format(self))
             self._mode = SERVO
             self.board.servo_config(self.pin_number)
             return
@@ -525,7 +529,8 @@ class Pin(object):
         if self.mode is UNAVAILABLE:
             raise IOError("{0} can not be used through Firmata".format(self))
         if self.mode is INPUT:
-            raise IOError("{0} is set up as an INPUT and can therefore not be written to".format(self))
+            raise IOError("{0} is set up as an INPUT and can therefore not be written to"
+                          .format(self))
         if value is not self.value:
             self.value = value
             if self.mode is OUTPUT:
