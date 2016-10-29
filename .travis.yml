@@ -13,7 +13,7 @@ install:
 
 before_script:
    - flake8 --show-source .
-   - isort -c pyfirmata/*.py tests.py
+   - isort -rc .
 
 # run tests
 script: python tests.py
