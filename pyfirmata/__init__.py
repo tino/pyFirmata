@@ -50,12 +50,26 @@ class ArduinoDue(Board):
 
 class ArduinoNano(Board):
     """
-    A board that will set itself up as an Arduino Due.
+    A board that will set itself up as an Arduino Nano.
     """
     def __init__(self, *args, **kwargs):
         args = list(args)
         args.append(BOARDS['arduino_nano'])
-        super(nano, self).__init__(*args, **kwargs)
+        super(ArduinoNano, self).__init__(*args, **kwargs)
 
     def __str__(self):
         return "Arduino Nano {0.name} on {0.sp.port}".format(self)
+
+
+class SparkFunProMicro(Board):
+    """
+    A board that will set itself up as a SparkFun Pro Micro.
+    """
+    def __init__(self, *args, **kwargs):
+        args = list(args)
+        args.append(BOARDS['sparkfun_pro_micro'])
+        args.append(28800)  # Lower baudrate is necessary for these boards
+        super(SparkFunProMicro, self).__init__(*args, **kwargs)
+
+    def __str__(self):
+        return "SparkFun Pro Micro {0.name} on {0.sp.port}".format(self)
