@@ -161,12 +161,6 @@ class Board(object):
         # Create pin instances based on board layout
 
         self.pins = []
-        # Analog:
-        self.analog = []
-        self._setup_pins(board_layout['analog'], ANALOG, append_to=self.analog, default_res=10)
-        for i, a in enumerate(self.analog):
-            a.analog_pin_number = i
-
         # Digital input:
         if 'digital_input' not in board_layout:
             board_layout['digital_input'] = board_layout['digital']
@@ -181,6 +175,16 @@ class Board(object):
         for p in sorted(set(board_layout['digital_input'] + board_layout['digital_output'])):
             self.digital.append(self.pins[p])
 
+        # Analog:
+        self.analog = []
+        if 'analog_real' not in board_layout:
+            board_layout['analog_real'] = [len(self.digital) + x for x in board_layout['analog']]
+        self._setup_pins(
+            board_layout['analog_real'], ANALOG, append_to=self.analog, default_res=10
+        )
+        for i, a in enumerate(self.analog):
+            a.analog_pin_number = i
+
         # Setup pins into ports
         self.digital_ports = []
         for i in range(0, len(self.digital), 8):
@@ -189,13 +193,15 @@ class Board(object):
 
         if 'pwm' in board_layout:
             self._setup_pins(board_layout['pwm'], PWM, default_res=8)
-        if 'servo' in board_layout:
-            self._setup_pins(board_layout['servo'], SERVO, default_res=14)
+
+        # Is that assumption true?
+        if 'servo' not in board_layout:
+            board_layout['servo'] = board_layout['digital_output']
+        self._setup_pins(board_layout['servo'], SERVO, default_res=14)
 
         # Disable certain ports like Rx/Tx and crystal ports
         for i in board_layout['disabled']:
-            if i < len(self.pins):
-                self.pins[i].mode = UNAVAILABLE
+            self._get_pin(i).mode = UNAVAILABLE
 
         self._set_default_handlers()
 
@@ -422,7 +428,7 @@ class Board(object):
         board_dict = {
             'digital_input': [],
             'digital_output': [],
-            'analog': [],
+            'analog_real': [],
             'pwm': [],
             'servo': [],  # 2.2 specs
             'i2c': [],  # 2.3 specs
@@ -447,7 +453,7 @@ class Board(object):
                     elif mode == OUTPUT and val == 1:
                         board_dict['digital_output'].append(pin)
                     elif mode == ANALOG:
-                        board_dict['analog'].append((pin, val))
+                        board_dict['analog_real'].append((pin, val))
                     elif mode == PWM:
                         board_dict['pwm'].append((pin, val))
                     elif mode == SERVO:
@@ -458,11 +464,11 @@ class Board(object):
             capabilities = []
 
         self._layout = board_dict
-        self.setup_layout(board_dict)
 
 
 class Port(object):
     """An 8-bit port on the board."""
+
     def __init__(self, board, port_number, pins):
         self.board = board
         self.port_number = port_number
@@ -521,7 +527,7 @@ class Pin(object):
         self.pin_number = pin_number
         self.analog_pin_number = analog_pin_number
         self.port = port
-        self.supported_modes = supported_modes
+        self.supported_modes = supported_modes[:]
         self._mode = None  # Until first usage
         self.reporting = False
         self.taken = False
@@ -540,7 +546,7 @@ class Pin(object):
         if self.mode is UNAVAILABLE:
             raise IOError("{0} can not be used through Firmata".format(self))
         if mode not in self.supported_modes:
-            raise IOError("{0} does not support {0} mode".format(modes_names[mode]))
+            raise IOError("{0} does not support {1} mode".format(self, modes_names[mode]))
         if mode == SERVO:
             self.board.servo_config(self.pin_number)
             return
@@ -557,26 +563,54 @@ class Pin(object):
     mode = property(_get_mode, _set_mode)
     """
     Mode of operation for the pin. Can be one of the pin modes: INPUT, OUTPUT,
-    ANALOG, PWM. or SERVO (or UNAVAILABLE).
+    ANALOG, PWM or SERVO (or UNAVAILABLE).
     """
+
+    def _get_pwm_capable(self):
+        return self.is_supported(PWM)
+
+    def _set_pwm_capable(self, pwm):
+        self.supported_modes.remove(PWM)
+        if pwm:
+            self.supported_modes.append(PWM)
+
+    PWM_CAPABLE = property(_get_pwm_capable, _set_pwm_capable)
+    """
+    Deprecated property for backward compatibility. Use
+        pin.is_supported(PWM)
+    instead of this.
+    """
+
+    def is_supported(self, mode):
+        if self.mode == UNAVAILABLE:
+            return False
+        return (mode in self.supported_modes)
 
     def enable_reporting(self):
         """Set an input pin to report values."""
+        # Auto set pin mode if pin was not activated yet (analog capable pin as
+        # ANALOG, INPUT otherwise)
+        if self.mode is None:
+            if self.is_supported(ANALOG):
+                self.mode = ANALOG
+            elif self.is_supported(INPUT):
+                self.mode = INPUT
+
         if self.mode == ANALOG:
             self.reporting = True
-            msg = bytearray([REPORT_ANALOG + self.pin_number, 1])
+            msg = bytearray([REPORT_ANALOG + self.analog_pin_number, 1])
             self.board.sp.write(msg)
         elif self.mode == INPUT:
             self.port.enable_reporting()
             # TODO This is not going to work for non-optimized boards like Mega
         else:
-            raise IOError("{0} is not an input and can therefore not report".format(self))
+            raise IOError("{0} is not set as input and can therefore not report".format(self))
 
     def disable_reporting(self):
         """Disable the reporting of an input pin."""
         if self.mode == ANALOG:
             self.reporting = False
-            msg = bytearray([REPORT_ANALOG + self.pin_number, 0])
+            msg = bytearray([REPORT_ANALOG + self.analog_pin_number, 0])
             self.board.sp.write(msg)
         else:
             self.port.disable_reporting()
