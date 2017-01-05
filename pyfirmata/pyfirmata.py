@@ -7,6 +7,7 @@ import time
 import serial
 
 from .util import to_two_bytes, two_byte_iter_to_str
+from . import i2c
 
 # Message command bytes (0x80(128) to 0xFF(255)) - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -38,14 +39,10 @@ ANALOG_MAPPING_RESPONSE = 0x6A  # reply with mapping info
 SERVO_CONFIG = 0x70         # set max angle, minPulse, maxPulse, freq
 STRING_DATA = 0x71          # a string message with 14-bits per char
 SHIFT_DATA = 0x75           # a bitstream to/from a shift register
-I2C_REQUEST = 0x76          # send an I2C read/write request
-I2C_REPLY = 0x77            # a reply to an I2C read request
-I2C_CONFIG = 0x78           # config I2C settings such as delay times and power pins
 REPORT_FIRMWARE = 0x79      # report name and version of the firmware
 SAMPLING_INTERVAL = 0x7A    # set the poll rate of the main loop
 SYSEX_NON_REALTIME = 0x7E   # MIDI Reserved for non-realtime messages
 SYSEX_REALTIME = 0x7F       # MIDI Reserved for realtime messages
-
 
 # Pin modes.
 # except from UNAVAILABLE taken from Firmata.h
@@ -112,6 +109,8 @@ class Board(object):
             self.setup_layout(layout)
         else:
             self.auto_setup()
+
+        self.i2c = i2c.I2C(self)
 
         # Iterate over the first messages to get firmware data
         while self.bytes_available():
