@@ -85,6 +85,7 @@ class NoInputWarning(RuntimeWarning):
 
 class Board(object):
     """The Base class for any board."""
+
     firmata_version = None
     firmware = None
     firmware_version = None
@@ -123,6 +124,8 @@ class Board(object):
 
     def __del__(self):
         """
+        Close connection to the board.
+
         The connection with the a board can get messed up when a script is
         closed without calling board.exit() (which closes the serial
         connection). Therefore also do it here and hope it helps.
@@ -154,11 +157,8 @@ class Board(object):
                 append_to.append(pin)
 
     def setup_layout(self, board_layout):
-        """
-        Setup the Pin instances based on the given board layout.
-        """
+        """Setup the Pin instances based on the given board layout."""
         # Create pin instances based on board layout
-
         self.pins = []
         # Digital input:
         if 'digital_input' not in board_layout:
@@ -210,11 +210,10 @@ class Board(object):
         self.add_cmd_handler(DIGITAL_MESSAGE, self._handle_digital_message)
         self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
         self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
+        self.add_cmd_handler(STRING_DATA, self._handle_string_message)
 
     def auto_setup(self):
-        """
-        Automatic setup based on Firmata's "Capability Query"
-        """
+        """Automatic setup based on Firmata's "Capability Query"."""
         self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_response)
         self.send_sysex(CAPABILITY_QUERY, [])
         self.pass_time(0.1)  # Serial SYNC
@@ -229,7 +228,7 @@ class Board(object):
             raise IOError("Board detection failed.")
 
     def add_cmd_handler(self, cmd, func):
-        """Adds a command handler for a command."""
+        """Add a command handler for a command."""
         len_args = len(inspect.getargspec(func)[0])
 
         def add_meta(f):
@@ -243,7 +242,8 @@ class Board(object):
 
     def get_pin(self, pin_def):
         """
-        Returns the activated pin given by the pin definition.
+        Return the activated pin given by the pin definition.
+
         May raise an ``InvalidPinDefError`` or a ``PinAlreadyTakenError``.
 
         :arg pin_def: Pin definition as described below,
@@ -300,7 +300,7 @@ class Board(object):
 
     def send_sysex(self, sysex_cmd, data):
         """
-        Sends a SysEx msg.
+        Send a SysEx message.
 
         :arg sysex_cmd: A sysex command byte
         : arg data: a bytearray of 7-bit bytes of arbitrary data
@@ -315,7 +315,8 @@ class Board(object):
 
     def iterate(self):
         """
-        Reads and handles data from the microcontroller over the serial port.
+        Read and handle data from the microcontroller over the serial port.
+
         This method should be called in a main loop or in an :class:`Iterator`
         instance to keep this boards pin values up to date.
         """
@@ -357,15 +358,13 @@ class Board(object):
             pass
 
     def get_firmata_version(self):
-        """
-        Returns a version tuple (major, minor) for the firmata firmware on the
-        board.
-        """
+        """Return a version tuple (major, minor) for the firmata firmware on the board."""
         return self.firmata_version
 
     def servo_config(self, pin, min_pulse=544, max_pulse=2400, angle=0):
         """
         Configure a pin as servo with min_pulse, max_pulse and first angle.
+
         ``min_pulse`` and ``max_pulse`` default to the arduino defaults.
         """
         if pin > len(self.digital) or self.digital[pin].mode == UNAVAILABLE:
@@ -401,8 +400,13 @@ class Board(object):
         except IndexError:
             raise ValueError
 
+    def _handle_string_message(self, *data):
+        print(two_byte_iter_to_str(data))
+
     def _handle_digital_message(self, port_nr, lsb, msb):
         """
+        Handle digital message for given port.
+
         Digital messages always go by the whole port. This means we have a
         bitmask which we update the port.
         """
@@ -520,7 +524,8 @@ class Port(object):
 
 
 class Pin(object):
-    """A Pin representation"""
+    """A Pin representation."""
+
     def __init__(self, board, pin_number, port=None, analog_pin_number=None, supported_modes=[]):
         self.board = board
         self.pin_number = pin_number
@@ -617,9 +622,10 @@ class Pin(object):
 
     def read(self):
         """
-        Returns the output value of the pin. This value is updated by the
-        boards :meth:`Board.iterate` method. Value is always in the range from
-        0.0 to 1.0.
+        Return the output value of the pin.
+
+        This value is updated by the boards :meth:`Board.iterate` method. Value
+        is always in the range from 0.0 to 1.0.
         """
         if self.mode == UNAVAILABLE:
             raise IOError("Cannot read pin {0}".format(self.__str__()))
@@ -627,7 +633,7 @@ class Pin(object):
 
     def write(self, value):
         """
-        Output a voltage from the pin
+        Output a voltage from the pin.
 
         :arg value: Uses value as a boolean if the pin is in output mode, or
             expects a float from 0 to 1 if the pin is in PWM mode. If the pin
