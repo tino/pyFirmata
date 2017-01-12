@@ -1,3 +1,4 @@
+"""Helper functioons for pyFirmata."""
 from __future__ import division, unicode_literals
 
 import os
@@ -6,34 +7,59 @@ import threading
 import time
 
 import serial
+import serial.tools.list_ports
 
 from .boards import BOARDS
 
 
-def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.usbserial',):
+def autoload_board(layout=None, ports=None, ports_filter='Arduino'):
     """
-    Helper function to get the one and only board connected to the computer
-    running this. It assumes a normal arduino layout, but this can be
-    overriden by passing a different layout dict as the ``layout`` parameter.
-    ``base_dir`` and ``identifier`` are overridable as well. It will raise an
-    IOError if it can't find a board, on a serial, or if it finds more than
-    one.
+    Helper function to get the one and only board connected to the computer.
+
+    It loads board layout from board auto setup, but layout could be specified
+    by setting ``layout`` parameter.
+    By default it loads active ports list by OS independent call, but specific
+    ports to scan could be set by ``ports`` parameter. When autoloading ports
+    they could be filtered by description starting by specific string (default
+    "Arduino"). Filtering could be disabled by setting ``ports_filter`` to None.
+
+    It will raise an IOError if it can't find a board, on a serial, or if it
+    finds more than one.
     """
-    from .pyfirmata import Board  # prevent a circular import
+    from .pyfirmata import Board, BoardSetupError  # prevent a circular import
+
+    # OS independent ports scan
+    if ports is None:
+        ports = [
+            port.device for port
+            in serial.tools.list_ports.comports()
+            if ports_filter is None or port.description.startswith(ports_filter)
+        ]
+
     boards = []
+    for port in ports:
+        try:
+            board = Board(port, layout)
+        except (serial.SerialException, BoardSetupError):
+            pass
+        else:
+            boards.append(board)
+
+    if len(boards) == 0:
+        raise IOError("No boards connected to {0} found".format(ports))
+    elif len(boards) > 1:
+        raise IOError("Multiple boards found!")
+    return boards[0]
+
+
+def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.usbserial'):
+    """Deprecated function for backward compatibility, Linux-only ports scan."""
+    ports = []
+
     for device in os.listdir(base_dir):
         if device.startswith(identifier):
-            try:
-                board = Board(os.path.join(base_dir, device), layout)
-            except serial.SerialException:
-                pass
-            else:
-                boards.append(board)
-    if len(boards) == 0:
-        raise IOError("No boards found in {0} with identifier {1}".format(base_dir, identifier))
-    elif len(boards) > 1:
-        raise IOError("More than one board found!")
-    return boards[0]
+            ports.append(os.path.join(base_dir, device))
+    return autoload_board(layout=layout, ports=ports)
 
 
 class Iterator(threading.Thread):
