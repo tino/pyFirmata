@@ -115,11 +115,11 @@ def two_byte_iter_to_bytes(bytes):
     return decoded
 
 
-def two_byte_iter_to_str(bytes):
+def two_byte_iter_to_str(str_bytes):
     """
     Return a string made from a list of two byte chars.
     """
-    return two_byte_iter_to_bytes(bytes).decode()
+    return bytes(two_byte_iter_to_bytes(str_bytes)).decode()
 
 
 def str_to_two_byte_iter(string):
