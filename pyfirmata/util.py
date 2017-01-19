@@ -49,6 +49,7 @@ def autoload_board(layout=None, ports=None, ports_filter='Arduino'):
         raise IOError("No boards connected to {0} found".format(ports))
     elif len(boards) > 1:
         raise IOError("Multiple boards found!")
+    print("Initialized board on port", boards[0].port)
     return boards[0]
 
 

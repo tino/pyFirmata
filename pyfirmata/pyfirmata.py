@@ -96,6 +96,7 @@ class Board(object):
         # For 2.3, even 5 seconds might not be enough.
         # TODO Find a more reliable way to wait until the board is ready
         self.pass_time(BOARD_SETUP_WAIT_TIME)
+        self.port = port
         self.name = name
         self._layout = layout
         if not self.name:
@@ -182,7 +183,7 @@ class Board(object):
         if self._layout:
             self.setup_layout(self._layout)
         else:
-            raise IOError("Board detection failed.")
+            raise BoardSetupError("Board detection failed.")
 
     def add_cmd_handler(self, cmd, func):
         """Adds a command handler for a command."""
