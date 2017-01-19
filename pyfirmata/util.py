@@ -119,7 +119,7 @@ def two_byte_iter_to_str(str_bytes):
     """
     Return a string made from a list of two byte chars.
     """
-    return bytes(two_byte_iter_to_bytes(str_bytes)).decode()
+    return bytearray(two_byte_iter_to_bytes(str_bytes)).decode()
 
 
 def str_to_two_byte_iter(string):
