@@ -32,7 +32,7 @@ BOARDS = {
         'analog': tuple(x for x in range(11)),
         'pwm': (3, 5, 6, 9, 10),
         'use_ports': True,
-        'disabled': (0, 1)
+        'disabled': (0, 1, 11, 12, 13, 17)
     }
 
 }
