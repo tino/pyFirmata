@@ -173,7 +173,9 @@ class Board(object):
 
         self.digital = []
         for p in sorted(set(board_layout['digital_input'] + board_layout['digital_output'])):
-            self.digital.append(self.pins[p])
+            while len(self.digital) <= p:
+                    self.digital.append(None)
+            self.digital[p] = self.pins[p]
 
         # Analog:
         self.analog = []
@@ -387,7 +389,7 @@ class Board(object):
         # First detach all servo's, otherwise it somehow doesn't want to close...
         if hasattr(self, 'digital'):
             for pin in self.digital:
-                if pin.mode == SERVO:
+                if pin is not None and pin.mode == SERVO:
                     pin.mode = OUTPUT
         if hasattr(self, 'sp'):
             self.sp.close()
@@ -476,7 +478,8 @@ class Port(object):
 
         self.pins = pins
         for pin in pins:
-            pin.port = self
+            if pin is not None:
+                pin.port = self
 
     def __str__(self):
         return "Digital Port {0.port_number} on {0.board}".format(self)
@@ -488,7 +491,7 @@ class Port(object):
         self.board.sp.write(msg)
 
         for pin in self.pins:
-            if pin.mode == INPUT:
+            if pin is not None and pin.mode == INPUT:
                 pin.reporting = True  # TODO Shouldn't this happen at the pin?
 
     def disable_reporting(self):
@@ -501,7 +504,7 @@ class Port(object):
         """Set the output pins of the port to the correct state."""
         mask = 0
         for pin in self.pins:
-            if pin.mode == OUTPUT:
+            if pin is not None and pin.mode == OUTPUT:
                 if pin.value == 1:
                     pin_nr = pin.pin_number - self.port_number * 8
                     mask |= 1 << int(pin_nr)
@@ -515,7 +518,7 @@ class Port(object):
         """Update the values for the pins marked as input with the mask."""
         if self.reporting:
             for pin in self.pins:
-                if pin.mode is INPUT:
+                if pin is not None and pin.mode is INPUT:
                     pin_nr = pin.pin_number - self.port_number * 8
                     pin.value = (mask & (1 << pin_nr)) > 0
 
