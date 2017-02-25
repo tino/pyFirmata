@@ -4,6 +4,8 @@ import inspect
 import time
 
 import serial
+import socket
+import select
 
 from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str
 
@@ -74,7 +76,6 @@ class InvalidPinDefError(Exception):
 class NoInputWarning(RuntimeWarning):
     pass
 
-import socket,select
 class SocketSerial(socket.socket):
     def __init__(self,host_port,name=None,timeout=None,**kw):
         super().__init__()
@@ -104,7 +105,7 @@ class Board(object):
 
     def __init__(self, port, layout=None, baudrate=57600, name=None, timeout=None):
         if ':' in port:
-            self.sp=SocketSerial(port,name=name,timeout=timeout)
+            self.sp=SocketSerial(port, name=name, timeout=timeout)
         else:
             self.sp = serial.Serial(port, baudrate, timeout=timeout)
         # Allow 5 secs for Arduino's auto-reset to happen
