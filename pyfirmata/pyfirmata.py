@@ -76,22 +76,30 @@ class InvalidPinDefError(Exception):
 class NoInputWarning(RuntimeWarning):
     pass
 
+
 class SocketSerial(socket.socket):
+    """SocketSerial -- provides the identical api to serial.Serial()
+    you can use it as a drop in replacement for serial.Serial, for pushing firmata stream over the
+    network."""
     def __init__(self, host_port, name=None, timeout=None, **kw):
         super().__init__()
         (host, port) = host_port.split(':')
-        portno=int(port)
+        portno = int(port)
         addr = socket.getaddrinfo(host, port)[0][-1]
         self.connect(addr)
         self.setblocking(False)
         self.poll = select.poll()
-        self.poll.register(self ,select.POLLIN)
+        self.poll.register(self, select.POLLIN)
+
     def inWaiting(self):
         return self.poll.poll(0)
+
     def read(self):
         return self.recv(1)
+
     def write(self,buf):
         self.send(buf)
+
 
 class Board(object):
     """The Base class for any board."""
