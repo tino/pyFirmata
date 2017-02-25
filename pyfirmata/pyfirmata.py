@@ -77,15 +77,15 @@ class NoInputWarning(RuntimeWarning):
     pass
 
 class SocketSerial(socket.socket):
-    def __init__(self,host_port,name=None,timeout=None,**kw):
+    def __init__(self, host_port, name=None, timeout=None, **kw):
         super().__init__()
-        (host,port)=host_port.split(':')
+        (host, port) = host_port.split(':')
         portno=int(port)
-        addr=socket.getaddrinfo(host,port)[0][-1]
+        addr = socket.getaddrinfo(host, port)[0][-1]
         self.connect(addr)
         self.setblocking(False)
-        self.poll=select.poll()
-        self.poll.register(self,select.POLLIN)
+        self.poll = select.poll()
+        self.poll.register(self ,select.POLLIN)
     def inWaiting(self):
         return self.poll.poll(0)
     def read(self):
@@ -105,7 +105,7 @@ class Board(object):
 
     def __init__(self, port, layout=None, baudrate=57600, name=None, timeout=None):
         if ':' in port:
-            self.sp=SocketSerial(port, name=name, timeout=timeout)
+            self.sp = SocketSerial(port, name=name, timeout=timeout)
         else:
             self.sp = serial.Serial(port, baudrate, timeout=timeout)
         # Allow 5 secs for Arduino's auto-reset to happen
