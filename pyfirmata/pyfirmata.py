@@ -84,7 +84,7 @@ class SocketSerial(socket.socket):
     def __init__(self, host_port, name=None, timeout=None, **kw):
         super().__init__()
         (host, port) = host_port.split(':')
-        portno = int(port)
+        #portno = int(port)
         addr = socket.getaddrinfo(host, port)[0][-1]
         self.connect(addr)
         self.setblocking(False)
@@ -97,7 +97,7 @@ class SocketSerial(socket.socket):
     def read(self):
         return self.recv(1)
 
-    def write(self,buf):
+    def write(self, buf):
         self.send(buf)
 
 
