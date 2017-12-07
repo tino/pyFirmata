@@ -55,7 +55,7 @@ class ArduinoNano(Board):
     def __init__(self, *args, **kwargs):
         args = list(args)
         args.append(BOARDS['arduino_nano'])
-        super(nano, self).__init__(*args, **kwargs)
+        super(ArduinoNano, self).__init__(*args, **kwargs)
 
     def __str__(self):
         return "Arduino Nano {0.name} on {0.sp.port}".format(self)
