@@ -132,12 +132,13 @@ class TestBoardMessages(BoardBaseTest):
          """
 
         test_layout = {
-            'digital': (0, 1, 2),
-            'analog': (0, 1),
-            'pwm': (1, 2),
-            'servo': (0, 1, 2),
+            'digital_input': [1, 2, 3, 4],
+            'digital_output': [1, 2, 3, 4],
+            'analog_real': [(3, 10), (4, 10)],
+            'pwm': [(1, 8), (2, 8)],
+            'servo': [(1, 14), (2, 14)],
             # 'i2c': (2),  # TODO 2.3 specs
-            'disabled': (0,),
+            'disabled': [0],
         }
 
         # Eg: (127)
@@ -153,6 +154,8 @@ class TestBoardMessages(BoardBaseTest):
             0x01,
             0x03,  # PWM
             0x08,
+            0x04,  # SERVO
+            0x0E,
             0x7F,  # END_SYSEX (Pin delimiter)
         ]
 
@@ -233,6 +236,8 @@ class TestBoardMessages(BoardBaseTest):
     # ---------------------------------------------------------------------------
     # report analog pin     0xC0   pin #      disable/enable(0/1)   - n/a -
     def test_report_analog(self):
+        self.board.analog[1].mode = pyfirmata.ANALOG
+        self.assert_serial(0xF4, self.board.analog[1].pin_number, pyfirmata.ANALOG)
         self.board.analog[1].enable_reporting()
         self.assert_serial(0xC0 + 1, 1)
         self.assertTrue(self.board.analog[1].reporting)
@@ -353,13 +358,13 @@ class TestBoardLayout(BoardBaseTest):
 
     def test_layout_arduino(self):
         self.assertEqual(len(BOARDS['arduino']['digital']), len(self.board.digital))
-        self.assertEqual(len(BOARDS['arduino']['analog']), len(self.board.analog))
+        self.assertEqual(len(BOARDS['arduino']['analog_real']), len(self.board.analog))
 
     def test_layout_arduino_mega(self):
         pyfirmata.pyfirmata.serial.Serial = mockup.MockupSerial
         mega = pyfirmata.Board('', BOARDS['arduino_mega'])
         self.assertEqual(len(BOARDS['arduino_mega']['digital']), len(mega.digital))
-        self.assertEqual(len(BOARDS['arduino_mega']['analog']), len(mega.analog))
+        self.assertEqual(len(BOARDS['arduino_mega']['analog_real']), len(mega.analog))
 
     def test_pwm_layout(self):
         pins = []
@@ -380,7 +385,8 @@ class TestBoardLayout(BoardBaseTest):
 
     def test_get_pin_analog(self):
         pin = self.board.get_pin('a:5:i')
-        self.assertEqual(pin.pin_number, 5)
+        self.assertEqual(pin.analog_pin_number, 5)
+        self.assertEqual(pin.pin_number, 19)
         self.assertEqual(pin.reporting, True)
         self.assertEqual(pin.value, None)
 
