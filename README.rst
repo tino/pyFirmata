@@ -43,14 +43,24 @@ Basic usage::
     >>> board = Arduino('/dev/tty.usbserial-A6008rIF')
     >>> board.digital[13].write(1)
 
-To use analog ports, it is probably handy to start an iterator thread.
-Otherwise the board will keep sending data to your serial, until it overflows::
+To always have the most recent reading from the analog ports, the function board.iterator
+needs to be called periodically. This can be achieved with the utility class util.Iterator
+which starts up a new thread and then calls board.iterator as fast as possible::
 
-    >>> it = util.Iterator(board)
-    >>> it.start()
+    >>> util.Iterator(board).start()
     >>> board.analog[0].enable_reporting()
     >>> board.analog[0].read()
     0.661440304938
+
+If you want to process data at a given sampling rate you can register a callback
+handler::
+  
+    >>> board.analog[0].register_callback(myCallback)
+    
+where myCallback(data) is then called every time when data has been received.
+The sampling rate can be set by the method (default is 1/0.019 Hz)::
+
+    >>> board.setSamplingRate(samplingRate)
 
 If you use a pin more often, it can be worth it to use the ``get_pin`` method
 of the board. It let's you specify what pin you need by a string, composed of
