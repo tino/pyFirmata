@@ -327,6 +327,10 @@ class Board(object):
         self.digital[pin]._mode = SERVO
         self.digital[pin].write(angle)
 
+    def setSamplingRate(self,rateInHz):
+        data = to_two_bytes(int(1000/rateInHz))
+        self.send_sysex(SAMPLING_INTERVAL, data)
+
     def exit(self):
         """Call this to exit cleanly."""
         # First detach all servo's, otherwise it somehow doesn't want to close...
@@ -344,6 +348,8 @@ class Board(object):
         try:
             if self.analog[pin_nr].reporting:
                 self.analog[pin_nr].value = value
+                if not self.analog[pin_nr].callback == None:
+                    self.analog[pin_nr].callback(value)
         except IndexError:
             raise ValueError
 
@@ -449,6 +455,7 @@ class Pin(object):
         self._mode = (type == DIGITAL and OUTPUT or INPUT)
         self.reporting = False
         self.value = None
+        self.callback = None
 
     def __str__(self):
         type = {ANALOG: 'Analog', DIGITAL: 'Digital'}[self.type]
@@ -516,6 +523,12 @@ class Pin(object):
         if self.mode == UNAVAILABLE:
             raise IOError("Cannot read pin {0}".format(self.__str__()))
         return self.value
+
+    def register_callback(self,_callback):
+        self.callback = _callback
+
+    def unregiser_callback(self):
+        self.callback = None
 
     def write(self, value):
         """

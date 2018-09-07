@@ -41,6 +41,11 @@ To use analog ports, it is probably handy to start an iterator thread. Otherwise
     >>> board.analog[0].read()
     0.661440304938
 
+    You can register an event handler for the board with
+    >>> board.analog[0].register_callback(myCallback)
+    where then myCallback(sample) is called at the sampling rate specified by
+    >>> board.setSamplingRate(samplingRate)
+
 If you use a pin more often, it can be worth it to use the ``get_pin`` method of the board. It let's you specify what pin you need by a string, composed of 'a' or 'd' (depending on wether you need an analog or digital pin), the pin number, and the mode ('i' for input, 'o' for output, 'p' for pwm). All seperated by ``:``. Eg. ``a:0:i`` for analog 0 as input, or ``d:3:p`` for digital pin 3 as pwm.::
 
     >>> analog_0 = board.get_pin('a:0:i')
