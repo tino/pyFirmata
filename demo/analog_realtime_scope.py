@@ -1,4 +1,4 @@
-from pyfirmata import Arduino, util
+from pyfirmata import Arduino
 import time
 import numpy as np
 import matplotlib.pyplot as plt
