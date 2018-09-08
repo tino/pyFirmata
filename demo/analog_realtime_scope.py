@@ -45,8 +45,7 @@ ax.set_ylim(0, 1)
 
 
 board = Arduino('/dev/ttyACM0')
-board.setSamplingRate(samplingRate)
-util.Iterator(board).start()
+board.samplingOn(50)
 board.analog[0].register_callback(myCallback)
 board.analog[0].enable_reporting()
 
@@ -57,5 +56,7 @@ ani = animation.FuncAnimation(fig, update, interval=100)
 # show it and start the animation
 plt.show()
 
+#
+board.samplingOff()
 
 print("finished")

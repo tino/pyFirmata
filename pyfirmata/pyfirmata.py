@@ -5,7 +5,8 @@ import time
 
 import serial
 
-from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str
+from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str, Iterator
+
 
 # Message command bytes (0x80(128) to 0xFF(255)) - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -107,6 +108,7 @@ class Board(object):
             self.iterate()
         # TODO Test whether we got a firmware name and version, otherwise there
         # probably isn't any Firmata installed
+        self.samplerThread = Iterator(self)
 
     def __str__(self):
         return "Board{0.name} on {0.sp.port}".format(self)
@@ -162,6 +164,16 @@ class Board(object):
         self.add_cmd_handler(DIGITAL_MESSAGE, self._handle_digital_message)
         self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
         self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
+
+    def samplingOn(self,sample_rate = 50):
+        # enables sampling
+        self.setSamplingRate(sample_rate)
+        self.samplerThread.start()
+
+    def samplingOff(self):
+        # disables sampling
+        self.samplerThread.stop()
+        self.samplerThread.join()
 
     def auto_setup(self):
         """
