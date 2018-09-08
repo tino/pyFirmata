@@ -1,16 +1,15 @@
 from pyfirmata import Arduino
-import time
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-#sampling rate: 50Hz
+# sampling rate: 50Hz
 samplingRate = 50
 
 
-#That's our ringbuffer which accumluates the samples
-#It's emptied every time when the plot window below
-#does a repaint
+# That's our ringbuffer which accumluates the samples
+# It's emptied every time when the plot window below
+# does a repaint
 ringbuffer = []
 
 
@@ -19,10 +18,10 @@ def update(data):
     global plotbuffer
     global ringbuffer
     # add new data to the buffer
-    plotbuffer=np.append(plotbuffer,ringbuffer)
+    plotbuffer = np.append(plotbuffer, ringbuffer)
     ringbuffer = []
     # only keep the 500 newest ones and discard the old ones
-    plotbuffer=plotbuffer[-500:]
+    plotbuffer = plotbuffer[-500:]
     # set the new 500 points of channel 9
     line.set_ydata(plotbuffer)
     return line,

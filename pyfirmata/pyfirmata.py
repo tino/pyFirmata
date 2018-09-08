@@ -165,7 +165,7 @@ class Board(object):
         self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
         self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
 
-    def samplingOn(self,sample_rate = 50):
+    def samplingOn(self, sample_rate=50):
         # enables sampling
         self.setSamplingRate(sample_rate)
         self.samplerThread.start()
@@ -339,8 +339,8 @@ class Board(object):
         self.digital[pin]._mode = SERVO
         self.digital[pin].write(angle)
 
-    def setSamplingRate(self,rateInHz):
-        data = to_two_bytes(int(1000/rateInHz))
+    def setSamplingRate(self, rateInHz):
+        data = to_two_bytes(int(1000 / rateInHz))
         self.send_sysex(SAMPLING_INTERVAL, data)
 
     def exit(self):
@@ -360,7 +360,7 @@ class Board(object):
         try:
             if self.analog[pin_nr].reporting:
                 self.analog[pin_nr].value = value
-                if not self.analog[pin_nr].callback == None:
+                if not self.analog[pin_nr].callback is None:
                     self.analog[pin_nr].callback(value)
         except IndexError:
             raise ValueError
@@ -536,7 +536,7 @@ class Pin(object):
             raise IOError("Cannot read pin {0}".format(self.__str__()))
         return self.value
 
-    def register_callback(self,_callback):
+    def register_callback(self, _callback):
         self.callback = _callback
 
     def unregiser_callback(self):

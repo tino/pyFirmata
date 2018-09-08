@@ -67,10 +67,10 @@ class Iterator(threading.Thread):
                 raise
             except (KeyboardInterrupt) as e:
                 sys.exit()
-                
+
     def stop(self):
         self.running = False
-        
+
 
 def to_two_bytes(integer):
     """
