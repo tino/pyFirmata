@@ -3,6 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+
+# Realtime oscilloscope on analog pin 0 (A0)
+
+
 # sampling rate: 50Hz
 samplingRate = 50
 

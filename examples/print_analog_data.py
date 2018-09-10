@@ -1,8 +1,10 @@
 from pyfirmata import Arduino
 import time
 
+
 # prints data on the screen at the sampling rate of 50Hz
 # can easily be changed to saving data to a file
+
 
 class AnalogPrinter:
 
@@ -25,7 +27,7 @@ class AnalogPrinter:
 
 analogPrinter = AnalogPrinter()
 analogPrinter.start()
-    
+
 # let's acquire data for 10secs
 time.sleep(10)
 
