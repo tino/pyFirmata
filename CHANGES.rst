@@ -2,6 +2,19 @@
 Changes
 =======
 
+Version 1.1.x
+=============
+
+1.10 - 10/09/2018
+-----------------
+
+- Added function ``samplingOn`` which starts contiouns data acquisition in the background
+  with the optional parameter ``samplingOn(samplingRateHz)`` to set the sampling rate
+  of the arduino and ``samplingOff`` to disable it again.
+- Added function ``register_callback`` which is called every time after new data has
+  arrived at the given sampling rate.
+
+
 Version 1.0.x
 =============
 
