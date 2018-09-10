@@ -8,13 +8,15 @@ import time
 
 class AnalogPrinter:
 
-    def start(self):
+    def __init__(self):
         # sampling rate: 50Hz
         self.samplingRate = 50
         self.timestamp = 0
         self.board = Arduino('/dev/ttyACM0')
-        self.board.samplingOn(self.samplingRate)
+
+    def start(self):
         self.board.analog[0].register_callback(self.myPrintCallback)
+        self.board.samplingOn(self.samplingRate)
         self.board.analog[0].enable_reporting()
 
     def myPrintCallback(self, data):
@@ -25,12 +27,13 @@ class AnalogPrinter:
         self.board.samplingOff()
 
 
+# Let's create an instance
 analogPrinter = AnalogPrinter()
+
+# and start DAQ
 analogPrinter.start()
 
 # let's acquire data for 10secs
 time.sleep(10)
-
-analogPrinter.stop()
 
 print("finished")

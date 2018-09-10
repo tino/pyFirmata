@@ -346,6 +346,7 @@ class Board(object):
     def exit(self):
         """Call this to exit cleanly."""
         # First detach all servo's, otherwise it somehow doesn't want to close...
+        self.samplingOff()
         if hasattr(self, 'digital'):
             for pin in self.digital:
                 if pin.mode == SERVO:
