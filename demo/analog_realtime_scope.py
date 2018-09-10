@@ -44,7 +44,7 @@ ax.set_ylim(0, 1)
 
 
 board = Arduino('/dev/ttyACM0')
-board.samplingOn(50)
+board.samplingOn(samplingRate)
 board.analog[0].register_callback(myCallback)
 board.analog[0].enable_reporting()
 
