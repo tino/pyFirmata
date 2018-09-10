@@ -4,9 +4,6 @@ import time
 # prints data on the screen at the sampling rate of 50Hz
 # can easily be changed to saving data to a file
 
-def a(d):
-    print(d)
-
 class AnalogPrinter:
 
     def start(self):
@@ -24,7 +21,6 @@ class AnalogPrinter:
 
     def stop(self):
         self.board.samplingOff()
-
 
 
 analogPrinter = AnalogPrinter()
