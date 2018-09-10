@@ -167,13 +167,15 @@ class Board(object):
 
     def samplingOn(self, sample_rate=50):
         # enables sampling
-        self.setSamplingRate(sample_rate)
-        self.samplerThread.start()
+        if not self.samplerThread.running:
+            self.setSamplingRate(sample_rate)
+            self.samplerThread.start()
 
     def samplingOff(self):
         # disables sampling
-        self.samplerThread.stop()
-        self.samplerThread.join()
+        if self.samplerThread.running:
+            self.samplerThread.stop()
+            self.samplerThread.join()
 
     def auto_setup(self):
         """

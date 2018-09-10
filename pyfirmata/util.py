@@ -41,9 +41,10 @@ class Iterator(threading.Thread):
         super(Iterator, self).__init__()
         self.board = board
         self.daemon = True
-        self.running = True
+        self.running = False
 
     def run(self):
+        self.running = True
         while self.running:
             try:
                 while self.board.bytes_available():
