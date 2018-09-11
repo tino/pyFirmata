@@ -3,7 +3,7 @@
 #
 # All rights reserved.
 #
-# Redistribution and use in source and binary forms, with or without 
+# Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
 # * Redistributions of source code must retain the above copyright notice, this
@@ -33,7 +33,7 @@ PIN = 13  # Pin 13 is used
 DELAY = 1  # 1 second delay
 
 # Adjust that the port match your system, see samples below:
-# On Linux: /dev/tty.usbserial-A6008rIF, /dev/ttyACM0, 
+# On Linux: /dev/tty.usbserial-A6008rIF, /dev/ttyACM0,
 # On Windows: \\.\COM1, \\.\COM2
 PORT = '/dev/ttyACM0'
 
