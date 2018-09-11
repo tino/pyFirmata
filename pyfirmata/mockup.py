@@ -1,6 +1,5 @@
 from collections import deque
 import pyfirmata
-from .util import Iterator
 
 
 class MockupSerial(deque):
@@ -131,7 +130,7 @@ class MockupPin(pyfirmata.Pin):
 
 class Iterator(object):
     def __init__(self, *args, **kwargs):
-        pass
+        self.running = False
 
     def start(self):
         pass
