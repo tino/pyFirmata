@@ -3,7 +3,7 @@
 #
 # All rights reserved.
 #
-# Redistribution and use in source and binary forms, with or without 
+# Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
 # * Redistributions of source code must retain the above copyright notice, this
@@ -30,14 +30,14 @@ import pyfirmata
 
 
 # Adjust that the port match your system, see samples below:
-# On Linux: /dev/tty.usbserial-A6008rIF, /dev/ttyACM0, 
+# On Linux: /dev/tty.usbserial-A6008rIF, /dev/ttyACM0,
 # On Windows: \\.\COM1, \\.\COM2
 PORT = '/dev/ttyACM0'
 
 # Definition of the analog pin
 PINS = (0, 1, 2, 3)
 
-# Creates a new board 
+# Creates a new board
 board = pyfirmata.Arduino(PORT)
 print("Setting up the connection to the board ...")
 board.samplingOn()
@@ -51,7 +51,7 @@ while (True):
         print("Button pressed")
     elif str(digital_0.read()) == 'False':
         print("Button not pressed")
-    else: 
+    else:
         print("Button has never been pressed")
     board.pass_time(0.5)
 
