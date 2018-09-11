@@ -1,6 +1,6 @@
 from collections import deque
-
 import pyfirmata
+from .util import Iterator
 
 
 class MockupSerial(deque):
@@ -54,6 +54,7 @@ class MockupBoard(pyfirmata.Board):
         self.setup_layout(layout)
         self.values_dict = values_dict
         self.id = 1
+        self.samplerThread = Iterator(self)
 
     def reset_taken(self):
         for key in self.taken['analog']:
