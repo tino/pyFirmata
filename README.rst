@@ -21,14 +21,14 @@ Installation
 
 The preferred way to install is with pip_::
 
-    pip install pyfirmata
+    pip3 install pyfirmata
 
 You can also install from source with ``python setup.py install``. You will
 need to have `setuptools`_ installed::
 
     git clone https://github.com/tino/pyFirmata
     cd pyFirmata
-    python setup.py install
+    python3 setup.py install
 
 .. _pip: http://www.pip-installer.org/en/latest/
 .. _setuptools: https://pypi.python.org/pypi/setuptools
@@ -48,7 +48,7 @@ To switch on data acquisition from the inputs of the board run::
     >>> board.samplingOn()
 
 and they will be updated approximately every 19ms. Or enable sampling
-with the exact sampling rate::
+with the exact sampling rate (max 100Hz)::
 
     >>> board.samplingOn(samplingrate in Hz)
 
@@ -64,7 +64,8 @@ handler::
     >>> board.analog[0].register_callback(myCallback)
     
 where myCallback(data) is then called every time when data has been received
-and is timed by the arduino itself so is very precise.
+and is timed by the arduino itself so is very precise of up about 100Hz
+sampling rate.
 
 If you use a pin more often, it can be worth it to use the ``get_pin`` method
 of the board. It let's you specify what pin you need by a string, composed of
