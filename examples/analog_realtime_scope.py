@@ -11,7 +11,7 @@ import matplotlib.animation as animation
 # callbacks from the other channels.
 
 
-# Creates a scrolling data display 
+# Creates a scrolling data display
 class RealtimePlotWindow:
 
     def __init__(self):
