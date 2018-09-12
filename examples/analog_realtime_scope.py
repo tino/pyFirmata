@@ -4,62 +4,68 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
-# Realtime oscilloscope on analog pin 0 (A0)
+# Realtime oscilloscope at a sampling rate of 50Hz
+# It displays analog channel 0.
+# You can plot multiple chnannels just by instantiating
+# more RealtimePlotWindow instances and registering
+# callbacks from the other channels.
 
+
+# Creates a scrolling data display 
+class RealtimePlotWindow:
+
+    def __init__(self):
+        # create a plot window
+        self.fig, self.ax = plt.subplots()
+        # that's our plotbuffer
+        self.plotbuffer = np.zeros(500)
+        # create an empty line
+        self.line, = self.ax.plot(self.plotbuffer)
+        # axis
+        self.ax.set_ylim(0, 1)
+        # That's our ringbuffer which accumluates the samples
+        # It's emptied every time when the plot window below
+        # does a repaint
+        self.ringbuffer = []
+        # start the animation
+        self.ani = animation.FuncAnimation(self.fig, self.update, interval=100)
+
+    # updates the plot
+    def update(self, data):
+        # add new data to the buffer
+        self.plotbuffer = np.append(self.plotbuffer, self.ringbuffer)
+        # only keep the 500 newest ones and discard the old ones
+        self.plotbuffer = self.plotbuffer[-500:]
+        self.ringbuffer = []
+        # set the new 500 points of channel 9
+        self.line.set_ydata(self.plotbuffer)
+        return self.line,
+
+    # appends data to the ringbuffer
+    def addData(self, v):
+        self.ringbuffer.append(v)
+
+        
+# Create an instance of an animated scrolling window
+# To plot more channels just create more instances
+realtimePlotWindow = RealtimePlotWindow()
+
+# Get the Ardunio board
+board = Arduino('/dev/ttyACM0')
 
 # sampling rate: 50Hz
 samplingRate = 50
 
-
-# That's our ringbuffer which accumluates the samples
-# It's emptied every time when the plot window below
-# does a repaint
-ringbuffer = []
-
-
-# updates the plot
-def update(data):
-    global plotbuffer
-    global ringbuffer
-    # add new data to the buffer
-    plotbuffer = np.append(plotbuffer, ringbuffer)
-    ringbuffer = []
-    # only keep the 500 newest ones and discard the old ones
-    plotbuffer = plotbuffer[-500:]
-    # set the new 500 points of channel 9
-    line.set_ydata(plotbuffer)
-    return line,
-
-
-# called from pyfirmata and appends data to the ringbuffer
-def myCallback(v):
-    global ringbuffer
-    ringbuffer.append(v)
-
-
-# now let's plot the data
-fig, ax = plt.subplots()
-# that's our plotbuffer
-plotbuffer = np.zeros(500)
-# plots an empty line
-line, = ax.plot(plotbuffer)
-# axis
-ax.set_ylim(0, 1)
-
-
-board = Arduino('/dev/ttyACM0')
+# Set the sampling rate in the Arduino
 board.samplingOn(samplingRate)
-board.analog[0].register_callback(myCallback)
+
+# Register the callback which adds the data to the animated plot
+board.analog[0].register_callback(realtimePlotWindow.addData)
+
+# Enable the callback
 board.analog[0].enable_reporting()
 
-
-# start the animation
-ani = animation.FuncAnimation(fig, update, interval=100)
-
-# show it and start the animation
+# show the plot and start the animation
 plt.show()
-
-#
-board.samplingOff()
 
 print("finished")
