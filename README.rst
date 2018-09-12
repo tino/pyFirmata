@@ -21,14 +21,14 @@ Installation
 
 The preferred way to install is with pip_::
 
-    pip install pyfirmata
+    pip3 install pyfirmata
 
 You can also install from source with ``python setup.py install``. You will
 need to have `setuptools`_ installed::
 
     git clone https://github.com/tino/pyFirmata
     cd pyFirmata
-    python setup.py install
+    python3 setup.py install
 
 .. _pip: http://www.pip-installer.org/en/latest/
 .. _setuptools: https://pypi.python.org/pypi/setuptools
@@ -43,14 +43,29 @@ Basic usage::
     >>> board = Arduino('/dev/tty.usbserial-A6008rIF')
     >>> board.digital[13].write(1)
 
-To use analog ports, it is probably handy to start an iterator thread.
-Otherwise the board will keep sending data to your serial, until it overflows::
+To switch on data acquisition from the inputs of the board run::
 
-    >>> it = util.Iterator(board)
-    >>> it.start()
+    >>> board.samplingOn()
+
+and they will be updated approximately every 19ms. Or enable sampling
+with the exact sampling rate (max 100Hz)::
+
+    >>> board.samplingOn(samplingrate in Hz)
+
+The individual analoge pins are enabled / read by:
+
     >>> board.analog[0].enable_reporting()
     >>> board.analog[0].read()
     0.661440304938
+
+In order to get the data at the given sampling rate you can register a callback
+handler::
+  
+    >>> board.analog[0].register_callback(myCallback)
+    
+where myCallback(data) is then called every time when data has been received
+and is timed by the arduino itself so is very precise of up about 100Hz
+sampling rate.
 
 If you use a pin more often, it can be worth it to use the ``get_pin`` method
 of the board. It let's you specify what pin you need by a string, composed of

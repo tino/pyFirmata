@@ -41,9 +41,11 @@ class Iterator(threading.Thread):
         super(Iterator, self).__init__()
         self.board = board
         self.daemon = True
+        self.running = False
 
     def run(self):
-        while 1:
+        self.running = True
+        while self.running:
             try:
                 while self.board.bytes_available():
                     self.board.iterate()
@@ -66,6 +68,9 @@ class Iterator(threading.Thread):
                 raise
             except (KeyboardInterrupt) as e:
                 sys.exit()
+
+    def stop(self):
+        self.running = False
 
 
 def to_two_bytes(integer):

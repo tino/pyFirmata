@@ -1,5 +1,4 @@
 from collections import deque
-
 import pyfirmata
 
 
@@ -54,6 +53,7 @@ class MockupBoard(pyfirmata.Board):
         self.setup_layout(layout)
         self.values_dict = values_dict
         self.id = 1
+        self.samplerThread = Iterator(self)
 
     def reset_taken(self):
         for key in self.taken['analog']:
@@ -130,13 +130,14 @@ class MockupPin(pyfirmata.Pin):
 
 class Iterator(object):
     def __init__(self, *args, **kwargs):
-        pass
+        self.running = False
 
     def start(self):
         pass
 
     def stop(self):
         pass
+
 
 if __name__ == '__main__':
     import doctest

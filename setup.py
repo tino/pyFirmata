@@ -7,10 +7,10 @@ with open('README.rst') as f:
 
 setup(
     name='pyFirmata',
-    version='1.0.3',  # Use bumpversion!
+    version='1.1.0',  # Use bumpversion!
     description="A Python interface for the Firmata procotol",
     long_description=long_description,
-    author='Tino de Bruijn',
+    author='Tino de Bruijn, Bernd Porr',
     author_email='tinodb@gmail.com',
     packages=['pyfirmata'],
     include_package_data=True,
@@ -29,6 +29,8 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Utilities',
         'Topic :: Home Automation',
     ],

@@ -5,7 +5,8 @@ import time
 
 import serial
 
-from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str
+from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str, Iterator
+
 
 # Message command bytes (0x80(128) to 0xFF(255)) - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -107,6 +108,7 @@ class Board(object):
             self.iterate()
         # TODO Test whether we got a firmware name and version, otherwise there
         # probably isn't any Firmata installed
+        self.samplerThread = Iterator(self)
 
     def __str__(self):
         return "Board{0.name} on {0.sp.port}".format(self)
@@ -162,6 +164,18 @@ class Board(object):
         self.add_cmd_handler(DIGITAL_MESSAGE, self._handle_digital_message)
         self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
         self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
+
+    def samplingOn(self, sample_rate=50):
+        # enables sampling
+        if not self.samplerThread.running:
+            self.setSamplingRate(sample_rate)
+            self.samplerThread.start()
+
+    def samplingOff(self):
+        # disables sampling
+        if self.samplerThread.running:
+            self.samplerThread.stop()
+            self.samplerThread.join()
 
     def auto_setup(self):
         """
@@ -327,9 +341,14 @@ class Board(object):
         self.digital[pin]._mode = SERVO
         self.digital[pin].write(angle)
 
+    def setSamplingRate(self, rateInHz):
+        data = to_two_bytes(int(1000 / rateInHz))
+        self.send_sysex(SAMPLING_INTERVAL, data)
+
     def exit(self):
         """Call this to exit cleanly."""
         # First detach all servo's, otherwise it somehow doesn't want to close...
+        self.samplingOff()
         if hasattr(self, 'digital'):
             for pin in self.digital:
                 if pin.mode == SERVO:
@@ -344,6 +363,8 @@ class Board(object):
         try:
             if self.analog[pin_nr].reporting:
                 self.analog[pin_nr].value = value
+                if not self.analog[pin_nr].callback is None:
+                    self.analog[pin_nr].callback(value)
         except IndexError:
             raise ValueError
 
@@ -449,6 +470,7 @@ class Pin(object):
         self._mode = (type == DIGITAL and OUTPUT or INPUT)
         self.reporting = False
         self.value = None
+        self.callback = None
 
     def __str__(self):
         type = {ANALOG: 'Analog', DIGITAL: 'Digital'}[self.type]
@@ -516,6 +538,12 @@ class Pin(object):
         if self.mode == UNAVAILABLE:
             raise IOError("Cannot read pin {0}".format(self.__str__()))
         return self.value
+
+    def register_callback(self, _callback):
+        self.callback = _callback
+
+    def unregiser_callback(self):
+        self.callback = None
 
     def write(self, value):
         """
