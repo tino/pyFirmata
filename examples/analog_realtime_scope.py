@@ -45,7 +45,7 @@ class RealtimePlotWindow:
     def addData(self, v):
         self.ringbuffer.append(v)
 
-        
+
 # Create an instance of an animated scrolling window
 # To plot more channels just create more instances
 realtimePlotWindow = RealtimePlotWindow()
