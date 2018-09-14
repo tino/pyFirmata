@@ -26,7 +26,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import pyfirmata
+import pyfirmata2
 
 
 # Adjust that the port match your system, see samples below:
@@ -40,6 +40,7 @@ PINS = (0, 1, 2, 3)
 # Creates a new board
 board = pyfirmata.Arduino(PORT)
 print("Setting up the connection to the board ...")
+# default sampling interval of 19ms
 board.samplingOn()
 
 # Setup the digital pin

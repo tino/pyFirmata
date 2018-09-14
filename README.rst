@@ -2,32 +2,24 @@
 pyFirmata
 =========
 
-pyFirmata is a Python interface for the `Firmata`_ protocol. It is fully
-compatible with Firmata 2.1, and has some functionality of version 2.2. It runs
-on Python 2.7, 3.3 and 3.4.
+pyFirmata2 is a Python interface for the `Firmata`_ protocol. It is fully
+compatible with Firmata 2.1, and has some functionality of version 2.2.
+It runs on Python 2.7, 3.3, 3.4, 3.5 and 3.6
 
 .. _Firmata: http://firmata.org
-
-Test & coverage status:
-
-.. image:: https://travis-ci.org/tino/pyFirmata.png?branch=master
-    :target: https://travis-ci.org/tino/pyFirmata
-
-.. image:: https://coveralls.io/repos/github/tino/pyFirmata/badge.svg?branch=master
-    :target: https://coveralls.io/github/tino/pyFirmata?branch=master
 
 Installation
 ============
 
 The preferred way to install is with pip_::
 
-    pip3 install pyfirmata
+    pip3 install pyfirmata2
 
 You can also install from source with ``python setup.py install``. You will
 need to have `setuptools`_ installed::
 
-    git clone https://github.com/tino/pyFirmata
-    cd pyFirmata
+    git clone https://github.com/berndporr/pyFirmata2
+    cd pyFirmata2
     python3 setup.py install
 
 .. _pip: http://www.pip-installer.org/en/latest/
@@ -39,18 +31,18 @@ Usage
 
 Basic usage::
 
-    >>> from pyfirmata import Arduino, util
+    >>> from pyfirmata import Arduino
     >>> board = Arduino('/dev/tty.usbserial-A6008rIF')
     >>> board.digital[13].write(1)
 
-To switch on data acquisition from the inputs of the board run::
+To switch on contious data acquisition from the inputs of the board run::
 
     >>> board.samplingOn()
 
-and they will be updated approximately every 19ms. Or enable sampling
-with the exact sampling rate (max 100Hz)::
+and they will be updated approximately every 19ms. To enable sampling
+with the exact sampling interval (min 10ms)::
 
-    >>> board.samplingOn(samplingrate in Hz)
+    >>> board.samplingOn(samplinginterval in ms)
 
 The individual analoge pins are enabled / read by:
 
@@ -58,7 +50,7 @@ The individual analoge pins are enabled / read by:
     >>> board.analog[0].read()
     0.661440304938
 
-In order to get the data at the given sampling rate you can register a callback
+In order to get the data at the given sampling interval register a callback
 handler::
   
     >>> board.analog[0].register_callback(myCallback)
@@ -96,13 +88,3 @@ for the Mega for example::
     ...         'use_ports' : True,
     ...         'disabled' : (0, 1, 14, 15) # Rx, Tx, Crystal
     ...         }
-
-Todo
-====
-
-The next things on my list are to implement the new protocol changes in
-firmata:
-
-- Pin State Query, which allows it to populate on-screen controls with an
-  accurate representation of the hardware's configuration
-  (http://firmata.org/wiki/Proposals#Pin_State_Query_.28added_in_version_2.2.29)

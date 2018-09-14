@@ -19,7 +19,7 @@ def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.us
     IOError if it can't find a board, on a serial, or if it finds more than
     one.
     """
-    from .pyfirmata import Board  # prevent a circular import
+    from .pyfirmata2 import Board  # prevent a circular import
     boards = []
     for device in os.listdir(base_dir):
         if device.startswith(identifier):

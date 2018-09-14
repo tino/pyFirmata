@@ -6,17 +6,17 @@ with open('README.rst') as f:
     long_description = f.read()
 
 setup(
-    name='pyFirmata',
-    version='1.1.0',  # Use bumpversion!
-    description="A Python interface for the Firmata procotol",
+    name='pyFirmata2',
+    version='0.9.0',
+    description="A realtime Python interface for the Firmata procotol",
     long_description=long_description,
-    author='Tino de Bruijn, Bernd Porr',
-    author_email='tinodb@gmail.com',
-    packages=['pyfirmata'],
+    author='Bernd Porr',
+    author_email='mail@berndporr.me.uk',
+    packages=['pyfirmata2'],
     include_package_data=True,
     install_requires=['pyserial'],
     zip_safe=False,
-    url='https://github.com/tino/pyFirmata',
+    url='https://github.com/berndporr/pyFirmata2',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Other Environment',
@@ -32,6 +32,5 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Topic :: Utilities',
-        'Topic :: Home Automation',
     ],
 )
