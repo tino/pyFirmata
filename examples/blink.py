@@ -38,7 +38,7 @@ DELAY = 1  # 1 second delay
 PORT = '/dev/ttyACM0'
 
 # Creates a new board
-board = pyfirmata.Arduino(PORT)
+board = pyfirmata2.Arduino(PORT)
 
 # Loop for blinking the led
 while True:

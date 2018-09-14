@@ -34,11 +34,8 @@ import pyfirmata2
 # On Windows: \\.\COM1, \\.\COM2
 PORT = '/dev/ttyACM0'
 
-# Definition of the analog pin
-PINS = (0, 1, 2, 3)
-
 # Creates a new board
-board = pyfirmata.Arduino(PORT)
+board = pyfirmata2.Arduino(PORT)
 print("Setting up the connection to the board ...")
 # default sampling interval of 19ms
 board.samplingOn()
