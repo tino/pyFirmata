@@ -165,7 +165,7 @@ class Board(object):
         self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
         self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
 
-    def samplingOn(self, sample_interval = 50):
+    def samplingOn(self, sample_interval=19):
         # enables sampling
         if not self.samplerThread.running:
             self.setSamplingInterval(sample_interval)
