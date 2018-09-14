@@ -8,6 +8,10 @@ It runs on Python 2.7, 3.3, 3.4, 3.5 and 3.6
 
 .. _Firmata: http://firmata.org
 
+This is an updated version where you can measure at a given sampling
+rate which then allows digital filtering, for example with an realtime
+IIR filter.
+
 Installation
 ============
 
@@ -40,7 +44,8 @@ To switch on contious data acquisition from the inputs of the board run::
     >>> board.samplingOn()
 
 and they will be updated approximately every 19ms. To enable sampling
-with the exact sampling interval (min 10ms)::
+with the exact sampling interval (min 10ms) use the optional argument
+of samplingOn::
 
     >>> board.samplingOn(samplinginterval in ms)
 
@@ -50,16 +55,16 @@ The individual analoge pins are enabled / read by:
     >>> board.analog[0].read()
     0.661440304938
 
-In order to get the data at the given sampling interval register a callback
+In order to process the data at the given sampling interval register a callback
 handler::
   
     >>> board.analog[0].register_callback(myCallback)
     
 where myCallback(data) is then called every time when data has been received
-and is timed by the arduino itself so is very precise of up about 100Hz
-sampling rate.
+and is timed by the arduino itself. This is very precise up to about 100Hz
+sampling rate (10ms sampling interval).
 
-If you use a pin more often, it can be worth it to use the ``get_pin`` method
+If you use a pin more often, it can be worth using the ``get_pin`` method
 of the board. It let's you specify what pin you need by a string, composed of
 'a' or 'd' (depending on wether you need an analog or digital pin), the pin
 number, and the mode ('i' for input, 'o' for output, 'p' for pwm). All
@@ -88,3 +93,9 @@ for the Mega for example::
     ...         'use_ports' : True,
     ...         'disabled' : (0, 1, 14, 15) # Rx, Tx, Crystal
     ...         }
+
+Credits
+=======
+
+The original pyFirmata has been written by Tino de Bruijn.
+The realtime sampling / callback has been added by Bernd Porr.
