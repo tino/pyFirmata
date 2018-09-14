@@ -16,7 +16,7 @@ class AnalogPrinter:
 
     def start(self):
         self.board.analog[0].register_callback(self.myPrintCallback)
-        self.board.samplingOn(self.samplingRate)
+        self.board.samplingOn(1000 / self.samplingRate)
         self.board.analog[0].enable_reporting()
 
     def myPrintCallback(self, data):

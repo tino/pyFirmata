@@ -34,9 +34,6 @@ import pyfirmata
 # On Windows: \\.\COM1, \\.\COM2
 PORT = '/dev/ttyACM0'
 
-# Definition of the analog pin
-PINS = (0, 1, 2, 3)
-
 # Creates a new board
 board = pyfirmata.Arduino(PORT)
 print("Setting up the connection to the board ...")

@@ -48,9 +48,9 @@ To switch on data acquisition from the inputs of the board run::
     >>> board.samplingOn()
 
 and they will be updated approximately every 19ms. Or enable sampling
-with the exact sampling rate (max 100Hz)::
+with the exact sampling interval (min 10ms)::
 
-    >>> board.samplingOn(samplingrate in Hz)
+    >>> board.samplingOn(samplinginterval in ms)
 
 The individual analoge pins are enabled / read by:
 
@@ -58,14 +58,13 @@ The individual analoge pins are enabled / read by:
     >>> board.analog[0].read()
     0.661440304938
 
-In order to get the data at the given sampling rate you can register a callback
+In order to get the data at the given sampling interval register a callback
 handler::
   
     >>> board.analog[0].register_callback(myCallback)
     
 where myCallback(data) is then called every time when data has been received
-and is timed by the arduino itself so is very precise of up about 100Hz
-sampling rate.
+and is timed by the arduino itself.
 
 If you use a pin more often, it can be worth it to use the ``get_pin`` method
 of the board. It let's you specify what pin you need by a string, composed of

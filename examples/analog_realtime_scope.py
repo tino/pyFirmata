@@ -57,7 +57,7 @@ board = Arduino('/dev/ttyACM0')
 samplingRate = 50
 
 # Set the sampling rate in the Arduino
-board.samplingOn(samplingRate)
+board.samplingOn(1000 / samplingRate)
 
 # Register the callback which adds the data to the animated plot
 board.analog[0].register_callback(realtimePlotWindow.addData)

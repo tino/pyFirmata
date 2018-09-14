@@ -38,9 +38,9 @@ To switch on data acquisition from the inputs of the board run::
     >>> board.samplingOn()
 
 and they will be updated approximately every 19ms. Or enable sampling
-with the exact sampling rate::
+with the exact sampling interval (min 10ms)::
 
-    >>> board.samplingOn(samplingrate in Hz)
+    >>> board.samplingOn(samplinginterval in ms)
 
 The individual analoge pins are enabled / read by:
 
@@ -48,15 +48,20 @@ The individual analoge pins are enabled / read by:
     >>> board.analog[0].read()
     0.661440304938
 
-In order to get the data at the given sampling rate you can register a callback
+In order to get the data at the given sampling interval register a callback
 handler::
   
     >>> board.analog[0].register_callback(myCallback)
     
 where myCallback(data) is then called every time when data has been received
-and is timed by the arduino itself so is very precise.
+and is timed by the arduino itself.
 
-If you use a pin more often, it can be worth it to use the ``get_pin`` method of the board. It let's you specify what pin you need by a string, composed of 'a' or 'd' (depending on wether you need an analog or digital pin), the pin number, and the mode ('i' for input, 'o' for output, 'p' for pwm). All seperated by ``:``. Eg. ``a:0:i`` for analog 0 as input, or ``d:3:p`` for digital pin 3 as pwm.::
+If you use a pin more often, it can be worth it to use the ``get_pin`` method
+of the board. It let's you specify what pin you need by a string, composed of
+'a' or 'd' (depending on wether you need an analog or digital pin), the pin
+number, and the mode ('i' for input, 'o' for output, 'p' for pwm). All
+seperated by ``:``. Eg. ``a:0:i`` for analog 0 as input or ``d:3:p`` for
+digital pin 3 as pwm.::
 
     >>> analog_0 = board.get_pin('a:0:i')
     >>> analog_0.read()

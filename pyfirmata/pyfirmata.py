@@ -165,10 +165,10 @@ class Board(object):
         self.add_cmd_handler(REPORT_VERSION, self._handle_report_version)
         self.add_cmd_handler(REPORT_FIRMWARE, self._handle_report_firmware)
 
-    def samplingOn(self, sample_rate=50):
+    def samplingOn(self, sample_interval = 50):
         # enables sampling
         if not self.samplerThread.running:
-            self.setSamplingRate(sample_rate)
+            self.setSamplingInterval(sample_interval)
             self.samplerThread.start()
 
     def samplingOff(self):
@@ -341,8 +341,8 @@ class Board(object):
         self.digital[pin]._mode = SERVO
         self.digital[pin].write(angle)
 
-    def setSamplingRate(self, rateInHz):
-        data = to_two_bytes(int(1000 / rateInHz))
+    def setSamplingInterval(self, interval_in_ms):
+        data = to_two_bytes(int(interval_in_ms))
         self.send_sysex(SAMPLING_INTERVAL, data)
 
     def exit(self):
