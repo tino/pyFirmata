@@ -1,21 +1,30 @@
-=========
-pyFirmata
-=========
+==========
+pyFirmata2
+==========
 
-pyFirmata2 is a Python interface for the `Firmata`_ protocol. It is fully
-compatible with Firmata 2.1, and has some functionality of version 2.2.
-It runs on Python 2.7, 3.3, 3.4, 3.5 and 3.6
+PyFirmata2 is an API which allows you to sample directly
+analogue and digital data from the ports of your Arduino without
+writing any C code. Just upload the default firmata sketch
+into your Arduino and you are all set.
+
+The Python API is fully compatible with Firmata 2.1, and has some
+functionality of version 2.2. It runs on Python 2.7, 3.3, 3.4, 3.5
+and 3.6
 
 .. _Firmata: http://firmata.org
 
-This is an updated version where you can measure at a given sampling
-rate which then allows digital filtering, for example with an realtime
-IIR filter.
+pyFirmata2 is an updated version of pyFirmata where you can
+measure at a given sampling rate which then allows digital
+filtering, for example with an realtime IIR filter.
+
 
 Installation
 ============
 
-The preferred way to install is with pip_::
+First upload the standard firmata sketch into your Arduino with
+File -> Examples -> Firmata -> Standard Firmata.
+
+Then install pyFirmata2. The preferred way to install is with pip_::
 
     pip3 install pyfirmata2
 
@@ -43,9 +52,8 @@ To switch on contious data acquisition from the inputs of the board run::
 
     >>> board.samplingOn()
 
-and they will be updated approximately every 19ms. To enable sampling
-with the exact sampling interval (min 10ms) use the optional argument
-of samplingOn::
+To enable sampling at the exact sampling interval (min 10ms)
+use the optional argument of samplingOn::
 
     >>> board.samplingOn(samplinginterval in ms)
 
@@ -61,7 +69,7 @@ handler::
     >>> board.analog[0].register_callback(myCallback)
     
 where myCallback(data) is then called every time when data has been received
-and is timed by the arduino itself. This is very precise up to about 100Hz
+and is timed by the arduino itself. This is very precise up to 100Hz
 sampling rate (10ms sampling interval).
 
 If you use a pin more often, it can be worth using the ``get_pin`` method
