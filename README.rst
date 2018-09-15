@@ -2,8 +2,8 @@
 pyFirmata2
 ==========
 
-PyFirmata2 is an API which allows you to sample directly
-analogue and digital data from the ports of your Arduino without
+PyFirmata2 is an API which allows you to sample
+analogue and digital ports of your Arduino without
 writing any C code. Just upload the default firmata sketch
 into your Arduino and you are all set.
 
@@ -15,7 +15,7 @@ and 3.6
 
 pyFirmata2 is an updated version of pyFirmata where you can
 measure at a given sampling rate which then allows digital
-filtering, for example with an realtime IIR filter.
+filtering, for example with a realtime IIR filter.
 
 
 Installation
@@ -42,18 +42,16 @@ need to have `setuptools`_ installed::
 Usage
 =====
 
-Basic usage::
+Initialisation::
 
     >>> from pyfirmata import Arduino
     >>> board = Arduino('/dev/tty.usbserial-A6008rIF')
+
+Writing to a digital pin::
+  
     >>> board.digital[13].write(1)
 
-To switch on contious data acquisition from the inputs of the board run::
-
-    >>> board.samplingOn()
-
-To enable sampling at the exact sampling interval (min 10ms)
-use the optional argument of samplingOn::
+Starting sampling at a given sampling interval (min 10ms)::
 
     >>> board.samplingOn(samplinginterval in ms)
 
@@ -64,13 +62,13 @@ The individual analoge pins are enabled / read by:
     0.661440304938
 
 In order to process the data at the given sampling interval register a callback
-handler::
+handler and then enable it::
   
     >>> board.analog[0].register_callback(myCallback)
+    >>> board.analog[0].enable_reporting()
     
-where myCallback(data) is then called every time when data has been received
-and is timed by the arduino itself. This is very precise up to 100Hz
-sampling rate (10ms sampling interval).
+where myCallback(data) is then called every time after data has been received
+and is timed by the arduino itself.
 
 If you use a pin more often, it can be worth using the ``get_pin`` method
 of the board. It let's you specify what pin you need by a string, composed of
@@ -84,6 +82,15 @@ digital pin 3 as pwm.::
     0.661440304938
     >>> pin3 = board.get_pin('d:3:p')
     >>> pin3.write(0.6)
+
+
+Example code
+============
+
+The subdirectory examples contains a realtime Oscillsocope,
+a digital port reader and a program which prints data using
+the backback function.
+
 
 Board layout
 ============
