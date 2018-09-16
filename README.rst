@@ -81,8 +81,9 @@ handler and then enable it::
     >>> board.analog[0].register_callback(myCallback)
     >>> board.analog[0].enable_reporting()
     
-where myCallback(data) is then called every time after data has been received
+where `myCallback(data)` is then called every time after data has been received
 and is timed by the arduino itself.
+
 
 If you are not interested in the timing you can read
 the analoge value of a port any time by issuing a read
@@ -93,7 +94,8 @@ command:
     0.661440304938
 
 Still, the value will only be updated at the given sampling rate.
-    
+
+
 If you use a pin more often, it can be worth using the ``get_pin`` method
 of the board. It let's you specify what pin you need by a string, composed of
 'a' or 'd' (depending on wether you need an analog or digital pin), the pin
