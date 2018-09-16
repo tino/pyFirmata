@@ -120,10 +120,41 @@ digital pin 3 as pwm.::
 Example code
 ============
 
-The subdirectory ``examples`` contains
-a *realtime oscillsocope* with *realtime filtering*,
-a *digital port reader* and
-a program which *prints samples to stdout* using the callback handler.
+The subdirectory ``examples`` on github
+(https://github.com/berndporr/pyFirmata2) contains the demo programs.
+Here is a list with a short description::
+
+Realtime oscillsocope with realtime filtering
+---------------------------------------------
+
+The animation function of matplotlib is used to create
+scrolling animated plotwindow displaying the data. This
+is implemented as a class so that it's easy to add more plot
+windows for other channels. If you want to plot more channels
+in the same window then just use the read() function within the
+handler to read the other pins.
+
+Digital port reader
+-------------------
+
+This demo reads a digital port in a loop with a delay. This
+won't give precise timing but is OK for simple tasks.
+
+Analogue data printer
+---------------------
+
+A program which *prints samples to stdout* using the callback handler.
+The program as it is can be used to pipe data into a file and
+then plotted with gnuplot for example.
+
+
+Flashing LED
+------------
+
+Simplest case scenario where the internal LED on the Arduino
+is switched on/off using the delay function of the pyfirmata2 library.
+Here, sampling is switched off and the timing is only approximately
+given because of the unreliable delay.
 
 
 Board layout
