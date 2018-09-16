@@ -21,10 +21,17 @@ filtering, for example with a realtime IIR filter.
 Installation
 ============
 
-First upload the standard firmata sketch into your Arduino with
+1. Upload firmata
+-----------------
+
+Upload the standard firmata sketch into your Arduino with
 File -> Examples -> Firmata -> Standard Firmata.
 
-Then install pyFirmata2. The preferred way to install is with pip_::
+
+2. Install pyfirmata
+--------------------
+
+The preferred way to install is with pip_::
 
     pip3 install pyfirmata2
 
@@ -42,24 +49,31 @@ need to have `setuptools`_ installed::
 Usage
 =====
 
-Initialisation::
+Initialisation
+--------------
+
+Specify serial USB port in the constructor of `Arduino`::
 
     >>> from pyfirmata import Arduino
-    >>> board = Arduino('/dev/tty.usbserial-A6008rIF')
+    >>> board = Arduino('/dev/ttyACM0')
 
-Writing to a digital pin::
+Writing to a digital pin
+------------------------
+
+Digital ports can written to any time::
   
     >>> board.digital[13].write(1)
 
-Starting sampling at a given sampling interval (min 10ms)::
+Starting sampling at a given sampling interval
+----------------------------------------------
+
+In order to measure analoge data you need to specify a
+sampling interval in ms. The smallest reliable interval is 10ms.
 
     >>> board.samplingOn(samplinginterval in ms)
 
-The individual analoge pins are enabled / read by:
-
-    >>> board.analog[0].enable_reporting()
-    >>> board.analog[0].read()
-    0.661440304938
+Enabling and reading from individual analoge pins
+-------------------------------------------------
 
 In order to process the data at the given sampling interval register a callback
 handler and then enable it::
@@ -70,6 +84,16 @@ handler and then enable it::
 where myCallback(data) is then called every time after data has been received
 and is timed by the arduino itself.
 
+If you are not interested in the timing you can read
+the analoge value of a port any time by issuing a read
+command:
+
+    >>> board.analog[0].enable_reporting()
+    >>> board.analog[0].read()
+    0.661440304938
+
+Still, the value will only be updated at the given sampling rate.
+    
 If you use a pin more often, it can be worth using the ``get_pin`` method
 of the board. It let's you specify what pin you need by a string, composed of
 'a' or 'd' (depending on wether you need an analog or digital pin), the pin
@@ -87,9 +111,11 @@ digital pin 3 as pwm.::
 Example code
 ============
 
-The subdirectory examples contains a realtime Oscillsocope,
-a digital port reader and a program which prints data using
-the backback function.
+The subdirectory ``examples`` contains::
+  
+1. a realtime Oscillsocope using matplotlib,
+2. a digital port reader and
+3. a program which prints data using the callback handler.
 
 
 Board layout
