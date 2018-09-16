@@ -21,21 +21,22 @@ filtering, for example with a realtime IIR filter.
 Installation
 ============
 
-1. Upload firmata
+
+Upload firmata
 -----------------
 
 Upload the standard firmata sketch into your Arduino with
 File -> Examples -> Firmata -> Standard Firmata.
 
 
-2. Install pyfirmata
+Install pyfirmata
 --------------------
 
 The preferred way to install is with pip_::
 
     pip3 install pyfirmata2
 
-You can also install from source with ``python setup.py install``. You will
+You can also install from source with ``python3 setup.py install``. You will
 need to have `setuptools`_ installed::
 
     git clone https://github.com/berndporr/pyFirmata2
@@ -116,11 +117,10 @@ digital pin 3 as pwm.::
 Example code
 ============
 
-The subdirectory ``examples`` contains::
-  
-1. a realtime Oscillsocope using matplotlib,
-2. a digital port reader and
-3. a program which prints data using the callback handler.
+The subdirectory ``examples`` contains
+a realtime Oscillsocope using matplotlib,
+a digital port reader and
+a program which prints data using the callback handler.
 
 
 Board layout

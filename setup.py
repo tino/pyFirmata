@@ -7,7 +7,7 @@ with open('README.rst') as f:
 
 setup(
     name='pyFirmata2',
-    version='0.9.1',
+    version='0.9.3',
     description="A realtime Python interface for the Firmata procotol",
     long_description=long_description,
     author='Bernd Porr',

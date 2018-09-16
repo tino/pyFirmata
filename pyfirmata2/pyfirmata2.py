@@ -87,6 +87,7 @@ class Board(object):
     _parsing_sysex = False
 
     def __init__(self, port, layout=None, baudrate=57600, name=None, timeout=None):
+        self.samplerThread = Iterator(self)
         self.sp = serial.Serial(port, baudrate, timeout=timeout)
         # Allow 5 secs for Arduino's auto-reset to happen
         # Alas, Firmata blinks its version before printing it to serial
@@ -108,7 +109,6 @@ class Board(object):
             self.iterate()
         # TODO Test whether we got a firmware name and version, otherwise there
         # probably isn't any Firmata installed
-        self.samplerThread = Iterator(self)
 
     def __str__(self):
         return "Board{0.name} on {0.sp.port}".format(self)
