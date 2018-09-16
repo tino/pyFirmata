@@ -127,12 +127,20 @@ Here is a list with a short description::
 Realtime oscillsocope with realtime filtering
 ---------------------------------------------
 
-The animation function of matplotlib is used to create
+The `animation` function of `matplotlib` is used to create
 scrolling animated plotwindow displaying the data. This
 is implemented as a class so that it's easy to add more plot
 windows for other channels. If you want to plot more channels
-in the same window then just use the read() function within the
+in the same window then just use the `read()` function within the
 handler to read the other pins.
+
+The data is filtered with a 2nd order lowpass filter.
+This is achieved by the `scipy` filter
+functions `lfilter` and `butter`. Note the cumbersome use
+of these filters to establish a realtime filter. Their
+internal states are not kept from time step to time step
+so they need to be fed back into the filter every timestep.
+
 
 Digital port reader
 -------------------
