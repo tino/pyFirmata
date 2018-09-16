@@ -53,10 +53,13 @@ Usage
 Initialisation
 --------------
 
-Specify the serial USB port in the constructor of the `Arduino`::
+Specify the serial USB port in the constructor of the ``Arduino`` class::
 
     >>> from pyfirmata import Arduino
     >>> board = Arduino('/dev/ttyACM0')
+
+Under Linux this is usually ``/dev/ttyACM0``. Under Windows it is a
+com port, for example ``COM5``.
 
 Writing to a digital pin
 ------------------------
@@ -89,15 +92,17 @@ where `myCallback(data)` is then called every time after data has been received
 and is timed by the arduino itself.
 
 You can also read the analoge value of a port any time by issuing a read
-command:
+command::
 
     >>> board.analog[0].enable_reporting()
     >>> board.analog[0].read()
     0.661440304938
 
-This is useful for reading additional pins within a callback
-handler.
-
+If timing is not important you can use this approach in a loop.  This
+is also useful for reading additional pins within a callback handler
+to process multiple pins simultaneously. Note that the data obtained
+by ``read()`` is read from an internal buffer which stores the most
+recent value received from the arduino.
 
 If you use a pin more often, it can be worth using the ``get_pin`` method
 of the board. It let's you specify what pin you need by a string, composed of
@@ -118,7 +123,7 @@ Example code
 
 The subdirectory ``examples`` (on github) contains
 a realtime Oscillsocope with realtime filtering,
-a digital port reader and
+a digital port reader, the ubiquitous flashing LED program and
 a program which prints data using the callback handler.
 
 
