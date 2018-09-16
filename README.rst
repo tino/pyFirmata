@@ -139,7 +139,7 @@ This is achieved by the `scipy` filter
 functions `lfilter` and `butter`. Note the cumbersome use
 of these filters to establish a realtime filter. Their
 internal states are not kept from time step to time step
-so they need to be fed back into the filter every timestep.
+so they need to be fed back into the filter every time.
 
 
 Digital port reader
