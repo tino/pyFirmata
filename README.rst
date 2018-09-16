@@ -5,7 +5,7 @@ pyFirmata2
 PyFirmata2 is an API which allows you to sample
 analogue and digital ports of your Arduino without
 writing any C code. Just upload the default firmata sketch
-into your Arduino and you are all set.
+onto your Arduino and you are all set.
 
 The Python API is fully compatible with Firmata 2.1, and has some
 functionality of version 2.2. It runs on Python 2.7, 3.3, 3.4, 3.5
@@ -25,7 +25,7 @@ Installation
 Upload firmata
 -----------------
 
-Upload the standard firmata sketch into your Arduino with
+Upload the standard firmata sketch onto your Arduino with
 File -> Examples -> Firmata -> Standard Firmata.
 
 
@@ -53,7 +53,7 @@ Usage
 Initialisation
 --------------
 
-Specify serial USB port in the constructor of `Arduino`::
+Specify the serial USB port in the constructor of `Arduino`::
 
     >>> from pyfirmata import Arduino
     >>> board = Arduino('/dev/ttyACM0')
@@ -61,43 +61,46 @@ Specify serial USB port in the constructor of `Arduino`::
 Writing to a digital pin
 ------------------------
 
-Digital ports can written to any time::
+Digital ports can written to at any time::
   
     >>> board.digital[13].write(1)
 
 Starting sampling at a given sampling interval
 ----------------------------------------------
 
-In order to measure analoge data you need to specify a
-sampling interval in ms. The smallest reliable interval is 10ms.
+To measure analoge data you need to specify a
+sampling interval in ms:: 
 
     >>> board.samplingOn(samplinginterval in ms)
 
-Calling `samplingOn()` without its argument sets
+The smallest reliable interval is 10ms.
+Calling just `samplingOn()` without its argument sets
 the sampling interval to 19ms.
 
 Enabling and reading from individual analoge pins
 -------------------------------------------------
 
-In order to process the data at the given sampling interval register a callback
+To process the data at the given sampling interval register a callback
 handler and then enable it::
   
     >>> board.analog[0].register_callback(myCallback)
     >>> board.analog[0].enable_reporting()
     
-where `myCallback(data)` is then called every time after data has been received
-and is timed by the arduino itself.
+where `myCallback(data)` is then called at the given sampling rate
+with the received data.
 
-
-If you are not interested in the timing you can read
-the analoge value of a port any time by issuing a read
-command:
+The value of any enabled pin is also stored internally and
+you can read its value with the `read()` method any time::
 
     >>> board.analog[0].enable_reporting()
     >>> board.analog[0].read()
     0.661440304938
 
-Still, the value will only be updated at the given sampling rate.
+This allows you to read it within a loop or you can read
+additional pins in an event handler if you want to
+sample from more than one analoge/digital pin at the same time. For
+example you could register an event handler for the analogue pin
+0 and then in the event handler read the other analogue pins 1 and 2.
 
 
 If you use a pin more often, it can be worth using the ``get_pin`` method
@@ -118,9 +121,9 @@ Example code
 ============
 
 The subdirectory ``examples`` contains
-a realtime Oscillsocope using matplotlib,
-a digital port reader and
-a program which prints data using the callback handler.
+a *realtime oscillsocope* with *realtime filtering*,
+a *digital port reader* and
+a program which *prints samples to stdout* using the callback handler.
 
 
 Board layout

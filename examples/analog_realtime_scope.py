@@ -2,7 +2,7 @@ from pyfirmata2 import Arduino
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-
+from scipy import signal as signal
 
 # Realtime oscilloscope at a sampling rate of 50Hz
 # It displays analog channel 0.
@@ -47,20 +47,33 @@ class RealtimePlotWindow:
 
 
 # Create an instance of an animated scrolling window
-# To plot more channels just create more instances
+# To plot more channels just create more instances and add callback handlers below
 realtimePlotWindow = RealtimePlotWindow()
-
-# Get the Ardunio board
-board = Arduino('/dev/ttyACM0')
 
 # sampling rate: 50Hz
 samplingRate = 50
+
+# create a 2nd order Butterworth lowpass with
+# cutoff frequency at = 10 Hz and a gain of 5
+cutoff = 10
+gain = 5
+lp_b, lp_a = signal.butter(2, cutoff/samplingRate*2.0)
+lp_b = lp_b * gain
+lp_z = signal.lfiltic(lp_b, lp_a, [0])
+
+# our callback where we filter the data
+def callBack(data):
+    data, bp_z = signal.lfilter(lp_b, lp_a, [data], zi=lp_z)
+    realtimePlotWindow.addData(data)
+
+# Get the Ardunio board
+board = Arduino('/dev/ttyACM0')
 
 # Set the sampling rate in the Arduino
 board.samplingOn(1000 / samplingRate)
 
 # Register the callback which adds the data to the animated plot
-board.analog[0].register_callback(realtimePlotWindow.addData)
+board.analog[0].register_callback(callBack)
 
 # Enable the callback
 board.analog[0].enable_reporting()

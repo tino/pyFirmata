@@ -7,8 +7,8 @@ with open('README.rst') as f:
 
 setup(
     name='pyFirmata2',
-    version='0.9.3',
-    description="A realtime Python interface for the Firmata procotol",
+    version='0.9.4',
+    description="Use your Arduino as a data acquisition card",
     long_description=long_description,
     author='Bernd Porr',
     author_email='mail@berndporr.me.uk',
