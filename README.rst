@@ -72,6 +72,9 @@ sampling interval in ms. The smallest reliable interval is 10ms.
 
     >>> board.samplingOn(samplinginterval in ms)
 
+Calling `samplingOn()` without its argument sets
+the sampling interval to 19ms.
+
 Enabling and reading from individual analoge pins
 -------------------------------------------------
 
