@@ -26,7 +26,7 @@ Upload firmata
 -----------------
 
 Upload the standard firmata sketch into your Arduino with
-File -> Examples -> Firmata -> Standard Firmata.
+``File -> Examples -> Firmata -> Standard Firmata``.
 
 
 Install pyfirmata
@@ -53,7 +53,7 @@ Usage
 Initialisation
 --------------
 
-Specify serial USB port in the constructor of `Arduino`::
+Specify the serial USB port in the constructor of the `Arduino`::
 
     >>> from pyfirmata import Arduino
     >>> board = Arduino('/dev/ttyACM0')
@@ -61,25 +61,25 @@ Specify serial USB port in the constructor of `Arduino`::
 Writing to a digital pin
 ------------------------
 
-Digital ports can written to any time::
+Digital ports can be written to at any time::
   
     >>> board.digital[13].write(1)
 
 Starting sampling at a given sampling interval
 ----------------------------------------------
 
-In order to measure analoge data you need to specify a
+In order to sample analoge data you need to specify a
 sampling interval in ms. The smallest reliable interval is 10ms.
 
     >>> board.samplingOn(samplinginterval in ms)
 
-Calling `samplingOn()` without its argument sets
+Calling ``samplingOn()`` without its argument sets
 the sampling interval to 19ms.
 
 Enabling and reading from individual analoge pins
 -------------------------------------------------
 
-In order to process the data at the given sampling interval register a callback
+To process the data at the given sampling interval register a callback
 handler and then enable it::
   
     >>> board.analog[0].register_callback(myCallback)
@@ -88,16 +88,14 @@ handler and then enable it::
 where `myCallback(data)` is then called every time after data has been received
 and is timed by the arduino itself.
 
-
-If you are not interested in the timing you can read
-the analoge value of a port any time by issuing a read
+You can also read the analoge value of a port any time by issuing a read
 command:
 
     >>> board.analog[0].enable_reporting()
     >>> board.analog[0].read()
     0.661440304938
 
-This is also useful for reading additional pins within a callback
+This is useful for reading additional pins within a callback
 handler.
 
 
@@ -118,7 +116,7 @@ digital pin 3 as pwm.::
 Example code
 ============
 
-The subdirectory ``examples`` contains
+The subdirectory ``examples`` (on github) contains
 a realtime Oscillsocope with realtime filtering,
 a digital port reader and
 a program which prints data using the callback handler.
