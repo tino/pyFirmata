@@ -105,7 +105,7 @@ by ``read()`` is read from an internal buffer which stores the most
 recent value received from the arduino.
 
 If you use a pin more often, it can be worth using the ``get_pin`` method
-of the board. It let's you specify what pin you need by a string, composed of
+of the board. It lets you specify what pin you need by a string, composed of
 'a' or 'd' (depending on wether you need an analog or digital pin), the pin
 number, and the mode ('i' for input, 'o' for output, 'p' for pwm). All
 seperated by ``:``. Eg. ``a:0:i`` for analog 0 as input or ``d:3:p`` for
