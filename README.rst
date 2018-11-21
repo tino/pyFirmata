@@ -37,7 +37,7 @@ The preferred way to install is with `pip` / `pip3`. Under Linux::
     pip3 install pyfirmata2
 
     
-and under Windows type::
+and under Windows/Mac type::
   
     pip install pyfirmata2
 
@@ -51,7 +51,7 @@ Under Linux type::
   
     python3 setup.py install
 
-Under Windows::
+Under Windows / Mac::
 
     python setup.py install
 
