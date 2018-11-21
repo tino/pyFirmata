@@ -29,22 +29,31 @@ Upload the standard firmata sketch into your Arduino with
 ``File -> Examples -> Firmata -> Standard Firmata``.
 
 
-Install pyfirmata
---------------------
+Install pyfirmata2
+------------------
 
-The preferred way to install is with pip_::
+The preferred way to install is with `pip` / `pip3`. Under Linux::
 
     pip3 install pyfirmata2
 
-You can also install from source with ``python3 setup.py install``. You will
-need to have `setuptools`_ installed::
+    
+and under Windows type::
+  
+    pip install pyfirmata2
+
+    
+You can also install from source with::
 
     git clone https://github.com/berndporr/pyFirmata2
     cd pyFirmata2
+
+Under Linux type::
+  
     python3 setup.py install
 
-.. _pip: http://www.pip-installer.org/en/latest/
-.. _setuptools: https://pypi.python.org/pypi/setuptools
+Under Windows::
+
+    python setup.py install
 
 
 Usage
@@ -60,6 +69,7 @@ Specify the serial USB port in the constructor of the ``Arduino`` class::
 
 Under Linux this is usually ``/dev/ttyACM0``. Under Windows it is a
 COM port, for example ``COM4``. On a MAC it's `/dev/ttys000`.
+
 
 Writing to a digital pin
 ------------------------
