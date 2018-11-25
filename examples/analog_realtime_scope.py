@@ -61,12 +61,16 @@ lp_b, lp_a = signal.butter(2, cutoff/samplingRate*2.0)
 lp_b = lp_b * gain
 lp_z = signal.lfiltic(lp_b, lp_a, [0])
 
-# our callback where we filter the data
+# called for every new sample which has arrived from the Arduino
 def callBack(data):
+    # IIR filter receiving the data sample by sample.
+    # The use of lfilter is just a hack.
+    # Please replace by a proper IIR filter.
     data, bp_z = signal.lfilter(lp_b, lp_a, [data], zi=lp_z)
+    # send the sample to the plotwindow
     realtimePlotWindow.addData(data)
 
-# Get the Ardunio board
+# Get the Ardunio board. Replace serial port with name on your computer.
 board = Arduino('/dev/ttyACM0')
 
 # Set the sampling rate in the Arduino
