@@ -132,8 +132,8 @@ digital pin 3 as pwm.::
 Example code
 ============
 
-The directory https://github.com/berndporr/pyFirmata2/tree/master/examples contains
-a realtime Oscillsocope with realtime filtering,
+The directory https://github.com/berndporr/pyFirmata2/tree/master/examples 
+contains a realtime Oscillsocope with precise sampling rate,
 a digital port reader, the ubiquitous flashing LED program and
 a program which prints data using the callback handler.
 
