@@ -68,7 +68,8 @@ Specify the serial USB port in the constructor of the ``Arduino`` class::
     >>> board = Arduino('/dev/ttyACM0')
 
 Under Linux this is usually ``/dev/ttyACM0``. Under Windows it is a
-COM port, for example ``COM4``. On a MAC it's `/dev/ttys000`.
+COM port, for example ``COM4``. On a MAC it's `/dev/ttys000`, `/dev/cu.usbmodem14101` or
+check for the latest addition to `/dev/*`.
 
 
 Writing to a digital pin
