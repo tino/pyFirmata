@@ -91,7 +91,8 @@ class Board(object):
     def __init__(self, port, layout=None, baudrate=57600, name=None, timeout=None):
         if port == self.AUTODETECT:
             l = serial.tools.list_ports.comports()
-            port = str(l[0].device)
+            if l:
+                port = str(l[0].device)
         self.samplerThread = Iterator(self)
         self.sp = serial.Serial(port, baudrate, timeout=timeout)
         # Allow 5 secs for Arduino's auto-reset to happen

@@ -62,12 +62,12 @@ Usage
 Initialisation
 --------------
 
-Specify the serial USB port in the constructor of the `Arduino` class::
+Create an instance of the `Arduino` class::
 
     from pyfirmata import Arduino
     board = Arduino(Arduino.AUTODETECT)
 
-which tries to detect automatically the port on the system.
+which tries to connect to the first serial port availale on the system.
 
 If this fails you can also specify the port manually::
 
