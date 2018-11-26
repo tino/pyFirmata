@@ -93,6 +93,10 @@ class Board(object):
             l = serial.tools.list_ports.comports()
             if l:
                 port = str(l[0].device)
+            else:
+                self.samplerThread = None
+                self.sp = None
+                raise Exception('Could not find a serial port.')
         self.samplerThread = Iterator(self)
         self.sp = serial.Serial(port, baudrate, timeout=timeout)
         # Allow 5 secs for Arduino's auto-reset to happen
@@ -179,6 +183,8 @@ class Board(object):
 
     def samplingOff(self):
         # disables sampling
+        if not self.samplerThread:
+            return
         if self.samplerThread.running:
             self.samplerThread.stop()
             self.samplerThread.join()
@@ -360,7 +366,8 @@ class Board(object):
                 if pin.mode == SERVO:
                     pin.mode = OUTPUT
         if hasattr(self, 'sp'):
-            self.sp.close()
+            if self.sp:
+                self.sp.close()
 
     # Command handlers
     def _handle_analog_message(self, pin_nr, lsb, msb):
