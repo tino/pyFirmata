@@ -65,7 +65,13 @@ Initialisation
 Specify the serial USB port in the constructor of the `Arduino` class::
 
     from pyfirmata import Arduino
-    board = Arduino('/dev/ttyACM0')
+    board = Arduino(Arduino.AUTODETECT)
+
+which tries to detect automatically the port on the system.
+
+If this fails you can also specify the port manually::
+
+    board = Arduino('COM4')
 
 Under Linux this is usually `/dev/ttyACM0`. Under Windows it is a
 COM port, for example `COM4`. On a MAC it's `/dev/ttys000`, `/dev/cu.usbmodem14101` or

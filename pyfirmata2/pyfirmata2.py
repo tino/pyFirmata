@@ -4,6 +4,7 @@ import inspect
 import time
 
 import serial
+import serial.tools.list_ports
 
 from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str, Iterator
 
@@ -85,8 +86,12 @@ class Board(object):
     _command = None
     _stored_data = []
     _parsing_sysex = False
+    AUTODETECT = None
 
     def __init__(self, port, layout=None, baudrate=57600, name=None, timeout=None):
+        if port == self.AUTODETECT:
+            l = serial.tools.list_ports.comports()
+            port = str(l[0].device)
         self.samplerThread = Iterator(self)
         self.sp = serial.Serial(port, baudrate, timeout=timeout)
         # Allow 5 secs for Arduino's auto-reset to happen

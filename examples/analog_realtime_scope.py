@@ -58,7 +58,7 @@ def callBack(data):
     realtimePlotWindow.addData(data)
 
 # Get the Ardunio board. Replace serial port with name on your computer.
-board = Arduino('COM5')
+board = Arduino(Arduino.AUTODETECT)
 
 # Set the sampling rate in the Arduino
 board.samplingOn(1000 / samplingRate)
