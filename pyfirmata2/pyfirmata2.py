@@ -98,8 +98,12 @@ class Board(object):
                         if 'ACM' in d.device or 'usbserial' in d.device:
                             port = str(d.device)
                 elif platform == "win32":
-                    sorted(l,reverse=True)
-                    port = str(l[0].device)
+                    comports = []
+                    for d in l:
+                        devname = str(d.device)
+                        comports.append(devname)
+                    comports.sort()
+                    port = comports[0]
                 else:
                     port = str(l[0].device)
         if port == self.AUTODETECT:
