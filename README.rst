@@ -3,7 +3,7 @@ pyFirmata2
 ==========
 
 PyFirmata2 turns your Arduino into a data acquisition card which
-you can directly access from Python without writing any C code.
+you can directly access from Python.
 
 Just upload the default firmata sketch into your Arduino and you are all set.
 
@@ -12,7 +12,7 @@ to the API so that it's possible to filter signals and in general do
 signal processing. Instead of "sleep" commands which have unreliable timing
 the Arduino performs the sampling in its firmware and transmits the data
 then to pyFirmata2. The python application simply registers a callback
-which is then called after new data has arrived from the Arduino.
+which is then called after new data has arrived.
 
 
 Installation
@@ -115,12 +115,12 @@ Digital ports can be written to at any time::
   
     board.digital[13].write(1)
 
+For any other functionality use the pin class.
 
     
 The pin class
 -------------
-If you use a pin more often, it can be worth using the `get_pin` method
-of the board. It lets you specify what pin you need by a string, composed of
+The `get_pin` requests the class of pin by specifying a string, composed of
 'a' or 'd' (depending on wether you need an analog or digital pin), the pin
 number, and the mode ('i' for input, 'o' for output, 'p' for pwm). All
 seperated by `:`. Eg. `a:0:i` for analog 0 as input or `d:3:p` for
