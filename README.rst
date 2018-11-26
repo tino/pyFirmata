@@ -2,20 +2,17 @@
 pyFirmata2
 ==========
 
-PyFirmata2 is an API which allows you to sample
-analogue and digital ports of your Arduino without
-writing any C code. Just upload the default firmata sketch
-into your Arduino and you are all set.
+PyFirmata2 turns your Arduino into a data acquisition card which
+you can directly access from Python without writing any C code.
 
-The Python API is fully compatible with Firmata 2.1, and has some
-functionality of version 2.2. It runs on Python 2.7, 3.3, 3.4, 3.5
-and 3.6
+Just upload the default firmata sketch into your Arduino and you are all set.
 
-.. _Firmata: http://firmata.org
-
-pyFirmata2 is an updated version of pyFirmata where you can
-measure at a given sampling rate which then allows digital
-filtering, for example with a realtime IIR filter.
+pyFirmata2 is an updated version of pyFirmata which adds precise sampling
+to the API so that it's possible to filter signals and in general do
+signal processing. Instead of "sleep" commands which have unreliable timing
+the Arduino performs the sampling in its firmware and transmits the data
+then to pyFirmata2. The python application simply registers a callback
+which is then called after new data has arrived from the Arduino.
 
 
 Installation
@@ -64,20 +61,13 @@ Initialisation
 
 Specify the serial USB port in the constructor of the ``Arduino`` class::
 
-    >>> from pyfirmata import Arduino
-    >>> board = Arduino('/dev/ttyACM0')
+    from pyfirmata import Arduino
+    board = Arduino('/dev/ttyACM0')
 
-Under Linux this is usually ``/dev/ttyACM0``. Under Windows it is a
-COM port, for example ``COM4``. On a MAC it's `/dev/ttys000`, `/dev/cu.usbmodem14101` or
+Under Linux this is usually `/dev/ttyACM0`. Under Windows it is a
+COM port, for example `COM4`. On a MAC it's `/dev/ttys000`, `/dev/cu.usbmodem14101` or
 check for the latest addition to `/dev/*`.
 
-
-Writing to a digital pin
-------------------------
-
-Digital ports can be written to at any time::
-  
-    >>> board.digital[13].write(1)
 
 Starting sampling at a given sampling interval
 ----------------------------------------------
@@ -85,19 +75,20 @@ Starting sampling at a given sampling interval
 In order to sample analoge data you need to specify a
 sampling interval in ms. The smallest reliable interval is 10ms.
 
-    >>> board.samplingOn(samplinginterval in ms)
+    board.samplingOn(samplinginterval in ms)
 
 Calling ``samplingOn()`` without its argument sets
 the sampling interval to 19ms.
 
-Enabling and reading from individual analoge pins
+
+Enabling and reading from an analoge pins
 -------------------------------------------------
 
 To process the data at the given sampling interval register a callback
 handler and then enable it::
   
-    >>> board.analog[0].register_callback(myCallback)
-    >>> board.analog[0].enable_reporting()
+    board.analog[0].register_callback(myCallback)
+    board.analog[0].enable_reporting()
     
 where `myCallback(data)` is then called every time after data has been received
 and is timed by the arduino itself.
@@ -105,16 +96,28 @@ and is timed by the arduino itself.
 You can also read the analoge value of a port any time by issuing a read
 command::
 
-    >>> board.analog[0].enable_reporting()
-    >>> board.analog[0].read()
+    board.analog[0].enable_reporting()
+    board.analog[0].read()
     0.661440304938
 
-If timing is not important you can use this approach in a loop.  This
-is also useful for reading additional pins within a callback handler
+This is useful for reading additional pins within a callback handler
 to process multiple pins simultaneously. Note that the data obtained
 by ``read()`` is read from an internal buffer which stores the most
-recent value received from the arduino.
+recent value received from the Arduino.
 
+
+
+Writing to a digital port
+-------------------------
+
+Digital ports can be written to at any time::
+  
+    board.digital[13].write(1)
+
+
+    
+The pin class
+-------------
 If you use a pin more often, it can be worth using the ``get_pin`` method
 of the board. It lets you specify what pin you need by a string, composed of
 'a' or 'd' (depending on wether you need an analog or digital pin), the pin
