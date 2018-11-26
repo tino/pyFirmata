@@ -1,12 +1,6 @@
 from .boards import BOARDS
 from .pyfirmata2 import *  # NOQA
 
-# TODO: should change above import to an explicit list, but people might rely on
-# it, so do it in a backwards breaking release
-
-__version__ = '0.9.9'
-
-
 # shortcut classes
 
 class Arduino(Board):
