@@ -33,6 +33,7 @@ import pyfirmata2
 # On Linux: /dev/tty.usbserial-A6008rIF, /dev/ttyACM0,
 # On Windows: \\.\COM1, \\.\COM2
 PORT = '/dev/ttyACM0'
+# try PORT = Arduino.AUTODETECT
 
 # Creates a new board
 board = pyfirmata2.Arduino(PORT)
