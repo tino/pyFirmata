@@ -3,7 +3,7 @@ pyFirmata2
 ==========
 
 PyFirmata2 turns your Arduino into a data acquisition card which
-you can directly access from Python.
+you can directly program with Python.
 
 Just upload the default firmata sketch into your Arduino and you are all set.
 
@@ -120,7 +120,8 @@ For any other functionality use the pin class.
     
 The pin class
 -------------
-The `get_pin` requests the class of pin by specifying a string, composed of
+The command `get_pin` requests the class of a pin
+by specifying a string, composed of
 'a' or 'd' (depending on wether you need an analog or digital pin), the pin
 number, and the mode ('i' for input, 'o' for output, 'p' for pwm). All
 seperated by `:`. Eg. `a:0:i` for analog 0 as input or `d:3:p` for
