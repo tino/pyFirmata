@@ -10,6 +10,9 @@ import matplotlib.animation as animation
 # callbacks from the other channels.
 
 
+PORT = Arduino.AUTODETECT
+# PORT = 'COM4' or '/dev/ttyUSB' etc. See documentation.
+
 # Creates a scrolling data display
 class RealtimePlotWindow:
 
@@ -57,8 +60,8 @@ def callBack(data):
     # send the sample to the plotwindow
     realtimePlotWindow.addData(data)
 
-# Get the Ardunio board. Replace serial port with name on your computer.
-board = Arduino(Arduino.AUTODETECT)
+# Get the Ardunio board.
+board = Arduino(PORT)
 
 # Set the sampling rate in the Arduino
 board.samplingOn(1000 / samplingRate)
