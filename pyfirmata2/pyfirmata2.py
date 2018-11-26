@@ -5,6 +5,7 @@ import time
 
 import serial
 import serial.tools.list_ports
+from sys import platform
 
 from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str, Iterator
 
@@ -92,11 +93,19 @@ class Board(object):
         if port == self.AUTODETECT:
             l = serial.tools.list_ports.comports()
             if l:
-                port = str(l[0].device)
-            else:
-                self.samplerThread = None
-                self.sp = None
-                raise Exception('Could not find a serial port.')
+                if platform == "linux" or platform == "linux2":
+                    for d in l:
+                        if 'ACM' in d.device or 'usbserial' in d.device:
+                            port = str(d.device)
+                elif platform == "win32":
+                    sorted(l,reverse=True)
+                    port = str(l[0].device)
+                else:
+                    port = str(l[0].device)
+        if port == self.AUTODETECT:
+            self.samplerThread = None
+            self.sp = None
+            raise Exception('Could not find a serial port.')
         self.samplerThread = Iterator(self)
         self.sp = serial.Serial(port, baudrate, timeout=timeout)
         # Allow 5 secs for Arduino's auto-reset to happen
