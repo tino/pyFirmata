@@ -73,7 +73,7 @@ Starting sampling at a given sampling interval
 ----------------------------------------------
 
 In order to sample analoge data you need to specify a
-sampling interval in ms. The smallest reliable interval is 10ms.
+sampling interval in ms. The smallest reliable interval is 10ms::
 
     board.samplingOn(samplinginterval in ms)
 
@@ -98,7 +98,6 @@ command::
 
     board.analog[0].enable_reporting()
     board.analog[0].read()
-    0.661440304938
 
 This is useful for reading additional pins within a callback handler
 to process multiple pins simultaneously. Note that the data obtained
@@ -125,11 +124,10 @@ number, and the mode ('i' for input, 'o' for output, 'p' for pwm). All
 seperated by ``:``. Eg. ``a:0:i`` for analog 0 as input or ``d:3:p`` for
 digital pin 3 as pwm.::
 
-    >>> analog_0 = board.get_pin('a:0:i')
-    >>> analog_0.read()
-    0.661440304938
-    >>> pin3 = board.get_pin('d:3:p')
-    >>> pin3.write(0.6)
+    analog_0 = board.get_pin('a:0:i')
+    analog_0.read()
+    pin3 = board.get_pin('d:3:p')
+    pin3.write(0.6)
 
 
 Example code
@@ -150,13 +148,13 @@ or the Arduino Mega (for which there exist the shortcut classes
 class with a dictionary as the ``layout`` argument. This is the layout dict
 for the Mega for example::
 
-    >>> mega = {
-    ...         'digital' : tuple(x for x in range(54)),
-    ...         'analog' : tuple(x for x in range(16)),
-    ...         'pwm' : tuple(x for x in range(2,14)),
-    ...         'use_ports' : True,
-    ...         'disabled' : (0, 1, 14, 15) # Rx, Tx, Crystal
-    ...         }
+    mega = {
+             'digital' : tuple(x for x in range(54)),
+             'analog' : tuple(x for x in range(16)),
+             'pwm' : tuple(x for x in range(2,14)),
+             'use_ports' : True,
+             'disabled' : (0, 1, 14, 15) # Rx, Tx, Crystal
+             }
 
 Credits
 =======
