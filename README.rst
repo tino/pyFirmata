@@ -2,8 +2,7 @@
 pyFirmata2
 ==========
 
-PyFirmata2 turns your Arduino into a data acquisition card which
-you can directly program with Python.
+PyFirmata2 turns your Arduino into a data acquisition card controlled by Python.
 
 Just upload the default firmata sketch into your Arduino and you are all set.
 
@@ -12,7 +11,7 @@ to the API so that it's possible to filter signals and in general do
 signal processing. Instead of "sleep" commands which have unreliable timing
 the Arduino performs the sampling in its firmware and transmits the data
 then to pyFirmata2. The python application simply registers a callback
-which is then called after new data has arrived.
+which is then called every time after new data has arrived.
 
 
 Installation
@@ -69,20 +68,20 @@ Create an instance of the `Arduino` class::
 
 which automatically detects the serial port of the Arduino.
 
-If this fails you can also specify the serial port manually::
+If this fails you can also specify the serial port manually, for example::
 
     board = Arduino('COM4')
 
-Under Linux this is usually `/dev/ttyACM0`. Under Windows it is a
+Under Linux this is usually `/dev/ttyACM0`. Under Windows this is a
 COM port, for example `COM4`. On a MAC it's `/dev/ttys000`, `/dev/cu.usbmodem14101` or
-check for the latest addition to `/dev/*`.
+check for the latest addition: `ls -l -t /dev/*`.
 
 
 Starting sampling at a given sampling interval
 ----------------------------------------------
 
-In order to sample analoge data you need to specify a
-sampling interval in ms. The smallest reliable interval is 10ms::
+In order to sample analogue data you need to specify a
+sampling interval in ms. The smallest reliable interval is roughly 10ms::
 
     board.samplingOn(samplinginterval in ms)
 
@@ -93,7 +92,7 @@ the sampling interval to 19ms.
 Enabling and reading from an analoge pins
 -------------------------------------------------
 
-To process the data at the given sampling interval register a callback
+To process data at a given sampling interval register a callback
 handler and then enable it::
   
     board.analog[0].register_callback(myCallback)
@@ -102,7 +101,7 @@ handler and then enable it::
 where `myCallback(data)` is then called every time after data has been received
 and is timed by the arduino itself.
 
-You can also read the analoge value of a port any time by issuing a read
+You can also read an analoge value of a port any time by issuing a read
 command::
 
     board.analog[0].read()
@@ -110,7 +109,7 @@ command::
 This is useful for reading additional pins within a callback handler
 to process multiple pins simultaneously. Note that the data obtained
 by `read()` is read from an internal buffer which stores the most
-recent value received from the Arduino.
+recent value received from the Arduino. This call is non-blocking.
 
 
 
@@ -121,7 +120,7 @@ Digital ports can be written to at any time::
   
     board.digital[13].write(1)
 
-For any other functionality use the pin class.
+For any other functionality use the pin class below.
 
     
 The pin class
