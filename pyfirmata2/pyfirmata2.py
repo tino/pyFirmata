@@ -100,12 +100,15 @@ class Board(object):
                 elif platform == "win32":
                     comports = []
                     for d in l:
-                        devname = str(d.device)
-                        comports.append(devname)
+                        if d.vid:
+                            devname = str(d.device)
+                            comports.append(devname)
                     comports.sort()
                     port = comports[0]
                 else:
-                    port = str(l[0].device)
+                    for d in l:
+                        if d.vid:
+                            port = str(d.device)
         if port == self.AUTODETECT:
             self.samplerThread = None
             self.sp = None
