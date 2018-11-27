@@ -67,9 +67,9 @@ Create an instance of the `Arduino` class::
     from pyfirmata import Arduino
     board = Arduino(Arduino.AUTODETECT)
 
-which tries to connect to the first serial port availale on the system.
+which automatically detects the serial port of the Arduino.
 
-If this fails you can also specify the port manually::
+If this fails you can also specify the serial port manually::
 
     board = Arduino('COM4')
 
