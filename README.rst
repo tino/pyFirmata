@@ -81,7 +81,7 @@ Starting sampling at a given sampling interval
 ----------------------------------------------
 
 In order to sample analogue data you need to specify a
-sampling interval in ms. The smallest reliable interval is roughly 10ms::
+sampling interval in ms. The smallest interval is 10ms::
 
     board.samplingOn(samplinginterval in ms)
 
