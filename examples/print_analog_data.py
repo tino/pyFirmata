@@ -12,7 +12,7 @@ class AnalogPrinter:
 
     def __init__(self):
         # sampling rate: 50Hz
-        self.samplingRate = 50
+        self.samplingRate = 100
         self.timestamp = 0
         self.board = Arduino(PORT)
 
