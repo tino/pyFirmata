@@ -104,13 +104,13 @@ and is timed by the arduino itself.
 You can also read an analoge value of a port any time by issuing a read
 command::
 
-    board.analog[0].read()
+    board.analog[1].read()
 
 This is useful for reading additional pins within a callback handler
 to process multiple pins simultaneously. Note that the data obtained
 by `read()` is read from an internal buffer which stores the most
 recent value received from the Arduino. This call is non-blocking.
-
+You also need to run `enable_reporting()` before you can use `read()`.
 
 
 Writing to a digital port
