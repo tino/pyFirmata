@@ -150,5 +150,5 @@ a program which prints data using the callback handler.
 Credits
 =======
 
-The original pyFirmata has been written by Tino de Bruijn.
+The original pyFirmata was written by Tino de Bruijn.
 The realtime sampling / callback has been added by Bernd Porr.
