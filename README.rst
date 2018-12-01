@@ -10,7 +10,7 @@ pyFirmata2 is an updated version of pyFirmata which adds precise sampling
 to the API so that it's possible to filter signals and in general do
 signal processing. Instead of "sleep" commands which have unreliable timing
 the Arduino performs the sampling in its firmware and transmits the data
-then to pyFirmata2. The python application simply registers a callback
+then to pyFirmata2. The Python application simply registers a callback
 which is then called every time after new data has arrived.
 
 
@@ -101,7 +101,7 @@ handler and then enable it::
 where `myCallback(data)` is then called every time after data has been received
 and is timed by the arduino itself.
 
-You can also read an analoge value of a port any time by issuing a read
+You can also read additional analogue pins any time by issuing a read
 command::
 
     board.analog[1].read()
@@ -110,7 +110,7 @@ This is useful for reading additional pins within a callback handler
 to process multiple pins simultaneously. Note that the data obtained
 by `read()` is read from an internal buffer which stores the most
 recent value received from the Arduino. This call is non-blocking.
-You also need to run `enable_reporting()` before you can use `read()`.
+You also need to run `enable_reporting()` on that pin before you can use `read()`.
 
 
 Writing to a digital port
@@ -127,7 +127,7 @@ The pin class
 -------------
 The command `get_pin` requests the class of a pin
 by specifying a string, composed of
-'a' or 'd' (depending on wether you need an analog or digital pin), the pin
+'a' or 'd' (depending on if you need an analog or digital pin), the pin
 number, and the mode ('i' for input, 'o' for output, 'p' for pwm). All
 seperated by `:`. Eg. `a:0:i` for analog 0 as input or `d:3:p` for
 digital pin 3 as pwm::
@@ -142,7 +142,7 @@ Example code
 ============
 
 The directory https://github.com/berndporr/pyFirmata2/tree/master/examples 
-contains a realtime Oscillsocope with precise sampling rate,
+contains two realtime Oscilloscopes with precise sampling rate,
 a digital port reader, the ubiquitous flashing LED program and
 a program which prints data using the callback handler.
 
