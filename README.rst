@@ -89,7 +89,7 @@ Calling `samplingOn()` without its argument sets
 the sampling interval to 19ms.
 
 
-Enabling and reading from an analoge pins
+Enabling and reading from analoge pins
 -------------------------------------------------
 
 To process data at a given sampling interval register a callback
