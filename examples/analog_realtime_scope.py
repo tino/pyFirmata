@@ -75,4 +75,7 @@ board.analog[0].enable_reporting()
 # show the plot and start the animation
 plt.show()
 
+# needs to be called to close the serial port
+board.exit()
+
 print("finished")

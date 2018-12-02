@@ -27,6 +27,7 @@ class AnalogPrinter:
 
     def stop(self):
         self.board.samplingOff()
+        self.board.exit()
 
 
 # Let's create an instance
@@ -35,7 +36,10 @@ analogPrinter = AnalogPrinter()
 # and start DAQ
 analogPrinter.start()
 
-# let's acquire data for 10secs
+# let's acquire data for 10secs. We could do something else but we just sleep!
 time.sleep(10)
+
+# let's stop it
+analogPrinter.stop()
 
 print("finished")

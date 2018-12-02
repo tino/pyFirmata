@@ -79,3 +79,7 @@ board.analog[1].enable_reporting()
 # showing all the windows
 app.exec_()
 
+# needs to be called to close the serial port
+board.exit()
+
+print("Finished")
