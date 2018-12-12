@@ -147,6 +147,30 @@ a digital port reader, the ubiquitous flashing LED program and
 a program which prints data using the callback handler.
 
 
+Troubleshooting
+===============
+
+No analogue data after stopping the program in Spyder
+-----------------------------------------------------
+
+If you kill the Python program in Spyder the serial port will stay open and locked.
+
+Solution: always terminate the program properly by closing all plot windows in Spyder
+or start the program from the (Anaconda-) console. This is the safest option because
+even a ctrl-c will close the serial port.
+
+
+After an update still the old version is used
+---------------------------------------------
+
+If you use the "-user" option python might keep the older versions.
+
+Solution: Do a `pip uninstall pyfirmata2`
+multiple times until no version is left on your computer. Then install it again as described above.
+
+
+
+
 Credits
 =======
 
