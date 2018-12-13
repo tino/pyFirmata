@@ -136,6 +136,13 @@ digital pin 3 as pwm::
     analog_0.read()
     pin3 = board.get_pin('d:3:p')
     pin3.write(0.6)
+	
+	
+Closing the board
+-----------------
+To close the serial port to the Arduino use the exit command::
+    
+	board.exit()
 
 
 Example code
