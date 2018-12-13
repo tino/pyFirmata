@@ -32,12 +32,12 @@ Install pyfirmata2
 
 The preferred way to install is with `pip` / `pip3`. Under Linux::
 
-    pip3 install pyfirmata2
+    pip3 install pyfirmata2 [--user] [--upgrade]
 
     
 and under Windows/Mac type::
   
-    pip install pyfirmata2
+    pip install pyfirmata2 [--user] [--upgrade]
 
     
 You can also install from source with::
@@ -150,23 +150,29 @@ a program which prints data using the callback handler.
 Troubleshooting
 ===============
 
-No analogue data after stopping the program in Spyder
------------------------------------------------------
+Spyder
+------
 
-If you kill the Python program in Spyder the serial port will stay open and locked.
+Start your program from the (Anaconda-) console / terminal and never within Spyder. Here is
+an example for Windows::
 
-Solution: always terminate the program properly by closing all plot windows in Spyder
-or start the program from the (Anaconda-) console. This is the safest option because
-even a ctrl-c will close the serial port.
+    (base) D:\>
+    (base) D:\>cd pyFirmata2\examples
+    (base) D:\pyFirmata2\examples>python realtime_two_channel_scope.py
+
+The problem with Spyder is that it won't let your Python program terminate properly
+which leaves the serial port in an undefined state. If you then re-run your program
+it won't be able to talk to your Arduino. In the worst case you need to reboot your
+computer. Bottomline: use Spyder for editing, run the program from the console / terminal.
 
 
-After an update still the old version is used
----------------------------------------------
+After an update still the old version is being used
+---------------------------------------------------
 
-If you use the "-user" option python might keep the older versions.
+If you use the `--user` option to install / update packages Python might keep older versions.
 
-Solution: Do a `pip uninstall pyfirmata2`
-multiple times until no version is left on your computer. Then install it again as described above.
+Solution: Do a `pip uninstall pyfirmata2` multiple times until no version is left 
+on your computer. Then install it again as described above.
 
 
 

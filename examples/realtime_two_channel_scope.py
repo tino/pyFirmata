@@ -4,8 +4,6 @@ Plots channels zero and one in two different windows. Requires pyqtgraph.
 
 """
 
-import threading
-from time import sleep
 import sys
 
 import pyqtgraph as pg
