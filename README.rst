@@ -21,7 +21,9 @@ Installation
 Upload firmata
 --------------
 
-Upload the standard firmata sketch into your Arduino with::
+Install the Arduino IDE on your computer: https://www.arduino.cc/en/Main/Software
+
+Start the IDE and upload the standard firmata sketch into your Arduino with::
   
     File -> Examples -> Firmata -> Standard Firmata
 
