@@ -13,6 +13,11 @@ the Arduino performs the sampling in its firmware and transmits the data
 then to pyFirmata2. The Python application simply registers a callback
 which is then called every time after new data has arrived.
 
+This API has been used in my Digital Signal Processing (DSP) class to
+practise realtime filtering of analogue sensor
+data. Examples can be viewed on the YouTube channel of the
+class: https://www.youtube.com/user/DSPcourse
+
 
 Installation
 ============
