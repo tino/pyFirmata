@@ -10,7 +10,9 @@ import serial
 from .boards import BOARDS
 
 
-def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.usbserial',):
+def get_the_board(
+    layout=BOARDS["arduino"], base_dir="/dev/", identifier="tty.usbserial"
+):
     """
     Helper function to get the one and only board connected to the computer
     running this. It assumes a normal arduino layout, but this can be
@@ -20,6 +22,7 @@ def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.us
     one.
     """
     from .pyfirmata import Board  # prevent a circular import
+
     boards = []
     for device in os.listdir(base_dir):
         if device.startswith(identifier):
@@ -30,13 +33,16 @@ def get_the_board(layout=BOARDS['arduino'], base_dir='/dev/', identifier='tty.us
             else:
                 boards.append(board)
     if len(boards) == 0:
-        raise IOError("No boards found in {0} with identifier {1}".format(base_dir, identifier))
+        raise IOError(
+            "No boards found in {0} with identifier {1}".format(base_dir, identifier)
+        )
     elif len(boards) > 1:
         raise IOError("More than one board found!")
     return boards[0]
 
 
 class Iterator(threading.Thread):
+
     def __init__(self, board):
         super(Iterator, self).__init__()
         self.board = board
@@ -48,7 +54,7 @@ class Iterator(threading.Thread):
                 while self.board.bytes_available():
                     self.board.iterate()
                 time.sleep(0.001)
-            except (AttributeError, serial.SerialException, OSError) as e:
+            except (AttributeError, serial.SerialException, OSError):
                 # this way we can kill the thread by setting the board object
                 # to None, or when the serial port is closed by board.exit()
                 break
@@ -56,7 +62,7 @@ class Iterator(threading.Thread):
                 # catch 'error: Bad file descriptor'
                 # iterate may be called while the serial port is being closed,
                 # causing an "error: (9, 'Bad file descriptor')"
-                if getattr(e, 'errno', None) == 9:
+                if getattr(e, "errno", None) == 9:
                     break
                 try:
                     if e[0] == 9:
@@ -64,7 +70,7 @@ class Iterator(threading.Thread):
                 except (TypeError, IndexError):
                     pass
                 raise
-            except (KeyboardInterrupt) as e:
+            except (KeyboardInterrupt):
                 sys.exit()
 
 
@@ -164,18 +170,18 @@ def pin_list_to_board_dict(pinlist):
     """
 
     board_dict = {
-        'digital': [],
-        'analog': [],
-        'pwm': [],
-        'servo': [],  # 2.2 specs
+        "digital": [],
+        "analog": [],
+        "pwm": [],
+        "servo": [],  # 2.2 specs
         # 'i2c': [],  # 2.3 specs
-        'disabled': [],
+        "disabled": [],
     }
     for i, pin in enumerate(pinlist):
         pin.pop()  # removes the 0x79 on end
         if not pin:
-            board_dict['disabled'] += [i]
-            board_dict['digital'] += [i]
+            board_dict["disabled"] += [i]
+            board_dict["digital"] += [i]
             continue
 
         for j, _ in enumerate(pin):
@@ -183,16 +189,16 @@ def pin_list_to_board_dict(pinlist):
             if j % 2 == 0:
                 # This is safe. try: range(10)[5:50]
                 if pin[j:j + 4] == [0, 1, 1, 1]:
-                    board_dict['digital'] += [i]
+                    board_dict["digital"] += [i]
 
                 if pin[j:j + 2] == [2, 10]:
-                    board_dict['analog'] += [i]
+                    board_dict["analog"] += [i]
 
                 if pin[j:j + 2] == [3, 8]:
-                    board_dict['pwm'] += [i]
+                    board_dict["pwm"] += [i]
 
                 if pin[j:j + 2] == [4, 14]:
-                    board_dict['servo'] += [i]
+                    board_dict["servo"] += [i]
 
                 # Desable I2C
                 if pin[j:j + 2] == [6, 1]:
@@ -201,23 +207,19 @@ def pin_list_to_board_dict(pinlist):
     # We have to deal with analog pins:
     # - (14, 15, 16, 17, 18, 19)
     # + (0, 1, 2, 3, 4, 5)
-    diff = set(board_dict['digital']) - set(board_dict['analog'])
-    board_dict['analog'] = [n for n, _ in enumerate(board_dict['analog'])]
+    diff = set(board_dict["digital"]) - set(board_dict["analog"])
+    board_dict["analog"] = [n for n, _ in enumerate(board_dict["analog"])]
 
     # Digital pin problems:
     # - (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
     # + (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
 
-    board_dict['digital'] = [n for n, _ in enumerate(diff)]
+    board_dict["digital"] = [n for n, _ in enumerate(diff)]
     # Based on lib Arduino 0017
-    board_dict['servo'] = board_dict['digital']
+    board_dict["servo"] = board_dict["digital"]
 
     # Turn lists into tuples
     # Using dict for Python 2.6 compatibility
-    board_dict = dict([
-        (key, tuple(value))
-        for key, value
-        in board_dict.items()
-    ])
+    board_dict = dict([(key, tuple(value)) for key, value in board_dict.items()])
 
     return board_dict
