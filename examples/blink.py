@@ -1,5 +1,5 @@
 # Copyright (c) 2012, Fabian Affolter <fabian@affolter-engineering.ch>
-# Copyright (c) 2018, Bernd Porr <mail@berndporr.me.uk>
+# Copyright (c) 2019, Bernd Porr <mail@berndporr.me.uk>
 #
 # All rights reserved.
 #
@@ -25,6 +25,14 @@
 # ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+#
+# The "Hello World" demo how to change a digital port synchronously.
+#
+# Warning: this is just an example of how to accesss the digital ports.
+# For precise timing please use timers and not the pass_time command
+# which locks up processing and is not precise.
+# 
 
 import pyfirmata2
 
