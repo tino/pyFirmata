@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from pyfirmata2 import Arduino
 import time
 
@@ -6,6 +8,9 @@ PORT = Arduino.AUTODETECT
 
 # prints data on the screen at the sampling rate of 50Hz
 # can easily be changed to saving data to a file
+
+# It uses a callback operation so that timing is precise and
+# the main program can just go to sleep.
 
 
 class AnalogPrinter:
@@ -29,6 +34,7 @@ class AnalogPrinter:
         self.board.samplingOff()
         self.board.exit()
 
+print("Let's print data from Arduino's analogue pins for 10secs.")
 
 # Let's create an instance
 analogPrinter = AnalogPrinter()

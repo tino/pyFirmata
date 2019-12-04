@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from pyfirmata2 import Arduino
 import numpy as np
 import matplotlib.pyplot as plt

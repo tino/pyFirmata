@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 # Copyright (c) 2012, Fabian Affolter <fabian@affolter-engineering.ch>
 # Copyright (c) 2019, Bernd Porr <mail@berndporr.me.uk>
 #

@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 # Copyright (c) 2012, Fabian Affolter <fabian@affolter-engineering.ch>
 # Copyright (c) 2018, Bernd Porr <mail@berndporr.me.uk>
 #
@@ -25,6 +27,9 @@
 # ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# Warning: this code won't provide precise timing as it's using a
+# delay opertation.
 
 import pyfirmata2
 
