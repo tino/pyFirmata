@@ -29,6 +29,7 @@ class RealtimePlotWindow:
         # It's emptied every time when the plot window below
         # does a repaint
         self.ringbuffer = []
+        # add any initialisation code here (filters etc)
         # start the animation
         self.ani = animation.FuncAnimation(self.fig, self.update, interval=100)
 
@@ -58,6 +59,8 @@ samplingRate = 100
 # called for every new sample which has arrived from the Arduino
 def callBack(data):
     # send the sample to the plotwindow
+    # add any filtering here:
+    # data = self.myfilter.dofilter(data)
     realtimePlotWindow.addData(data)
 
 # Get the Ardunio board.
