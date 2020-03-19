@@ -5,6 +5,8 @@ import time
 
 import serial
 
+from . import I2C_REQUEST
+
 from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str
 
 # Message command bytes (0x80(128) to 0xFF(255)) - straight from Firmata.h
@@ -255,6 +257,8 @@ class Board(object):
         msg.extend(data)
         msg.append(END_SYSEX)
         self.sp.write(msg)
+     def send_i2c(self,data):
+        self.send_sysex(I2C_REQUEST, data)
 
     def bytes_available(self):
         return self.sp.inWaiting()
