@@ -257,7 +257,8 @@ class Board(object):
         msg.extend(data)
         msg.append(END_SYSEX)
         self.sp.write(msg)
-     def send_i2c(self,data):
+        
+     def send_i2c(self, data):
         self.send_sysex(I2C_REQUEST, data)
 
     def bytes_available(self):
