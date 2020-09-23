@@ -43,17 +43,18 @@ def get_the_board(
 
 class Iterator(threading.Thread):
 
-    def __init__(self, board):
+    def __init__(self, board, delay=0.001):
         super(Iterator, self).__init__()
         self.board = board
         self.daemon = True
+        self.delay = delay
 
     def run(self):
         while 1:
             try:
                 while self.board.bytes_available():
                     self.board.iterate()
-                time.sleep(0.001)
+                time.sleep(self.delay)
             except (AttributeError, serial.SerialException, OSError):
                 # this way we can kill the thread by setting the board object
                 # to None, or when the serial port is closed by board.exit()
