@@ -43,7 +43,7 @@ def get_the_board(
 
 class Iterator(threading.Thread):
 
-    def __init__(self, board, delay=0.001):
+    def __init__(self, board, delay=0.01):
         super(Iterator, self).__init__()
         self.board = board
         self.daemon = True
