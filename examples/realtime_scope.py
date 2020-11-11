@@ -13,7 +13,7 @@ import matplotlib.animation as animation
 
 
 PORT = Arduino.AUTODETECT
-# PORT = 'COM4' or '/dev/ttyUSB' etc. See documentation.
+# PORT = '/dev/ttyUSB0'
 
 # Creates a scrolling data display
 class RealtimePlotWindow:
