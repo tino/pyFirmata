@@ -4,9 +4,11 @@ pyFirmata2
 
 PyFirmata2 turns your Arduino into a data acquisition card controlled by Python.
 
+Up to 100Hz precise sampling at the analogue ports for digital filtering.
+
 Just upload the default firmata sketch into your Arduino and you are all set.
 
-pyFirmata2 is an updated version of pyFirmata which adds precise sampling
+pyFirmata2 is an updated version of pyFirmata which adds *precise sampling of the analogue inputs*
 to the API so that it's possible to filter signals and in general do
 signal processing. Instead of "sleep" commands which have unreliable timing
 the Arduino performs the sampling in its firmware and transmits the data
