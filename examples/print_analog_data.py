@@ -16,8 +16,8 @@ PORT = Arduino.AUTODETECT
 class AnalogPrinter:
 
     def __init__(self):
-        # sampling rate: 50Hz
-        self.samplingRate = 100
+        # sampling rate: 10Hz
+        self.samplingRate = 10
         self.timestamp = 0
         self.board = Arduino(PORT)
 
