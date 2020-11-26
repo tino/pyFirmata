@@ -32,7 +32,7 @@
 # delay opertation.
 
 import pyfirmata2
-
+import time
 
 # Adjust that the port match your system, see samples below:
 # On Linux: /dev/tty.usbserial-A6008rIF, /dev/ttyACM0,
@@ -57,6 +57,6 @@ while (True):
         print("Button not pressed")
     else:
         print("Button has never been pressed")
-    board.pass_time(0.5)
+    time.sleep(0.1)
 
 board.exit()

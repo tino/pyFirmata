@@ -26,7 +26,7 @@ class RealtimePlotWindow:
         # create an empty line
         self.line, = self.ax.plot(self.plotbuffer)
         # axis
-        self.ax.set_ylim(0, 1)
+        self.ax.set_ylim(0, 1.5)
         # That's our ringbuffer which accumluates the samples
         # It's emptied every time when the plot window below
         # does a repaint

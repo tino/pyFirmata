@@ -32,12 +32,13 @@
 # The "Hello World" demo how to change a digital port synchronously.
 #
 # Warning: this is just an example of how to accesss the digital ports.
-# For precise timing please use timers and not the pass_time command
-# which locks up processing and is not precise.
+# For precise timing please use timers or callback handlers
+# and not the sleep() command which locks up processing
+# and is not precise.
 # 
 
 import pyfirmata2
-
+import time
 
 PIN = 13  # Pin 13 is used
 DELAY = 1  # 1 second delay
@@ -53,6 +54,6 @@ board = pyfirmata2.Arduino(PORT)
 # Loop for blinking the led
 while True:
     board.digital[PIN].write(1)  # Set the LED pin to 1 (HIGH)
-    board.pass_time(DELAY)
+    time.sleep(1)
     board.digital[PIN].write(0)  # Set the LED pin to 0 (LOW)
-    board.pass_time(DELAY)
+    time.sleep(1)

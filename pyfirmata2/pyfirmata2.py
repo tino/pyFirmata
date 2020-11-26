@@ -119,7 +119,7 @@ class Board(object):
         # Alas, Firmata blinks its version before printing it to serial
         # For 2.3, even 5 seconds might not be enough.
         # TODO Find a more reliable way to wait until the board is ready
-        self.pass_time(BOARD_SETUP_WAIT_TIME)
+        self.__pass_time(BOARD_SETUP_WAIT_TIME)
         self.name = name
         self._layout = layout
         if not self.name:
@@ -213,7 +213,7 @@ class Board(object):
         """
         self.add_cmd_handler(CAPABILITY_RESPONSE, self._handle_report_capability_response)
         self.send_sysex(CAPABILITY_QUERY, [])
-        self.pass_time(0.1)  # Serial SYNC
+        self.__pass_time(0.1)  # Serial SYNC
 
         while self.bytes_available():
             self.iterate()
@@ -282,7 +282,7 @@ class Board(object):
             pin.enable_reporting()
         return pin
 
-    def pass_time(self, t):
+    def __pass_time(self, t):
         """Non-blocking time-out for ``t`` seconds."""
         cont = time.time() + t
         while time.time() < cont:
