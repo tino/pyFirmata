@@ -2,6 +2,9 @@
 """
 Plots channels zero and one in two different windows. Requires pyqtgraph.
 
+Copyright (c) 2018-2020, Bernd Porr <mail@berndporr.me.uk>
+see LICENSE file.
+
 """
 
 import sys
