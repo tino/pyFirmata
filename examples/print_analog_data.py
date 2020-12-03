@@ -11,6 +11,8 @@ PORT = Arduino.AUTODETECT
 
 # It uses a callback operation so that timing is precise and
 # the main program can just go to sleep.
+# Copyright (c) 2018-2020, Bernd Porr <mail@berndporr.me.uk>
+# see LICENSE file.
 
 
 class AnalogPrinter:
