@@ -256,6 +256,15 @@ class Board(object):
         msg.append(END_SYSEX)
         self.sp.write(msg)
 
+    def send_string(self, string: str):
+        """
+        Sends a ASCII-compartible string.
+        
+        :param 'string': str
+            The string to send
+        """
+        self.send_sysex(0x71, str_to_two_byte_iter(data))
+        
     def bytes_available(self):
         return self.sp.inWaiting()
 
