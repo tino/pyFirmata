@@ -100,7 +100,7 @@ class Board(object):
                 elif platform == "win32":
                     comports = []
                     for d in l:
-                        if d.vid:
+                        if d.device:
                             devname = str(d.device)
                             comports.append(devname)
                     comports.sort()
