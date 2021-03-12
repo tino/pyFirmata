@@ -164,7 +164,7 @@ a program which prints data using the callback handler.
 ### Spyder
 
 Start your program from the (Anaconda-) console / terminal and never within Spyder. Here is
-an example for Windows::
+an example for Windows:
 ```
     (base) D:\>
     (base) D:\>cd pyFirmata2\examples
