@@ -433,10 +433,17 @@ class Board(object):
         self._layout = pin_list_to_board_dict(pin_spec_list)
 
     def _handle_report_stepper_position(self, *data):
+        """
+        Updates the stepper position from signed long returned by the board.
+        """
         device_num = data[0]
         self.stepper[device_num].position = util.read_signed_long(data[1:])
 
     def _handle_stepper_move_complete(self, *data):
+        """
+        Updates the stepper position from signed long returned by the board
+        after movement complete. Toggles stepper moving flag to False.
+        """
         device_num = data[0]
         stepper = self.stepper[device_num]
         stepper.position = util.read_signed_long(data[1:])
@@ -610,29 +617,42 @@ class Pin(object):
 
 class StepperMotor:
     def __init__(self, board, device_num, has_enable):
+        """
+        Class to expose AccelStepper-specific methods.
+        """
         self.board = board
         self.device_num = device_num
         self.has_enable = has_enable
         self.acceleration = 0.0
-        self.speed = 0
+        self.speed = 0.0
         self.moving = False
         self.enabled = True
         self.position = 0
 
     def zero(self):
+        """
+        Sends sysex instruction to set stepper position to zero.
+        """
         data = bytearray([ACCELSTEPPER_ZERO, self.device_num])
         self.board.send_sysex(ACCELSTEPPER_DATA, data)
 
     def step(self, steps):
+        """
+        Sends a sysex instruction to step the motor relative to the current position by steps.
+        Direction can be reversed using negative steps.
+        """
         data = bytearray([ACCELSTEPPER_STEP, self.device_num])
         steps_sl = util.write_signed_long(steps)
         if steps_sl is None:
             return
-        data += bytearray(steps_sl)
+        data += steps_sl
         self.board.send_sysex(ACCELSTEPPER_DATA, data)
         self.moving = True
 
     def move_to(self, position):
+        """
+        Sends a sysex instruction to step the motor to reach the desired position.
+        """
         data = bytearray([ACCELSTEPPER_TO, self.device_num])
         position_sl = util.write_signed_long(position)
         if position_sl is None:
@@ -642,25 +662,51 @@ class StepperMotor:
         self.moving = True
 
     def enable(self, enable=False):
+        """
+        Sends a sysex instruction to enable the motor. Can be used to save power
+        and reduce overheating.
+        """
         if enable != self.enabled and self.has_enable:
             data = bytearray([ACCELSTEPPER_ENABLE, self.device_num, enable])
             self.enabled = enable
             self.board.send_sysex(ACCELSTEPPER_DATA, data)
 
     def stop(self):
+        """
+        Sends a sysex instruction to stop the motor. Motor moving flag will be updated
+        by Board._handle_move_complete
+        """
         data = bytearray([ACCELSTEPPER_STOP, self.device_num])
         self.board.send_sysex(ACCELSTEPPER_DATA, data)
 
     def request_position(self):
+        """
+        Sends a sysex instruction to query the motor's current position.
+        """
         data = bytearray([ACCELSTEPPER_REPORT_POSITION, self.device_num])
         self.board.send_sysex(ACCELSTEPPER_DATA, data)
 
     def set_acceleration(self, acceleration):
+        """
+        Sends a sysex instruction to set the acceleration.
+        """
         data = bytearray([ACCELSTEPPER_SET_ACCELERATION, self.device_num])
-        data += util.write_float(acceleration)
+        custom_float = util.write_float(acceleration)
+        if custom_float is None:
+            return
+        data += custom_float
         self.board.send_sysex(ACCELSTEPPER_DATA, data)
+        self.acceleration = acceleration
 
     def set_speed(self, speed):
+        """
+        Sends a sysex instruction to set the motor speed. Should be called before
+        calling step or move_to, otherwise max speed will be 1.0 step/sec.
+        """
         data = bytearray([ACCELSTEPPER_SET_SPEED, self.device_num])
-        data += util.write_float(speed)
+        custom_float = util.write_float(speed)
+        if custom_float is None:
+            return
+        data += custom_float
         self.board.send_sysex(ACCELSTEPPER_DATA, data)
+        self.speed = speed

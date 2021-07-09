@@ -159,6 +159,11 @@ def break_to_bytes(value):
 
 
 def read_signed_long(data):
+    """
+    Read a signed long from the board.
+    Signed long format is 31 bits for the number plus a sign bit.
+    Returns an integer.
+    """
     long = data[0] | data[1] << 7 | data[2] << 14 | data[3] << 21
     long |= ((data[4] << 28) & 0x07)
     if data[-1] >> 3 == 1:
@@ -167,6 +172,11 @@ def read_signed_long(data):
 
 
 def write_signed_long(number):
+    """
+    Converts a signed long into a bytearray.
+    Format is 31 bits for the number plus a sign bit.
+    Returns a bytearray
+    """
     parsed_numbers = []
     mask = 127
     negative = False
@@ -180,10 +190,14 @@ def write_signed_long(number):
         parsed_numbers.append(byte)
     if negative:
         parsed_numbers[-1] |= 0x08
-    return parsed_numbers
+    return bytearray(parsed_numbers)
 
 
 def write_float(number):
+    """
+    Converts a floating point number to the Firmata custom float format.
+    Returns None if number cannot be converted, otherwise returns bytearray.
+    """
     args = []
     mask = 0x7f
     i = 0
@@ -205,6 +219,8 @@ def write_float(number):
             i += 1
             if i > 3:
                 break
+    if number > 8388607 or number < 1:
+        return
     number = int(number)
     exponent = i + 11
     args.extend([number & mask,
