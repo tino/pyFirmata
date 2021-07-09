@@ -6,9 +6,7 @@ import time
 import serial
 import math
 
-from pyfirmata import util
-
-from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str
+from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str, write_signed_long, read_signed_long, write_float
 
 # Message command bytes (0x80(128) to 0xFF(255)) - straight from Firmata.h
 DIGITAL_MESSAGE = 0x90      # send data for a digital pin
@@ -437,7 +435,7 @@ class Board(object):
         Updates the stepper position from signed long returned by the board.
         """
         device_num = data[0]
-        self.stepper[device_num].position = util.read_signed_long(data[1:])
+        self.stepper[device_num].position = read_signed_long(data[1:])
 
     def _handle_stepper_move_complete(self, *data):
         """
@@ -446,7 +444,7 @@ class Board(object):
         """
         device_num = data[0]
         stepper = self.stepper[device_num]
-        stepper.position = util.read_signed_long(data[1:])
+        stepper.position = read_signed_long(data[1:])
         stepper.moving = False
 
 
@@ -642,7 +640,7 @@ class StepperMotor:
         Direction can be reversed using negative steps.
         """
         data = bytearray([ACCELSTEPPER_STEP, self.device_num])
-        steps_sl = util.write_signed_long(steps)
+        steps_sl = write_signed_long(steps)
         if steps_sl is None:
             return
         data += steps_sl
@@ -654,7 +652,7 @@ class StepperMotor:
         Sends a sysex instruction to step the motor to reach the desired position.
         """
         data = bytearray([ACCELSTEPPER_TO, self.device_num])
-        position_sl = util.write_signed_long(position)
+        position_sl = write_signed_long(position)
         if position_sl is None:
             return
         data += bytearray(position_sl)
@@ -691,7 +689,7 @@ class StepperMotor:
         Sends a sysex instruction to set the acceleration.
         """
         data = bytearray([ACCELSTEPPER_SET_ACCELERATION, self.device_num])
-        custom_float = util.write_float(acceleration)
+        custom_float = write_float(acceleration)
         if custom_float is None:
             return
         data += custom_float
@@ -704,7 +702,7 @@ class StepperMotor:
         calling step or move_to, otherwise max speed will be 1.0 step/sec.
         """
         data = bytearray([ACCELSTEPPER_SET_SPEED, self.device_num])
-        custom_float = util.write_float(speed)
+        custom_float = write_float(speed)
         if custom_float is None:
             return
         data += custom_float
