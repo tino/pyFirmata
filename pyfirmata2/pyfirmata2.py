@@ -194,8 +194,8 @@ class Board(object):
     def samplingOn(self, sample_interval=19):
         # enables sampling
         if not self.samplerThread.running:
-            if sample_interval < 10:
-                raise ValueError("Sampling interval less than 10ms")
+            if sample_interval < 1:
+                raise ValueError("Sampling interval less than 1ms")
             self.setSamplingInterval(sample_interval)
             self.samplerThread.start()
 

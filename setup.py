@@ -7,7 +7,7 @@ with open('README_py.rst') as f:
 
 setup(
     name='pyFirmata2',
-    version='2.1.1',
+    version='2.2.0',
     description="Use your Arduino as a data acquisition card under Python",
     long_description=long_description,
     author='Bernd Porr',
