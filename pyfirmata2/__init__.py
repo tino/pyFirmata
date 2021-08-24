@@ -44,7 +44,7 @@ class ArduinoDue(Board):
 
 class ArduinoNano(Board):
     """
-    A board that will set itself up as an Arduino Due.
+    A board that will set itself up as an Arduino Nano.
     """
     def __init__(self, *args, **kwargs):
         args = list(args)
