@@ -4,7 +4,7 @@
 
 PyFirmata2 turns your Arduino into a data acquisition card controlled by Python.
 
-Up to 100Hz precise sampling at the analogue ports for digital filtering.
+Up to 1kHz precise sampling at the analogue ports for digital filtering.
 
 Just upload the default firmata sketch into your Arduino and you are all set.
 
@@ -89,7 +89,7 @@ check for the latest addition: `ls -l -t /dev/*`.
 ### Starting sampling at a given sampling interval
 
 In order to sample analogue data you need to specify a
-sampling interval in ms. The smallest interval is 10ms:
+sampling interval in ms. The smallest interval is 1ms:
 ```
     board.samplingOn(samplinginterval in ms)
 ```
