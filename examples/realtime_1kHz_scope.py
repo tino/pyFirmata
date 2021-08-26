@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 """
-Plots channels zero and one in two different windows. Requires pyqtgraph.
+Plots channel zero at 1kHz. Requires pyqtgraph.
 
-Copyright (c) 2018-2020, Bernd Porr <mail@berndporr.me.uk>
+Copyright (c) 2018-2021, Bernd Porr <mail@berndporr.me.uk>
 see LICENSE file.
 
 """
