@@ -205,7 +205,7 @@ class Board(object):
         'd' digital pin    Pin number   'o' for output
                                         'p' for pwm (Pulse-width modulation)
 
-        All seperated by ``:``.
+        All separated by ``:``.
         """
         if type(pin_def) == list:
             bits = pin_def
@@ -272,7 +272,7 @@ class Board(object):
         received_data = []
         handler = None
         if data < START_SYSEX:
-            # These commands can have 'channel data' like a pin nummber appended.
+            # These commands can have 'channel data' like a pin number appended.
             try:
                 handler = self._command_handlers[data & 0xF0]
             except KeyError:
