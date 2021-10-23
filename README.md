@@ -134,8 +134,13 @@ For any other functionality use the pin class below.
 The command `get_pin` requests the class of a pin
 by specifying a string, composed of
 'a' or 'd' (depending on if you need an analog or digital pin), the pin
-number, and the mode ('i' for input, 'o' for output, 'p' for pwm). All
-seperated by `:`. Eg. `a:0:i` for analog 0 as input or `d:3:p` for
+number, and the mode:
+  - 'i' for input
+  - 'u' for input with pullup
+  - 'o' for output
+  - 'p' for pwm
+  - 's' for servo.
+All seperated by `:`. Eg. `a:0:i` for analog 0 as input or `d:3:p` for
 digital pin 3 as pwm:
 ```
     analog_0 = board.get_pin('a:0:i')
