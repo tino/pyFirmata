@@ -8,14 +8,12 @@ Up to 1kHz precise sampling at the analogue ports for digital filtering.
 
 Just upload the default firmata sketch into your Arduino and you are all set.
 
-pyFirmata2 is an updated version of pyFirmata which adds *precise sampling of the analogue inputs*
-to the API so that it's possible to filter signals and in general do
-signal processing. Instead of "sleep" commands which have unreliable timing
-the Arduino performs the sampling in its firmware and transmits the data
-then to pyFirmata2. The Python application simply registers a callback
-which is then called every time after new data has arrived.
+pyFirmata2 is an updated version of pyFirmata which *replaces loops
+with callbacks*. Instead of unreliable "sleep" commands in a loop the
+Python application registers callbacks which are then called
+every time after new data has arrived.
 
-This API has been used in my Digital Signal Processing (DSP) class to
+This API has been used in the Digital Signal Processing (DSP) class to
 practise realtime filtering of analogue sensor
 data. Examples can be viewed on the YouTube channel of the
 class: https://www.youtube.com/user/DSPcourse
