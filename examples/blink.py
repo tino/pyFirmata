@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # Copyright (c) 2012, Fabian Affolter <fabian@affolter-engineering.ch>
-# Copyright (c) 2019, Bernd Porr <mail@berndporr.me.uk>
+# Copyright (c) 2019-2021, Bernd Porr <mail@berndporr.me.uk>
 #
 # All rights reserved.
 #
@@ -29,18 +29,13 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #
-# The "Hello World" demo how to change a digital port synchronously.
-#
-# Warning: this is just an example of how to accesss the digital ports.
-# For precise timing please use timers or callback handlers
-# and not the sleep() command which locks up processing
-# and is not precise.
-# 
+# This program toggles the digital port 13 on/off every second.
+# Port 13 has an LED connected so you'll see def a flashing light!
+# Coding is done with a timer callback to avoid evil loops / delays.
 
 import pyfirmata2
-import time
+from threading import Timer
 
-PIN = 13  # Pin 13 is used
 DELAY = 1  # 1 second delay
 
 # Adjust that the port match your system, see samples below:
@@ -51,9 +46,38 @@ PORT =  pyfirmata2.Arduino.AUTODETECT
 # Creates a new board
 board = pyfirmata2.Arduino(PORT)
 
-# Loop for blinking the led
-while True:
-    board.digital[PIN].write(1)  # Set the LED pin to 1 (HIGH)
-    time.sleep(1)
-    board.digital[PIN].write(0)  # Set the LED pin to 0 (LOW)
-    time.sleep(1)
+# pin 13 which is connected to the internal LED
+digital_0 = board.get_pin('d:13:o')
+
+# flag that we want the timer to restart itself in the callback
+running = True
+
+# callback function which toggles the digital port and
+# restarts the timer
+def blinkCallback():
+    if not running:
+        return
+    v = digital_0.read()
+    v = not v
+    if v:
+        print("On")
+    else:
+        print("Off")
+    digital_0.write(v)
+    # call itself again and again etc
+    timer = Timer(DELAY,blinkCallback)
+    timer.start()
+
+# Kickstarting the perpetual timer by calling the
+# callback function once
+blinkCallback()
+
+print("To stop the program press return.")
+# Just blocking here to do nothing.
+input()
+
+# flag to stop it all
+running = False
+
+# Close the serial connection to the Arduino
+board.exit()

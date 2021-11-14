@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # Copyright (c) 2012, Fabian Affolter <fabian@affolter-engineering.ch>
-# Copyright (c) 2018, Bernd Porr <mail@berndporr.me.uk>
+# Copyright (c) 2018-2021, Bernd Porr <mail@berndporr.me.uk>
 #
 # All rights reserved.
 #
@@ -28,11 +28,13 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Warning: this code won't provide precise timing as it's using a
-# delay opertation.
-
 import pyfirmata2
-import time
+
+# The program monitors the digital pin 6.
+# Connect a switch between pin 6 and GND.
+# Whenever there is a change of the state
+# at pin 6 the callback function "pinCallback"
+# is called.
 
 # Adjust that the port match your system, see samples below:
 # On Linux: /dev/tty.usbserial-A6008rIF, /dev/ttyACM0,
@@ -40,23 +42,37 @@ import time
 # PORT = '/dev/ttyACM0'
 PORT = pyfirmata2.Arduino.AUTODETECT
 
+
+# Callback function which is called whenever there is a
+# change at the digital port 6.
+def pinCallback(value):
+    if value:
+        print("Button released")
+    else:
+        print("Button pressed")
+    
+
 # Creates a new board
 board = pyfirmata2.Arduino(PORT)
 print("Setting up the connection to the board ...")
+
 # default sampling interval of 19ms
 board.samplingOn()
 
-# Setup the digital pin
+# Setup the digital pin with pullup resistor: "u"
 digital_0 = board.get_pin('d:6:u')
+
+# points to the callback
+digital_0.register_callback(pinCallback)
+
+# Switches the callback on
 digital_0.enable_reporting()
 
-while (True):
-    if str(digital_0.read()) == 'True':
-        print("Button pressed")
-    elif str(digital_0.read()) == 'False':
-        print("Button not pressed")
-    else:
-        print("Button has never been pressed")
-    time.sleep(0.1)
+print("To stop the program press return.")
 
+# Do nothing here. Just preventing the program from reaching the
+# exit function.
+input()
+
+# Close the serial connection to the Arduino
 board.exit()
