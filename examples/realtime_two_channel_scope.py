@@ -58,17 +58,18 @@ samplingRate = 100
 
 # called for every new sample at channel 0 which has arrived from the Arduino
 # "data" contains the new sample
-def callBack(data):
+def callBack1(data):
     # filter your channel 0 samples here:
     # data = self.filter_of_channel0.dofilter(data)
     # send the sample to the plotwindow
     qtPanningPlot1.addData(data)
-    ch1 = board.analog[1].read()
-    # 1st sample of 2nd channel might arrive later so need to check
-    if ch1:
-        # filter your channel 1 samples here:
-        # ch1 = self.filter_of_channel1.dofilter(ch1)
-        qtPanningPlot2.addData(ch1)
+
+def callBack2(data):
+    # filter your channel 0 samples here:
+    # data = self.filter_of_channel0.dofilter(data)
+    # send the sample to the plotwindow
+    qtPanningPlot2.addData(data)
+
 
 # Get the Ardunio board.
 board = Arduino(PORT)
@@ -79,7 +80,8 @@ board.samplingOn(1000 / samplingRate)
 # Register the callback which adds the data to the animated plot
 # The function "callback" (see above) is called when data has
 # arrived on channel 0.
-board.analog[0].register_callback(callBack)
+board.analog[0].register_callback(callBack1)
+board.analog[1].register_callback(callBack2)
 
 # Enable the callback
 board.analog[0].enable_reporting()

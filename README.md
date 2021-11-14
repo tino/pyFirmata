@@ -11,7 +11,10 @@ Just upload the default firmata sketch into your Arduino and you are all set.
 pyFirmata2 is an updated version of pyFirmata which *replaces loops
 with callbacks*. Instead of unreliable "sleep" commands in a loop the
 Python application registers callbacks which are then called
-every time after new data has arrived.
+every time after new data has arrived. This means for the analogue
+channels the callbacks are called at the specified sampling rate
+while the the digital ports call the callback functions after
+a state change has happened (from 0 to 1 or 1 to 0).
 
 This API has been used in the Digital Signal Processing (DSP) class to
 practise realtime filtering of analogue sensor
@@ -138,13 +141,12 @@ number, and the mode:
   - 'o' for output
   - 'p' for pwm
   - 's' for servo.
-All seperated by `:`. Eg. `a:0:i` for analog 0 as input or `d:3:p` for
-digital pin 3 as pwm:
+All seperated by `:`, for example:
 ```
-    analog_0 = board.get_pin('a:0:i')
-    analog_0.read()
-    pin3 = board.get_pin('d:3:p')
-    pin3.write(0.6)
+    digital_0 = board.get_pin('d:0:i')
+    v = digital_0.read()
+    pin3 = board.get_pin('d:3:o')
+    pin3.write(True)
 ```	
 	
 ### Closing the board
