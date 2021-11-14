@@ -47,7 +47,7 @@ print("Setting up the connection to the board ...")
 board.samplingOn()
 
 # Setup the digital pin
-digital_0 = board.get_pin('d:6:i')
+digital_0 = board.get_pin('d:6:u')
 digital_0.enable_reporting()
 
 while (True):

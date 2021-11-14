@@ -493,6 +493,8 @@ class Port(object):
                 if pin.mode is INPUT or pin.mode is INPUT_PULLUP:
                     pin_nr = pin.pin_number - self.port_number * 8
                     pin.value = (mask & (1 << pin_nr)) > 0
+                    if not pin.callback is None:
+                        pin.callback(pin.value)
 
 
 class Pin(object):
