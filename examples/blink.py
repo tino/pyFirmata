@@ -36,48 +36,64 @@
 import pyfirmata2
 from threading import Timer
 
-DELAY = 1  # 1 second delay
+class Blink():
+    def __init__(self, board, seconds):
+        # pin 13 which is connected to the internal LED
+        self.digital_0 = board.get_pin('d:13:o')
+
+        # flag that we want the timer to restart itself in the callback
+        self.timer = None
+
+        # delay
+        self.DELAY = seconds
+
+    # callback function which toggles the digital port and
+    # restarts the timer
+    def blinkCallback(self):
+        # call itself again so that it runs periodically
+        self.timer = Timer(self.DELAY,self.blinkCallback)
+
+        # start the timer
+        self.timer.start()
+        
+        # now let's toggle the LED
+        v = self.digital_0.read()
+        v = not v
+        if v:
+            print("On")
+        else:
+            print("Off")
+        self.digital_0.write(v)
+
+    # starts the blinking
+    def start(self):
+        # Kickstarting the perpetual timer by calling the
+        # callback function once
+        self.blinkCallback()
+
+    # stops the blinking
+    def stop(self):
+        # Cancel the timer
+        self.timer.cancel()
+
+# main program
 
 # Adjust that the port match your system, see samples below:
-# On Linux: /dev/tty.usbserial-A6008rIF, /dev/ttyACM0,
-# On Windows: \\.\COM1, \\.\COM2
+# On Linux: /dev/ttyACM0,
+# On Windows: COM1, COM2, ...
 PORT =  pyfirmata2.Arduino.AUTODETECT
 
 # Creates a new board
 board = pyfirmata2.Arduino(PORT)
 
-# pin 13 which is connected to the internal LED
-digital_0 = board.get_pin('d:13:o')
-
-# flag that we want the timer to restart itself in the callback
-running = True
-
-# callback function which toggles the digital port and
-# restarts the timer
-def blinkCallback():
-    if not running:
-        return
-    v = digital_0.read()
-    v = not v
-    if v:
-        print("On")
-    else:
-        print("Off")
-    digital_0.write(v)
-    # call itself again and again etc
-    timer = Timer(DELAY,blinkCallback)
-    timer.start()
-
-# Kickstarting the perpetual timer by calling the
-# callback function once
-blinkCallback()
+t = Blink(board,1)
+t.start()
 
 print("To stop the program press return.")
 # Just blocking here to do nothing.
 input()
 
-# flag to stop it all
-running = False
+t.stop()
 
-# Close the serial connection to the Arduino
+# close the serial connection
 board.exit()
