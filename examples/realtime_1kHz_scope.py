@@ -52,7 +52,7 @@ class QtPanningPlot:
 # Let's create two instances of plot windows
 qtPanningPlot1 = QtPanningPlot("Arduino 1st channel")
 
-# sampling rate: 100Hz
+# sampling rate: 1kHz
 samplingRate = 1000
 
 # called for every new sample at channel 0 which has arrived from the Arduino
