@@ -73,7 +73,7 @@ Under Windows / Mac:
 
 Create an instance of the `Arduino` class:
 ```
-    from pyfirmata import Arduino
+    from pyfirmata2 import Arduino
     board = Arduino(Arduino.AUTODETECT)
 ```
 which automatically detects the serial port of the Arduino.
@@ -109,18 +109,6 @@ handler and then enable it:
 where `myCallback(data)` is then called every time after data has been received
 and is timed by the arduino itself.
 
-You can also read additional analogue pins any time by issuing a read
-command:
-```
-    board.analog[1].read()
-```
-This is useful for reading additional pins within a callback handler
-to process multiple pins simultaneously. Note that the data obtained
-by `read()` is read from an internal buffer which stores the most
-recent value received from the Arduino. This call is non-blocking.
-You also need to run `enable_reporting()` on that pin before you can use `read()`.
-
-
 ### Writing to a digital port
 
 Digital ports can be written to at any time:
@@ -143,17 +131,19 @@ number, and the mode:
   - 's' for servo.
 All seperated by `:`, for example:
 ```
-    analog_0 = board.get_pin('a:0:i')
-    analog_0.read()
-    pin3 = board.get_pin('d:3:o')
-    pin3.write(True)
+analog_0 = board.get_pin('a:0:i')
+analog_0.read()
+pin3 = board.get_pin('d:3:o')
+pin3.write(True)
 ```	
-	
+Values for analogue ports, pwm and servo are 0..1 and for digital ones
+`True` & `False`.
+
 ### Closing the board
 
 To close the serial port to the Arduino use the exit command:
-```    
-	board.exit()
+```
+board.exit()
 ```
 
 ## Example code
