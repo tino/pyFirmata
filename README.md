@@ -113,7 +113,7 @@ and is timed by the arduino itself.
 
 Digital ports can be written to at any time:
 ```  
-    board.digital[13].write(1)
+    board.digital[13].write(True)
 ```
 For any other functionality use the pin class below.
 
@@ -131,14 +131,14 @@ number, and the mode:
   - 's' for servo.
 All seperated by `:`, for example:
 ```
-analog_0 = board.get_pin('a:0:i')
-analog_0.register_callback(myCallback)
-analog_0.enable_reporting()
+analog_in_0 = board.get_pin('a:0:i')
+analog_in_0.register_callback(myCallback)
+analog_in_0.enable_reporting()
 
-digital_3 = board.get_pin('d:3:o')
-digital_3.write(True)
+digital_out_3 = board.get_pin('d:3:o')
+digital_out_3.write(True)
 ```	
-Values for analogue ports and pwm are 0..1, for servo between 0 and 180 (degrees) and for digital ports
+Values for analogue ports and PWM are 0..1, for servo between 0 and 180 (degrees) and for digital ports
 `True` & `False`.
 
 ### Closing the board
