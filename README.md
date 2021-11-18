@@ -132,11 +132,13 @@ number, and the mode:
 All seperated by `:`, for example:
 ```
 analog_0 = board.get_pin('a:0:i')
-analog_0.read()
-pin3 = board.get_pin('d:3:o')
-pin3.write(True)
+analog_0.register_callback(myCallback)
+analog_0.enable_reporting()
+
+digital_3 = board.get_pin('d:3:o')
+digital_3.write(True)
 ```	
-Values for analogue ports, pwm and servo are 0..1 and for digital ones
+Values for analogue ports and pwm are 0..1, for servo between 0 and 180 (degrees) and for digital ports
 `True` & `False`.
 
 ### Closing the board

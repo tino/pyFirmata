@@ -6,3 +6,5 @@
   - Printing data on the screen using an event handler
   - Digital in reads from a digital pin using an event handler
   - Flashing LED using a timer
+  - PWM
+  - Servo
