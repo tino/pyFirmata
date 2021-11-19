@@ -2,6 +2,7 @@ from __future__ import division, unicode_literals
 
 import inspect
 import time
+import warnings
 
 import serial
 import serial.tools.list_ports
@@ -572,7 +573,7 @@ class Pin(object):
         if self.mode == UNAVAILABLE:
             raise IOError("Cannot read pin {0}".format(self.__str__()))
         if (self.mode is INPUT) or (self.mode is INPUT_PULLUP) or (self.type == ANALOG):
-            raise IOError("Use a callback handler for pin {0}".format(self.__str__()))
+            warnings.warn("Use a callback handler for pin {0}".format(self.__str__()))
         return self.value
 
     def register_callback(self, _callback):
