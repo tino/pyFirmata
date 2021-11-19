@@ -145,6 +145,49 @@ Values for analogue ports and PWM are 0..1,
 for servo between 0 and 180 (degrees) and for digital ports
 `True` & `False`.
 
+```
+class Pin(builtins.object)
+ |  Pin(board, pin_number, type=2, port=None)
+ |  
+ |  A Pin representation
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, board, pin_number, type=2, port=None)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |  
+ |  __str__(self)
+ |      Return str(self).
+ |  
+ |  disable_reporting(self)
+ |      Disable the reporting of an input pin.
+ |  
+ |  enable_reporting(self)
+ |      Set an input pin to report values.
+ |  
+ |  read(self)
+ |      Returns the value of an output pin.
+ |  
+ |  register_callback(self, _callback)
+ |      Register a callback to read from an analogue or digital port
+ |      
+ |      :arg value: callback with one argument which receives the data:
+ |      boolean if the pin is digital, or 
+ |      float from 0 to 1 if the pin is an analgoue input
+ |  
+ |  unregiser_callback(self)
+ |      Unregisters the callback which receives data from a pin
+ |  
+ |  write(self, value)
+ |      Output a voltage from the pin
+ |      
+ |      :arg value: Uses value as a boolean if the pin is in output mode, or
+ |          expects a float from 0 to 1 if the pin is in PWM mode. If the pin
+ |          is in SERVO the value should be in degrees.
+ |  
+
+```
+
 ### Closing the board
 
 To close the serial port to the Arduino use the exit command:
