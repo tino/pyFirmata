@@ -568,19 +568,27 @@ class Pin(object):
             # TODO This is not going to work for non-optimized boards like Mega
 
     def read(self):
-        """
-        Returns the output value of the pin. This value is updated by the
-        boards :meth:`Board.iterate` method. Value is always in the range from
-        0.0 to 1.0.
-        """
+        """Returns the value of an output pin."""
         if self.mode == UNAVAILABLE:
             raise IOError("Cannot read pin {0}".format(self.__str__()))
+        if (self.mode is INPUT) or (self.mode is INPUT_PULLUP) or (self.type == ANALOG):
+            raise IOError("Use a callback handler for pin {0}".format(self.__str__()))
         return self.value
 
     def register_callback(self, _callback):
+        """
+        Register a callback to read from an analogue or digital port
+
+        :arg value: callback with one argument which receives the data:
+        boolean if the pin is digital, or 
+        float from 0 to 1 if the pin is an analgoue input
+        """        
         self.callback = _callback
 
     def unregiser_callback(self):
+        """
+        Unregisters the callback which receives data from a pin
+        """
         self.callback = None
 
     def write(self, value):
