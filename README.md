@@ -73,14 +73,14 @@ Under Windows / Mac:
 
 Create an instance of the `Arduino` class:
 ```
-    from pyfirmata2 import Arduino
-    board = Arduino(Arduino.AUTODETECT)
+PORT =  pyfirmata2.Arduino.AUTODETECT
+board = pyfirmata2.Arduino(PORT)
 ```
 which automatically detects the serial port of the Arduino.
 
 If this fails you can also specify the serial port manually, for example:
 ```
-    board = Arduino('COM4')
+board = pyfirmata2.Arduino('COM4')
 ```
 Under Linux this is usually `/dev/ttyACM0`. Under Windows this is a
 COM port, for example `COM4`. On a MAC it's `/dev/ttys000`, `/dev/cu.usbmodem14101` or
@@ -89,25 +89,28 @@ check for the latest addition: `ls -l -t /dev/*`.
 
 ### Starting sampling at a given sampling interval
 
-In order to sample analogue data you need to specify a
-sampling interval in ms. The smallest interval is 1ms:
+In order to sample analogue data you need to specify a sampling
+interval in ms which then applies to all channels. The smallest
+interval is 1ms:
 ```
-    board.samplingOn(samplinginterval in ms)
+board.samplingOn(samplinginterval in ms)
 ```
-Calling `samplingOn()` without its argument sets
-the sampling interval to 19ms.
+Calling `samplingOn()` without its argument sets the sampling interval
+to 19ms.
 
 
-### Enabling and reading from analoge pins
+### Enabling and reading from analogue or digital input pins
 
-To process data at a given sampling interval register a callback
+To receive data register a callback
 handler and then enable it:
 ```
     board.analog[0].register_callback(myCallback)
     board.analog[0].enable_reporting()
 ```    
 where `myCallback(data)` is then called every time after data has been received
-and is timed by the arduino itself.
+and is timed by the arduino itself. For analogue inputs that's at
+the given sampling rate and for digital ones at state changes from 0 to 1 or
+1 to 0.
 
 ### Writing to a digital port
 
@@ -115,7 +118,7 @@ Digital ports can be written to at any time:
 ```  
     board.digital[13].write(True)
 ```
-For any other functionality use the pin class below.
+For any other functionality (PWM or servo) use the pin class below.
 
     
 ### The pin class
@@ -124,11 +127,11 @@ The command `get_pin` requests the class of a pin
 by specifying a string, composed of
 'a' or 'd' (depending on if you need an analog or digital pin), the pin
 number, and the mode:
-  - 'i' for input
-  - 'u' for input with pullup
-  - 'o' for output
-  - 'p' for pwm
-  - 's' for servo.
+  - 'i' for input (digital or analogue)
+  - 'u' for input with pullup (digital)
+  - 'o' for output (digital)
+  - 'p' for pwm (digital)
+  - 's' for servo (digital)
 All seperated by `:`, for example:
 ```
 analog_in_0 = board.get_pin('a:0:i')
@@ -138,7 +141,8 @@ analog_in_0.enable_reporting()
 digital_out_3 = board.get_pin('d:3:o')
 digital_out_3.write(True)
 ```	
-Values for analogue ports and PWM are 0..1, for servo between 0 and 180 (degrees) and for digital ports
+Values for analogue ports and PWM are 0..1,
+for servo between 0 and 180 (degrees) and for digital ports
 `True` & `False`.
 
 ### Closing the board
@@ -152,7 +156,8 @@ board.exit()
 
 The directory https://github.com/berndporr/pyFirmata2/tree/master/examples 
 contains two realtime Oscilloscopes with precise sampling rate,
-a digital port reader, the ubiquitous flashing LED program and
+a digital port reader, the ubiquitous flashing LED program, pwm, servo control
+and
 a program which prints data using the callback handler.
 
 
