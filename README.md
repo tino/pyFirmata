@@ -234,6 +234,6 @@ on your computer. Then install it again as described above.
 
 ### Credits
 
-The [original pyFirmata]https://github.com/tino/pyFirmata()
+The [original pyFirmata](https://github.com/tino/pyFirmata)
 was written by Tino de Bruijn and is recommended if you'd rather
 prefer loops and sleep()-commands. 
