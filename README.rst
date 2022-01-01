@@ -1,8 +1,8 @@
 =========
-pyFirmata
+arduPython
 =========
 
-pyFirmata is a Python interface for the `Firmata`_ protocol. It is fully
+arduPython is a Python interface for the `Firmata`_ protocol. It is fully
 compatible with Firmata 2.1, and has some functionality of version 2.2. It runs
 on Python 2.7, 3.6 and 3.7.
 
@@ -16,25 +16,17 @@ Test & coverage status:
 .. image:: https://coveralls.io/repos/github/tino/pyFirmata/badge.svg?branch=master
     :target: https://coveralls.io/github/tino/pyFirmata?branch=master
 
-Installation
+Instalação
 ============
 
-The preferred way to install is with pip_::
-
-    pip install pyfirmata
-
-You can also install from source with ``python setup.py install``. You will
-need to have `setuptools`_ installed::
+Instalando com PIP:
 
     git clone https://github.com/tino/pyFirmata
     cd pyFirmata
     python setup.py install
 
-.. _pip: http://www.pip-installer.org/en/latest/
-.. _setuptools: https://pypi.python.org/pypi/setuptools
 
-
-Usage
+Usagem:
 =====
 
 Basic usage::
