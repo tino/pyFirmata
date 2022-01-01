@@ -19,14 +19,14 @@ Test & coverage status:
 Instalação
 ============
 
-Instalando com PIP:
+Instalando com PIP::
 
     git clone https://github.com/tino/pyFirmata
     cd pyFirmata
     python setup.py install
 
 
-Usagem:
+Usagem
 =====
 
 Basic usage::
