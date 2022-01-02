@@ -207,19 +207,19 @@ a program which prints data using the callback handler.
 
 ## Troubleshooting
 
-### Spyder
+### Spyder / pyCharm / IDEs
 
-Start your program from the (Anaconda-) console / terminal and never within Spyder. Here is
+Start your program from the console / terminal and never within an IDE. Here is
 an example for Windows:
 ```
     (base) D:\>
     (base) D:\>cd pyFirmata2\examples
     (base) D:\pyFirmata2\examples>python realtime_two_channel_scope.py
 ```
-The problem with Spyder is that it won't let your Python program terminate properly
+The problem with IDEs is that they won't let your Python program terminate properly
 which leaves the serial port in an undefined state. If you then re-run your program
 it won't be able to talk to your Arduino. In the worst case you need to reboot your
-computer. Bottomline: use Spyder for editing, run the program from the console / terminal.
+computer. Bottomline: use your IDE for editing, run the program from the console / terminal.
 
 
 ### After an update still the old version is being used
