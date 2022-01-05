@@ -1,7 +1,7 @@
 arduPython
 ==========
 
-arduPython é um Fork da pyFirmata, onde é uma interface Python para o protocolo [Firmata](http://firmata.org). É totalmente compatível com Firmata 2.1 e possui algumas funcionalidades da versão 2.2. Ele roda em Python 3.7, 3.8, 3.9 e 3.10.
+arduPython é um Fork da pyFirmata, onde é uma interface Python para Arduino que usa o protocolo [Firmata](http://firmata.org). É totalmente compatível com Firmata 2.1 e possui algumas funcionalidades da versão 2.2. Ele roda em Python 3.7, 3.8, 3.9 e 3.10.
 
 Instalação
 ============
