@@ -1,26 +1,20 @@
-=========
 arduPython
-=========
+==========
 
-arduPython é um Fork da pyFirmata, onde é uma interface Python para o protocolo `Firmata`_. É totalmente compatível com Firmata 2.1 e possui algumas funcionalidades da versão 2.2. Ele roda em Python 2.7, 3.6 e 3.7.
-
-.. _Firmata: http://firmata.org
+arduPython é um Fork da pyFirmata, onde é uma interface Python para o protocolo [Firmata](http://firmata.org). É totalmente compatível com Firmata 2.1 e possui algumas funcionalidades da versão 2.2. Ele roda em Python 3.7, 3.8, 3.9 e 3.10.
 
 Instalação
 ============
 
-A maneira preferida de instalar é com pip_::
+A maneira preferida de instalar é com [pip](http://www.pip-installer.org/en/latest/)::
 
     pip install audupython
 
-Você também pode instalar a partir do código-fonte com ``python setup.py install``. Você precisará ter `setuptools`_ instalado ::
+Você também pode instalar a partir do código-fonte com ``python setup.py install``. Você precisará ter [setuptools](https://pypi.python.org/pypi/setuptools) instalado ::
 
     git clone https://github.com/BosonsHiggs/arduPython.git
     cd pyFirmata
     python setup.py install
-
-.. _pip: http://www.pip-installer.org/en/latest/
-.. _setuptools: https://pypi.python.org/pypi/setuptools
 
 
 Uso
