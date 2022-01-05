@@ -6,7 +6,7 @@ with open('README.md', "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name='pyfirmata',
+    name='ardupython',
     version='1.1.1',  # Use bumpversion!
     description="A Python interface for the Firmata procotol",
     long_description=long_description,
