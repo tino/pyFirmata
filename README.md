@@ -6,13 +6,6 @@ arduPython é um Fork da pyFirmata, onde é uma interface Python para o protocol
 
 .. _Firmata: http://firmata.org
 
-Test & coverage status:
-
-.. image:: https://travis-ci.org/tino/pyFirmata.png?branch=master
-    :target: https://travis-ci.org/tino/pyFirmata
-
-.. image:: https://coveralls.io/repos/github/tino/pyFirmata/badge.svg?branch=master
-    :target: https://coveralls.io/github/tino/pyFirmata?branch=master
 
 Instalação
 ============
@@ -48,7 +41,7 @@ Para usar portas analógicas, provavelmente é útil iniciar um encadeamento de 
     >>> board.analog[0].read()
     0.661440304938
 
-Se você usa um pino com mais frequência, pode valer a pena usar o método ``get_pin`` da placa. Ele permite que você especifique qual pino você precisa por uma string, composta de 'a' ou 'd' (dependendo se você precisa de um pino analógico ou digital), o número do pino e o modo ('i' para entrada, 'o 'para saída,' p 'para pwm). Todos separados por ``:``. Por exemplo. `` a: 0: i`` para 0 analógico como entrada ou `` d: 3: p`` para pino digital 3 como pwm. ::
+Se você usa um pino com mais frequência, pode valer a pena usar o método ``get_pin`` da placa. Ele permite que você especifique qual pino você precisa por uma string, composta de 'a' ou 'd' (dependendo se você precisa de um pino analógico ou digital), o número do pino e o modo ('i' para entrada, 'o 'para saída,' p 'para pwm). Todos separados por ``:``. Por exemplo. `` a: 0: i`` para 0 analógico como entrada ou ``d: 3: p`` para pino digital 3 como pwm. ::
 
     >>> analog_0 = board.get_pin('a:0:i')
     >>> analog_0.read()
