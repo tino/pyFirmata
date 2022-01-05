@@ -6,7 +6,6 @@ arduPython é um Fork da pyFirmata, onde é uma interface Python para o protocol
 
 .. _Firmata: http://firmata.org
 
-
 Instalação
 ============
 
@@ -63,7 +62,7 @@ Se você quiser usar uma placa com um layout diferente do Arduino padrão ou do 
     ...         }
 
 Conflitos
-====
+========
 
 As próximas coisas na nossa lista são implementar as novas mudanças de protocolo no firmata:
 
