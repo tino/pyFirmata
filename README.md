@@ -2,9 +2,7 @@
 arduPython
 =========
 
-arduPython is a Python interface for the `Firmata`_ protocol. It is fully
-compatible with Firmata 2.1, and has some functionality of version 2.2. It runs
-on Python 2.7, 3.6 and 3.7.
+arduPython é um Fork da pyFirmata, onde é uma interface Python para o protocolo `Firmata`_. É totalmente compatível com Firmata 2.1 e possui algumas funcionalidades da versão 2.2. Ele roda em Python 2.7, 3.6 e 3.7.
 
 .. _Firmata: http://firmata.org
 
@@ -19,24 +17,30 @@ Test & coverage status:
 Instalação
 ============
 
-Instalando com PIP::
+A maneira preferida de instalar é com pip_::
 
-    git clone https://github.com/tino/pyFirmata
+    pip install audupython
+
+Você também pode instalar a partir do código-fonte com ``python setup.py install``. Você precisará ter `setuptools`_ instalado ::
+
+    git clone https://github.com/BosonsHiggs/arduPython.git
     cd pyFirmata
     python setup.py install
 
+.. _pip: http://www.pip-installer.org/en/latest/
+.. _setuptools: https://pypi.python.org/pypi/setuptools
 
-Usagem
+
+Uso
 =====
 
-Basic usage::
+Uso básico::
 
     >>> from pyfirmata import Arduino, util
     >>> board = Arduino('/dev/tty.usbserial-A6008rIF')
     >>> board.digital[13].write(1)
 
-To use analog ports, it is probably handy to start an iterator thread.
-Otherwise the board will keep sending data to your serial, until it overflows::
+Para usar portas analógicas, provavelmente é útil iniciar um encadeamento de iteradores. Caso contrário, a placa continuará enviando dados para o seu serial, até estourar:
 
     >>> it = util.Iterator(board)
     >>> it.start()
@@ -44,12 +48,7 @@ Otherwise the board will keep sending data to your serial, until it overflows::
     >>> board.analog[0].read()
     0.661440304938
 
-If you use a pin more often, it can be worth it to use the ``get_pin`` method
-of the board. It let's you specify what pin you need by a string, composed of
-'a' or 'd' (depending on wether you need an analog or digital pin), the pin
-number, and the mode ('i' for input, 'o' for output, 'p' for pwm). All
-seperated by ``:``. Eg. ``a:0:i`` for analog 0 as input or ``d:3:p`` for
-digital pin 3 as pwm.::
+Se você usa um pino com mais frequência, pode valer a pena usar o método ``get_pin`` da placa. Ele permite que você especifique qual pino você precisa por uma string, composta de 'a' ou 'd' (dependendo se você precisa de um pino analógico ou digital), o número do pino e o modo ('i' para entrada, 'o 'para saída,' p 'para pwm). Todos separados por ``:``. Por exemplo. `` a: 0: i`` para 0 analógico como entrada ou `` d: 3: p`` para pino digital 3 como pwm. ::
 
     >>> analog_0 = board.get_pin('a:0:i')
     >>> analog_0.read()
@@ -57,14 +56,10 @@ digital pin 3 as pwm.::
     >>> pin3 = board.get_pin('d:3:p')
     >>> pin3.write(0.6)
 
-Board layout
+Layout de uma placa Arduino qualquer
 ============
 
-If you want to use a board with a different layout than the standard Arduino
-or the Arduino Mega (for which there exist the shortcut classes
-``pyfirmata.Arduino`` and ``pyfirmata.ArduinoMega``), instantiate the Board
-class with a dictionary as the ``layout`` argument. This is the layout dict
-for the Mega for example::
+Se você quiser usar uma placa com um layout diferente do Arduino padrão ou do Arduino Mega (para o qual existem as classes de atalho ``pyfirmata.Arduino`` e `` pyfirmata.ArduinoMega``), instancie a classe Board com um dicionário como o argumento `` layout``. Este é o ditado de layout para o Mega, por exemplo::
 
     >>> mega = {
     ...         'digital' : tuple(x for x in range(54)),
@@ -74,12 +69,9 @@ for the Mega for example::
     ...         'disabled' : (0, 1, 14, 15) # Rx, Tx, Crystal
     ...         }
 
-Todo
+Conflitos
 ====
 
-The next things on my list are to implement the new protocol changes in
-firmata:
+As próximas coisas na nossa lista são implementar as novas mudanças de protocolo no firmata:
 
-- Pin State Query, which allows it to populate on-screen controls with an
-  accurate representation of the hardware's configuration
-  (http://firmata.org/wiki/Proposals#Pin_State_Query_.28added_in_version_2.2.29)
+- Pin State Query, que permite preencher os controles na tela com uma representação precisa da configuração do hardware (http://firmata.org/wiki/Proposals#Pin_State_Query_.28added_in_version_2.2.29)

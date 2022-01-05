@@ -26,5 +26,12 @@ BOARDS = {
         'pwm': (3, 5, 6, 9, 10, 11),
         'use_ports': True,
         'disabled': (0, 1)  # Rx, Tx, Crystal
+    },
+    'arduino_leonardo': {
+        'digital': tuple(x for x in range(20)),
+        'analog': tuple(x for x in range(12)),
+        'pwm': (3, 5, 6, 9, 10, 11, 13),
+        'use_ports': True,
+        'disabled': (0, 1)  # Rx, Tx, Crystal
     }
 }

@@ -6,17 +6,17 @@ with open('README.rst') as f:
     long_description = f.read()
 
 setup(
-    name='pyFirmata',
+    name='ArduPython',
     version='1.1.0',  # Use bumpversion!
     description="A Python interface for the Firmata procotol",
     long_description=long_description,
-    author='Tino de Bruijn',
-    author_email='tinodb@gmail.com',
+    author='Francisco Iago Lira Passos',
+    author_email='iagolirapassosb@gmail.com',
     packages=['pyfirmata'],
     include_package_data=True,
     install_requires=['pyserial'],
     zip_safe=False,
-    url='https://github.com/tino/pyFirmata',
+    url='https://github.com/BosonsHiggs/arduPython',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Other Environment',
@@ -24,11 +24,10 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',        
         'Topic :: Utilities',
         'Topic :: Home Automation',
     ],
