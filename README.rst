@@ -26,7 +26,7 @@ The preferred way to install is with pip_::
 You can also install from source with ``python setup.py install``. You will
 need to have `setuptools`_ installed::
 
-    git clone https://github.com/BosonsHiggs/arduPython.git
+    git clone https://github.com/BosonsHiggs/arduPython
     cd pyFirmata
     python setup.py install
 
