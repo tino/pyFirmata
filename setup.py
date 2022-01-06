@@ -2,7 +2,7 @@
 
 from setuptools import setup
 
-with open('README.rst', "r", encoding="utf-8") as f:
+with open('README.rst') as f:
     long_description = f.read()
 
 setup(
