@@ -1,3 +1,24 @@
+Metadata-Version: 2.1
+Name: arduPython
+Version: 1.1.1
+Summary: A Python interface for the Firmata procotol
+Home-page: https://github.com/BosonsHiggs/arduPython
+Author: Francisco Iago Lira Passos
+Author-email: iagolirapassosb@gmail.com
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Other Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Topic :: Utilities
+Classifier: Topic :: Home Automation
+License-File: LICENSE
+
 ==========
 arduPython
 ==========
@@ -91,3 +112,5 @@ firmata:
 - Pin State Query, which allows it to populate on-screen controls with an
   accurate representation of the hardware's configuration
   (http://firmata.org/wiki/Proposals#Pin_State_Query_.28added_in_version_2.2.29)
+
+

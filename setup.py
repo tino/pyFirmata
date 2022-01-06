@@ -6,7 +6,7 @@ with open('README.rst') as f:
     long_description = f.read()
 
 setup(
-    name='ardupython',
+    name='arduPython',
     version='1.1.1',  # Use bumpversion!
     description="A Python interface for the Firmata procotol",
     long_description=long_description,
@@ -23,7 +23,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',        

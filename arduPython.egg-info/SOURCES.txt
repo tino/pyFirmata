@@ -1,0 +1,17 @@
+LICENSE
+MANIFEST.in
+README.rst
+requirements.txt
+setup.cfg
+setup.py
+arduPython.egg-info/PKG-INFO
+arduPython.egg-info/SOURCES.txt
+arduPython.egg-info/dependency_links.txt
+arduPython.egg-info/not-zip-safe
+arduPython.egg-info/requires.txt
+arduPython.egg-info/top_level.txt
+pyfirmata/__init__.py
+pyfirmata/boards.py
+pyfirmata/mockup.py
+pyfirmata/pyfirmata.py
+pyfirmata/util.py
