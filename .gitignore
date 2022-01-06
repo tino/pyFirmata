@@ -7,3 +7,7 @@ MANIFEST
 docs/_build
 
 *.sublime-*
+
+arduPython.egg-info/*
+dist/*
+README.rst

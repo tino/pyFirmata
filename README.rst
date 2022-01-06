@@ -21,12 +21,12 @@ Installation
 
 The preferred way to install is with pip_::
 
-    pip install ardupython
+    pip install arduPython
 
 You can also install from source with ``python setup.py install``. You will
 need to have `setuptools`_ installed::
 
-    git clone https://github.com/tino/pyFirmata.git
+    git clone https://github.com/BosonsHiggs/arduPython.git
     cd pyFirmata
     python setup.py install
 
