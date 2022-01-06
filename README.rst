@@ -1,8 +1,8 @@
 =========
-arduPython
+pyFirmata
 =========
 
-arduPython is a Python interface for the `Firmata`_ protocol. It is fully
+pyFirmata is a Python interface for the `Firmata`_ protocol. It is fully
 compatible with Firmata 2.1, and has some functionality of version 2.2. It runs
 on Python 2.7, 3.6 and 3.7.
 
