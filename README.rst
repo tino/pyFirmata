@@ -4,7 +4,7 @@ arduPython
 
 arduPython is a Python interface for the `Firmata`_ protocol. It is fully
 compatible with Firmata 2.1, and has some functionality of version 2.2. It runs
-on Python 2.7, 3.6 and 3.7.
+on Python 3.6, 3.9 and 3.10.
 
 .. _Firmata: http://firmata.org
 
@@ -26,7 +26,7 @@ The preferred way to install is with pip_::
 You can also install from source with ``python setup.py install``. You will
 need to have `setuptools`_ installed::
 
-    git clone https://github.com/tino/pyFirmata
+    git clone https://github.com/tino/pyFirmata.git
     cd pyFirmata
     python setup.py install
 
@@ -88,6 +88,4 @@ Todo
 The next things on my list are to implement the new protocol changes in
 firmata:
 
-- Pin State Query, which allows it to populate on-screen controls with an
-  accurate representation of the hardware's configuration
-  (http://firmata.org/wiki/Proposals#Pin_State_Query_.28added_in_version_2.2.29)
+- Fix
