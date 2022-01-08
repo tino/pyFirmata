@@ -63,4 +63,4 @@ Fix
 Links
 =====
 
-- `Servidor Oficial na Discord <https://discord.gg/nPejnfC3Nu>`_
+- [Servidor Oficial na Discord](https://discord.gg/nPejnfC3Nu)
