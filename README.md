@@ -8,7 +8,7 @@ Instalação
 
 A maneira preferida de instalar é com [pip](http://www.pip-installer.org/en/latest/)::
 
-    pip install audupython
+    pip install arduPython==1.1.3
 
 Você também pode instalar a partir do código-fonte com ``python setup.py install``. Você precisará ter [setuptools](https://pypi.python.org/pypi/setuptools) instalado ::
 
