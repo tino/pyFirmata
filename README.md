@@ -18,12 +18,12 @@ Você também pode instalar a partir do código-fonte com ``python setup.py inst
 
 
 Uso
-=====
+====
 
 Uso básico::
 
     >>> from pyfirmata import Arduino, util
-    >>> board = Arduino('/dev/tty.usbserial-A6008rIF')
+    >>> board = Arduino('/dev/tty.usbserial-A6008rIF') ou board = Arduino() 
     >>> board.digital[13].write(1)
 
 Para usar portas analógicas, provavelmente é útil iniciar um encadeamento de iteradores. Caso contrário, a placa continuará enviando dados para o seu serial, até estourar:
@@ -43,7 +43,7 @@ Se você usa um pino com mais frequência, pode valer a pena usar o método ``ge
     >>> pin3.write(0.6)
 
 Layout de uma placa Arduino qualquer
-============
+====================================
 
 Se você quiser usar uma placa com um layout diferente do Arduino padrão ou do Arduino Mega (para o qual existem as classes de atalho ``pyfirmata.Arduino`` e `` pyfirmata.ArduinoMega``), instancie a classe Board com um dicionário como o argumento `` layout``. Este é o ditado de layout para o Mega, por exemplo::
 
@@ -56,8 +56,6 @@ Se você quiser usar uma placa com um layout diferente do Arduino padrão ou do 
     ...         }
 
 Conflitos
-========
+=========
 
-As próximas coisas na nossa lista são implementar as novas mudanças de protocolo no firmata:
-
-- Pin State Query, que permite preencher os controles na tela com uma representação precisa da configuração do hardware (http://firmata.org/wiki/Proposals#Pin_State_Query_.28added_in_version_2.2.29)
+Fix

@@ -7,7 +7,7 @@ with open('README.rst') as f:
 
 setup(
     name='arduPython',
-    version='1.1.1',  # Use bumpversion!
+    version='1.1.3',  # Use bumpversion!
     description="A Python interface for the Firmata procotol",
     long_description=long_description,
     author='Francisco Iago Lira Passos',
