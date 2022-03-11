@@ -67,7 +67,7 @@ class FindPort():
 
 		fmt+="Choose the baudrate of by the equivalent number: "
 		baudrate__ = input(fmt)
-		
+
 		if baudrate__ not in BAUDRATE['velocity']: return 57600
 
 		return BAUDRATE['velocity'][str(baudrate__)]
@@ -92,7 +92,7 @@ class Arduino(Board):
 		##add baudrate
 		baudrate=port__.baudrate()
 		args.append(baudrate)
-		print(args)
+
 		super(Arduino, self).__init__(*args, **kwargs)
 
 	def __str__(self):
