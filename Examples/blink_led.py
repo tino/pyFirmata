@@ -1,22 +1,22 @@
-# import modules
+# importando os módulos
 from pyfirmata import Arduino, pyfirmata
 import time
 
-pin = 13 # Put the number of digital pin where black wire is connected in circuit
+pin = 13 # número da porta digital
 
 board = Arduino() # or Arduino(port) define board
-print("Communication successfully started!")
+print("Comunicação iniciada com sucesso!")
 
-board.digital[pin].mode = pyfirmata.OUTPUT # define output mode
+board.digital[pin].mode = pyfirmata.OUTPUT # define o pino como saída
 
-# create function to turn on and off led
+# Criar funções para ligar e desligar led
 def turn_on_led():
-    board.digital[pin].write(1) # 1 means power on
+    board.digital[pin].write(1) # 1 liga o led
 def turn_off_led():
-    board.digital[pin].write(0) # 0 means power off
+    board.digital[pin].write(0) # 0 desliga o led
 
 while True:
-    turn_on_led() # call the function
-    time.sleep(1) # wait for 2 seconds and turn off led! 
-    turn_off_led() # call the function
+    turn_on_led() # chamar função e ligar led
+    time.sleep(1) # esperar 1 segundo
+    turn_off_led() # chamar função e desligar led
     time.sleep(1)

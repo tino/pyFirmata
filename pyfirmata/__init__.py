@@ -9,7 +9,7 @@ from serial.tools import list_ports
 __version__ = '1.1.3'  # Use bumpversion!
 
 #Class to choose port automatically
-class FindPort():
+class FindOptions():
 	## list ports
 	def port_(self):
 		list = []
@@ -22,6 +22,8 @@ class FindPort():
 	#Choose port
 	def chooseport(self):
 		ports = self.port_()
+
+		if ports is None: return None
 		if len(ports) > 1:
 			cont = 0
 			g="----------------\n"
@@ -71,6 +73,28 @@ class FindPort():
 		if baudrate__ not in BAUDRATE['velocity']: return 57600
 
 		return BAUDRATE['velocity'][str(baudrate__)]
+	
+	def board(self):
+		baudrate_dict = BOARDS
+
+		fmt = '+----------+----------+\n'
+		fmt +='|  Option  | baudrate |\n'
+		fmt +='+----------+----------+\n'
+		for (option, rate) in baudrate_dict.items():
+			print(option, rate)
+			#x = self.centralize(option, 10)
+			#y = self.centralize(rate, 10)
+#
+			#fmt +='|{0}|{1}|\n'.format(x, y)
+			#fmt +='+----------+----------+\n'
+
+		#fmt+="Choose the baudrate of by the equivalent number: "
+		#baudrate__ = input(fmt)
+#
+		#if baudrate__ not in BAUDRATE['velocity']: return 57600
+#
+		#return BAUDRATE['velocity'][str(baudrate__)]
+
 
 # shortcut classes
 
@@ -79,8 +103,8 @@ class Arduino(Board):
 	A board that will set itself up as a normal Arduino.
 	"""
 	def __init__(self, *args, **kwargs):
+		port__ = FindOptions()
 		if len(args) < 1 or args[0] is None:
-			port__ = FindPort()
 			args = []
 			args.append(port__.chooseport())
 		else:
@@ -105,13 +129,13 @@ class ArduinoMega(Board):
 	"""
 	def __init__(self, *args, **kwargs):
 		if len(args) < 1 or args[0] is None:
-			port__ = FindPort()
+			port__ = FindOptions()
 			args = []
 			args.append(port__.chooseport())
 		else:
 			args = list(args)
 		args.append(BOARDS['arduino_mega'])
-
+		port__.board()
 		baudrate=port__.baudrate()
 		args.append(baudrate)
 
@@ -127,7 +151,7 @@ class ArduinoDue(Board):
 	"""
 	def __init__(self, *args, **kwargs):
 		if len(args) < 1 or args[0] is None:
-			port__ = FindPort()
+			port__ = FindOptions()
 			args = []
 			args.append(port__.chooseport())
 		else:
@@ -150,7 +174,7 @@ class ArduinoNano(Board):
 	"""
 	def __init__(self, *args, **kwargs):
 		if len(args) < 1 or args[0] is None:
-			port__ = FindPort()
+			port__ = FindOptions()
 			args = []
 			args.append(port__.chooseport())
 		else:
@@ -172,7 +196,7 @@ class ArduinoLeonardo(Board):
 	"""
 	def __init__(self, *args, **kwargs):
 		if len(args) < 1 or args[0] is None:
-			port__ = FindPort()
+			port__ = FindOptions()
 			args = []
 			args.append(port__.chooseport())
 		else:
