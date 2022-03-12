@@ -74,26 +74,29 @@ class FindOptions():
 
 		return BAUDRATE['velocity'][str(baudrate__)]
 	
-	def board(self):
+	def FindLayout(self):
 		baudrate_dict = BOARDS
 
-		fmt = '+----------+----------+\n'
-		fmt +='|  Option  | baudrate |\n'
-		fmt +='+----------+----------+\n'
-		for (option, rate) in baudrate_dict.items():
-			print(option, rate)
-			#x = self.centralize(option, 10)
-			#y = self.centralize(rate, 10)
-#
-			#fmt +='|{0}|{1}|\n'.format(x, y)
-			#fmt +='+----------+----------+\n'
+		fmt = '+-------------+------------------+\n'
+		fmt +='|    Option   |       Layout     |\n'
+		fmt +='+-------------+------------------+\n'
 
-		#fmt+="Choose the baudrate of by the equivalent number: "
-		#baudrate__ = input(fmt)
+		cont=1
+		board__ = []
+		for (board, dictBoard) in baudrate_dict.items():
+			board__.append(dictBoard)
+			x = self.centralize(cont, 13)
+			y = self.centralize(board, 18)
 #
-		#if baudrate__ not in BAUDRATE['velocity']: return 57600
-#
-		#return BAUDRATE['velocity'][str(baudrate__)]
+			fmt +='|{0}|{1}|\n'.format(x, y)
+			fmt +='+-------------+------------------+\n'
+			cont+=1
+		fmt+="Choose the layout of by the equivalent number: "
+		
+		layout__ = int(input(fmt))
+		return board__[layout__-1]
+
+
 
 
 # shortcut classes
@@ -104,14 +107,15 @@ class Arduino(Board):
 	"""
 	def __init__(self, *args, **kwargs):
 		port__ = FindOptions()
+		
 		if len(args) < 1 or args[0] is None:
 			args = []
 			args.append(port__.chooseport())
 		else:
 			args = list(args)
-
 		##add board
-		args.append(BOARDS['arduino'])
+		layout = port__.FindLayout()
+		args.append(layout)
 		
 		##add baudrate
 		baudrate=port__.baudrate()
@@ -121,93 +125,3 @@ class Arduino(Board):
 
 	def __str__(self):
 		return "Arduino {0.name} on {0.sp.port}".format(self)
-
-
-class ArduinoMega(Board):
-	"""
-	A board that will set itself up as an Arduino Mega.
-	"""
-	def __init__(self, *args, **kwargs):
-		if len(args) < 1 or args[0] is None:
-			port__ = FindOptions()
-			args = []
-			args.append(port__.chooseport())
-		else:
-			args = list(args)
-		args.append(BOARDS['arduino_mega'])
-		port__.board()
-		baudrate=port__.baudrate()
-		args.append(baudrate)
-
-		super(ArduinoMega, self).__init__(*args, **kwargs)
-
-	def __str__(self):
-		return "Arduino Mega {0.name} on {0.sp.port}".format(self)
-
-
-class ArduinoDue(Board):
-	"""
-	A board that will set itself up as an Arduino Due.
-	"""
-	def __init__(self, *args, **kwargs):
-		if len(args) < 1 or args[0] is None:
-			port__ = FindOptions()
-			args = []
-			args.append(port__.chooseport())
-		else:
-			args = list(args)
-
-		args.append(BOARDS['arduino_due'])
-
-		baudrate=port__.baudrate()
-		args.append(baudrate)
-
-		super(ArduinoDue, self).__init__(*args, **kwargs)
-
-	def __str__(self):
-		return "Arduino Due {0.name} on {0.sp.port}".format(self)
-
-
-class ArduinoNano(Board):
-	"""
-	A board that will set itself up as an Arduino Nano.
-	"""
-	def __init__(self, *args, **kwargs):
-		if len(args) < 1 or args[0] is None:
-			port__ = FindOptions()
-			args = []
-			args.append(port__.chooseport())
-		else:
-			args = list(args)
-		
-		args.append(BOARDS['arduino_nano'])
-		
-		baudrate=port__.baudrate()
-		args.append(baudrate)
-
-		super(ArduinoNano, self).__init__(*args, **kwargs)
-
-	def __str__(self):
-		return "Arduino Nano {0.name} on {0.sp.port}".format(self)
-
-class ArduinoLeonardo(Board):
-	"""
-	A board that will set itself up as an Arduino Leonardo.
-	"""
-	def __init__(self, *args, **kwargs):
-		if len(args) < 1 or args[0] is None:
-			port__ = FindOptions()
-			args = []
-			args.append(port__.chooseport())
-		else:
-			args = list(args)
-
-		args.append(BOARDS['arduino_leonardo'])
-
-		baudrate=port__.baudrate()
-		args.append(baudrate)
-
-		super(ArduinoLeonardo, self).__init__(*args, **kwargs)
-
-	def __str__(self):
-		return "Arduino Leonardo {0.name} on {0.sp.port}".format(self)
