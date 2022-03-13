@@ -223,3 +223,30 @@ def pin_list_to_board_dict(pinlist):
     board_dict = dict([(key, tuple(value)) for key, value in board_dict.items()])
 
     return board_dict
+
+def ping_time_to_distance(time, calibration=None, distance_units='cm'):
+    """
+    Calculates the distance (in cm) given the time of a ping echo.
+    By default it uses the speed of sound (at sea level = 340.29 m/s)
+    to calculate the distance, but a list of calibrated points can
+    be used to calculate the distance using linear interpolation.
+    :arg calibration: A sorted list of (time, distance) tuples to calculate
+                        the distance using linear interpolation between the
+                        two closest points.
+                        Example (for a HC-SR04 ultrasonic ranging sensor):
+                        [(680.0, 10.0), (1460.0, 20.0), (2210.0, 30.0)]
+    """
+    if not calibration: # Standard calculation using speed of sound.
+        # 1 (second) / 340.29 (speed of sound in m/s) = 0.00293866995 metres
+        # distance = duration (microseconds) / 29.38 / 2 (go and back)
+        distance = time / 29.3866995 / 2
+    else: # Linear interpolation between two calibration points.
+        a = (0, 0)
+        b = calibration[-1]
+        for c in calibration:
+            if c[0] < time: a = c
+            if c[0] > time: b = c; break
+        if a == b:
+            a = calibration[-2]
+        distance = a[1] + (b[1] - a[1]) * ((time - a[0]) / (b[0] - a[0]))
+    return distance

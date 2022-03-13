@@ -96,9 +96,6 @@ class FindOptions():
 		layout__ = int(input(fmt))
 		return board__[layout__-1]
 
-
-
-
 # shortcut classes
 
 class Arduino(Board):
