@@ -10,7 +10,7 @@ Instalação
 
 A maneira preferida de instalar é com [pip](http://www.pip-installer.org/en/latest/)::
 
-    pip install arduPython==1.1.3
+    pip install git+https://github.com/BosonsHiggs/arduPython
 
 Você também pode instalar a partir do código-fonte com ``python setup.py install``. Você precisará ter [setuptools](https://pypi.python.org/pypi/setuptools) instalado ::
 
