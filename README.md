@@ -94,4 +94,4 @@ Links
 =====
 
 - [Servidor Oficial na Discord](https://discord.gg/nPejnfC3Nu)
-- Meu usuário na Discord: Aril Ogai#
+- **Meu usuário na Discord:** *Aril Ogai#5646*
