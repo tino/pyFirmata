@@ -68,7 +68,7 @@ Você pode baixá-lo da ramificação [``pulseIn``](https://github.com/jgautier/
 
 Basta conectar os pinos ``Trig`` e ``Echo`` do sensor a um pino digital em sua placa.
 
-![Fonte: https://github.com/NeoPolus/pyFirmata](examples/ping.png)
+![Fonte: https://github.com/NeoPolus/pyFirmata](Examples/ping.png)
 
 E então use o método ping no pino:
 
