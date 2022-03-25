@@ -115,8 +115,8 @@ class Arduino(Board):
 		args.append(layout)
 		
 		##add baudrate
-		baudrate=port__.baudrate()
-		args.append(baudrate)
+		#baudrate=port__.baudrate()
+		#args.append(baudrate)
 
 		super(Arduino, self).__init__(*args, **kwargs)
 

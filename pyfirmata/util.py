@@ -1,18 +1,16 @@
-from __future__ import division, unicode_literals
-
-import os
-import sys
+from __future__ import division
+from __future__ import unicode_literals
 import threading
 import time
+import os
 
 import serial
 
+import pyfirmata
 from .boards import BOARDS
 
 
-def get_the_board(
-    layout=BOARDS["arduino_uno"], base_dir="/dev/", identifier="tty.usbserial"
-):
+def get_the_board(layout=BOARDS['arduino_uno'], base_dir='/dev/', identifier='tty.usbserial', baudrate=57600, name=None, timeout=None,):
     """
     Helper function to get the one and only board connected to the computer
     running this. It assumes a normal arduino layout, but this can be
@@ -21,31 +19,37 @@ def get_the_board(
     IOError if it can't find a board, on a serial, or if it finds more than
     one.
     """
-    from .pyfirmata import Board  # prevent a circular import
-
     boards = []
     for device in os.listdir(base_dir):
         if device.startswith(identifier):
             try:
-                board = Board(os.path.join(base_dir, device), layout)
+                board = pyfirmata.Board(os.path.join(base_dir, device), 
+                                        layout, baudrate=baudrate, name=name, 
+                                        timeout=timeout)
             except serial.SerialException:
                 pass
             else:
                 boards.append(board)
     if len(boards) == 0:
-        raise IOError(
-            "No boards found in {0} with identifier {1}".format(base_dir, identifier)
-        )
+        raise IOError("No boards found in {0} with identifier {1}".format(base_dir, identifier))
     elif len(boards) > 1:
         raise IOError("More than one board found!")
     return boards[0]
 
 
 class Iterator(threading.Thread):
-
     def __init__(self, board):
         super(Iterator, self).__init__()
         self.board = board
+
+        # For proper exit even when Board.exit() doesn't get called
+        # we need to flag this thread as 'daemon'.
+        #   "The significance of this flag is that the entire Python
+        #    program exits when only daemon threads are left."
+        # This way Python won't hang at exit, will just warn of
+        # an exception at shutdown.
+        # Anyway it's better to call Board.exit() or use
+        # a "with board: ..." block to avoid this warning.
         self.daemon = True
 
     def run(self):
@@ -54,7 +58,7 @@ class Iterator(threading.Thread):
                 while self.board.bytes_available():
                     self.board.iterate()
                 time.sleep(0.001)
-            except (AttributeError, serial.SerialException, OSError):
+            except (AttributeError, serial.SerialException, OSError) as e:
                 # this way we can kill the thread by setting the board object
                 # to None, or when the serial port is closed by board.exit()
                 break
@@ -62,7 +66,7 @@ class Iterator(threading.Thread):
                 # catch 'error: Bad file descriptor'
                 # iterate may be called while the serial port is being closed,
                 # causing an "error: (9, 'Bad file descriptor')"
-                if getattr(e, "errno", None) == 9:
+                if getattr(e, 'errno', None) == 9:
                     break
                 try:
                     if e[0] == 9:
@@ -70,8 +74,6 @@ class Iterator(threading.Thread):
                 except (TypeError, IndexError):
                     pass
                 raise
-            except (KeyboardInterrupt):
-                sys.exit()
 
 
 def to_two_bytes(integer):
@@ -170,18 +172,18 @@ def pin_list_to_board_dict(pinlist):
     """
 
     board_dict = {
-        "digital": [],
-        "analog": [],
-        "pwm": [],
-        "servo": [],  # 2.2 specs
-        # 'i2c': [],  # 2.3 specs
-        "disabled": [],
+        'digital': [],
+        'analog': [],
+        'pwm': [],
+        'servo': [],  # 2.2 specs
+        #'i2c': [],  # 2.3 specs
+        'disabled': [],
     }
     for i, pin in enumerate(pinlist):
         pin.pop()  # removes the 0x79 on end
         if not pin:
-            board_dict["disabled"] += [i]
-            board_dict["digital"] += [i]
+            board_dict['disabled'] += [i]
+            board_dict['digital'] += [i]
             continue
 
         for j, _ in enumerate(pin):
@@ -189,16 +191,16 @@ def pin_list_to_board_dict(pinlist):
             if j % 2 == 0:
                 # This is safe. try: range(10)[5:50]
                 if pin[j:j + 4] == [0, 1, 1, 1]:
-                    board_dict["digital"] += [i]
+                    board_dict['digital'] += [i]
 
                 if pin[j:j + 2] == [2, 10]:
-                    board_dict["analog"] += [i]
+                    board_dict['analog'] += [i]
 
                 if pin[j:j + 2] == [3, 8]:
-                    board_dict["pwm"] += [i]
+                    board_dict['pwm'] += [i]
 
                 if pin[j:j + 2] == [4, 14]:
-                    board_dict["servo"] += [i]
+                    board_dict['servo'] += [i]
 
                 # Desable I2C
                 if pin[j:j + 2] == [6, 1]:
@@ -207,35 +209,44 @@ def pin_list_to_board_dict(pinlist):
     # We have to deal with analog pins:
     # - (14, 15, 16, 17, 18, 19)
     # + (0, 1, 2, 3, 4, 5)
-    diff = set(board_dict["digital"]) - set(board_dict["analog"])
-    board_dict["analog"] = [n for n, _ in enumerate(board_dict["analog"])]
+    diff = set(board_dict['digital']) - set(board_dict['analog'])
+    board_dict['analog'] = [n for n, _ in enumerate(board_dict['analog'])]
 
     # Digital pin problems:
-    # - (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
-    # + (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+    #- (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+    #+ (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
 
-    board_dict["digital"] = [n for n, _ in enumerate(diff)]
+    board_dict['digital'] = [n for n, _ in enumerate(diff)]
     # Based on lib Arduino 0017
-    board_dict["servo"] = board_dict["digital"]
+    board_dict['servo'] = board_dict['digital']
 
     # Turn lists into tuples
     # Using dict for Python 2.6 compatibility
-    board_dict = dict([(key, tuple(value)) for key, value in board_dict.items()])
+    board_dict = dict([
+        (key, tuple(value))
+        for key, value
+        in board_dict.items()
+    ])
 
     return board_dict
+
 
 def ping_time_to_distance(time, calibration=None, distance_units='cm'):
     """
     Calculates the distance (in cm) given the time of a ping echo.
+
     By default it uses the speed of sound (at sea level = 340.29 m/s)
     to calculate the distance, but a list of calibrated points can
     be used to calculate the distance using linear interpolation.
+
     :arg calibration: A sorted list of (time, distance) tuples to calculate
                         the distance using linear interpolation between the
                         two closest points.
                         Example (for a HC-SR04 ultrasonic ranging sensor):
                         [(680.0, 10.0), (1460.0, 20.0), (2210.0, 30.0)]
     """
+    if not time: 
+        return 0
     if not calibration: # Standard calculation using speed of sound.
         # 1 (second) / 340.29 (speed of sound in m/s) = 0.00293866995 metres
         # distance = duration (microseconds) / 29.38 / 2 (go and back)

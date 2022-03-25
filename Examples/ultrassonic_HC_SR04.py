@@ -1,29 +1,21 @@
-# import modules
 from pyfirmata import Arduino, pyfirmata, util
-import time, random
+from pyfirmata.util import ping_time_to_distance
+import time
 
-pins = [9, 10, 11] #PWM pins
-
+### Início da configuração de pinos
 board = Arduino() # or Arduino(port) define board
 print("Communication successfully started!")
 
-RGB = [board.get_pin(f'd:{pin}:p') for pin in pins]
+it = util.Iterator(board)
+it.start()
 
-iterator = util.Iterator(board)
-iterator.start()
+sonarEcho = board.get_pin('d:7:o')
 
-# create function to turn on and off led
-def turn_on_led(pin_, value):
-    RGB[pin_].write(value) # 1 means power on
+time.sleep(1)
 
-def turn_off_led():
-    for pin in range(len(pins)):
-        RGB[pin].write(0) # 0 means power off
+### End set pins
 
-random.seed()
 while True:
-    for pin in range(len(pins)):
-        value = random.random() 
-        turn_on_led(pin, value)
-    time.sleep(0.5)
-    turn_off_led()
+	time = sonarEcho.ping()
+	board.pass_time(0.06) #delay of 60ms -> see datasheet
+	print(f"Time: {time}ms, distance: {ping_time_to_distance(time)}cm")
