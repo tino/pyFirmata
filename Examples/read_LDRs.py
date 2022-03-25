@@ -1,22 +1,22 @@
-#Módulos necessários
+#import modulus
 from pyfirmata import Arduino, pyfirmata, util
 import time
 
-##Portas analógicas dos LDRs
+##LDR analog ports
 led1PullDw = 0
 led2PullUp = 1
 
-#Identificando a placa
+#Identifying the board
 board = Arduino() # or Arduino(port) define board
-print("Comunicação iniciada com sucesso!")
+print("Communication started successfully!")
 
-## Iniciando Iterador
-"""Para usar portas analógicas, provavelmente é útil iniciar um encadeamento iterador. 
-   Caso contrário, a placa continuará enviando dados para o seu serial, até transbordar:"""
+## Starting Iterator
+"""To use analog ports, it is probably useful to start an iterator thread.
+   Otherwise, the board will keep sending data to your serial, until it overflows:"""
 it = util.Iterator(board)
 it.start()
 
-##Configurando estado dos pinos
+##Setting pin status
 ldr1 = board.get_pin(f'a:{led1PullDw}:i') #a = analog and i = input
 ldr2 = board.get_pin(f'a:{led2PullUp}:i') #a = analog and i = input
 
@@ -25,8 +25,8 @@ ldr1.enable_reporting()
 ldr2.enable_reporting()
 
 while True:
-    ## Ler LDRs
+    ## read LDRs
     ldr1_ = ldr1.read()
     ldr2_ = ldr2.read()
     print(f'LDR PullDown: {ldr1_}, LDR PullUp: {ldr2_}')
-    time.sleep(0.3) #300 milissegundos ou 300ms
+    time.sleep(0.3) #300 milliseconds ou 300ms
