@@ -37,7 +37,7 @@ text_sonar1 = "sonar1: Time: {0}ms, distance: {1}cm"
 inicioEcho1 = Echo(sonarEcho1, text_sonar1)
 inicioEcho1.start()
 
-##Sonar 1: port 8
+##Sonar 2: port 8
 text_sonar2 = "sonar2: Time: {0}ms, distance: {1}cm"
 inicioEcho2 = Echo(sonarEcho2, text_sonar2)
 inicioEcho2.start()
