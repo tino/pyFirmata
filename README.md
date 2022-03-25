@@ -68,7 +68,7 @@ Você pode baixá-lo da ramificação [``pulseIn``](https://github.com/jgautier/
 
 Basta conectar os pinos ``Trig`` e ``Echo`` do sensor a um pino digital em sua placa.
 
-![Fonte: https://github.com/NeoPolus/pyFirmata](Examples/ping.png)
+![Fonte: https://github.com/NeoPolus/pyFirmata](Examples/Figures/ping.png)
 
 E então use o método ping no pino:
 
@@ -83,6 +83,11 @@ o resultado do ping (tempo de eco) em distância:
     >>> echo_pin = board.get_pin('d:7:o')
     >>> ping_time_to_distance(echo_pin.ping())
     20.485458055607776
+
+NOTA
+====
+
+Os códigos só funcionarão se você baixar e carregar o código [``pulseIn``](https://github.com/jgautier/arduino-1/tree/pulseIn) na placa Arduino! Tem que ser exatamente o código citado!
 
 Créditos
 ========
