@@ -79,7 +79,7 @@ Simply connect the sensor's ``Trig`` and ``Echo`` pins to a digital pin on your 
 .. _pulseIn: https://github.com/jgautier/arduino-1/tree/pulseIn
 .. _datasheet: https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf
 
-.. image:: ../../../blob/master/Examples/Figures/ping.png
+.. image:: Examples/Figures/ping.png
 
 And then use the ping method on the pin:
 
