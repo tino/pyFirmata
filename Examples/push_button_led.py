@@ -22,25 +22,27 @@ button = board.get_pin(f'd:{pushButton}:i') #definindo pino
 button.enable_reporting() #abrir leitura de valores nesse pino
 
 """ util.Iterator()
-Lê e manipula dados do microcontrolador pela porta serial. 
-Este método deve ser chamado em um loop principal ou em uma 
-Iterator instância para manter os valores dos pinos das placas atualizados.
+Reads and manipulates data from the microcontroller through the serial port.
+This method must be called in a main loop or in an Iterator instance to keep 
+the board pin values up to date.
 """
 iterator = util.Iterator(board)
 iterator.start()
 
-while True:
-   
-    buttonRead = button.read() #ler valores 
-    print(button.read())
-    time.sleep(0.075)
-
-    if buttonRead:
-        turn_on_led(ledPin) # call the function
-    else:
-        print( 'Desligando')
-        turn_off_led(ledPin) # call the function
+try:
+    while True:
     
-    board.pass_time(1)
+        buttonRead = button.read() #ler valores 
+        print(button.read())
+        time.sleep(0.075)
 
-board.exit()
+        if buttonRead:
+            print("Led on")
+            turn_on_led(ledPin) # call the function
+        else:
+            print( 'Led off')
+            turn_off_led(ledPin) # call the function
+        
+        board.pass_time(1)
+except KeyboardInterrupt:
+	board.exit()

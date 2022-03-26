@@ -23,8 +23,11 @@ def turn_off(pin):
         if pin_ == pin: continue #skip this pin
         turn_off_led(pin_)
 
-while True:
-    for pin in pins:
-        turn_on_led(pin) # call the function
-        time.sleep(0.5) # wait for 500 ms and turn off led! 
+try:
+    while True:
+        for pin in pins:
+            turn_on_led(pin) # call the function
+            time.sleep(0.5) # wait for 500 ms and turn off led! 
         turn_off(pin) #call the function
+except KeyboardInterrupt:
+	board.exit()

@@ -20,10 +20,13 @@ def turn_off_led():
     for pin in range(len(pins)):
         RGB[pin].write(0) # 0 means power off
 
-random.seed()
-while True:
-    for pin in range(len(pins)):
-        value = random.random() 
-        turn_on_led(pin, value)
-    time.sleep(0.5)
-    turn_off_led()
+try:
+    random.seed()
+    while True:
+        for pin in range(len(pins)):
+            value = random.random() 
+            turn_on_led(pin, value)
+        time.sleep(0.5)
+        turn_off_led()
+except KeyboardInterrupt:
+	board.exit()

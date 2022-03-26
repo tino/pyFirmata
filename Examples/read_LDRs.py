@@ -24,9 +24,12 @@ ldr2 = board.get_pin(f'a:{led2PullUp}:i') #a = analog and i = input
 ldr1.enable_reporting()
 ldr2.enable_reporting()
 
-while True:
-    ## read LDRs
-    ldr1_ = ldr1.read()
-    ldr2_ = ldr2.read()
-    print(f'LDR PullDown: {ldr1_}, LDR PullUp: {ldr2_}')
-    time.sleep(0.3) #300 milliseconds ou 300ms
+try:
+   while True:
+      ## read LDRs
+      ldr1_ = ldr1.read()
+      ldr2_ = ldr2.read()
+      print(f'LDR PullDown: {ldr1_}, LDR PullUp: {ldr2_}')
+      time.sleep(0.3) #300 milliseconds ou 300ms
+except KeyboardInterrupt:
+   board.exit()

@@ -83,6 +83,7 @@ class FindOptions():
 
 		cont=1
 		board__ = []
+
 		for (board, dictBoard) in baudrate_dict.items():
 			board__.append(dictBoard)
 			x = self.centralize(cont, 13)
@@ -91,7 +92,7 @@ class FindOptions():
 			fmt +='|{0}|{1}|\n'.format(x, y)
 			fmt +='+-------------+------------------+\n'
 			cont+=1
-		fmt+="Choose the layout of by the equivalent number: "
+		fmt+="Choose the layout by number: "
 		
 		layout__ = int(input(fmt))
 		return board__[layout__-1]
@@ -112,6 +113,7 @@ class Arduino(Board):
 			args = list(args)
 		##add board
 		layout = port__.FindLayout()
+
 		args.append(layout)
 		
 		##add baudrate

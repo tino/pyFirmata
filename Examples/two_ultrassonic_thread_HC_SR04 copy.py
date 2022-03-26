@@ -1,3 +1,4 @@
+## See Figures/two_ultrassonics_thread.png
 from threading import Thread
 from pyfirmata import Arduino, pyfirmata, util
 from pyfirmata.util import ping_time_to_distance

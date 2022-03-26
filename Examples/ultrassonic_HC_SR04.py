@@ -15,7 +15,10 @@ time.sleep(1)
 
 ### End set pins
 
-while True:
-	time = sonarEcho.ping()
-	board.pass_time(0.06) #delay of 60ms -> see datasheet
-	print(f"Time: {time}ms, distance: {ping_time_to_distance(time)}cm")
+try:
+	while True:
+		time = sonarEcho.ping()
+		board.pass_time(0.06) #delay of 60ms -> see datasheet
+		print(f"Time: {time}ms, distance: {ping_time_to_distance(time)}cm")
+except KeyboardInterrupt:
+	board.exit()

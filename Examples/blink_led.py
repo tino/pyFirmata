@@ -15,8 +15,11 @@ def turn_on_led():
 def turn_off_led():
     board.digital[pin].write(0) # 0 led off
 
-while True:
-    turn_on_led() # call and turn on
-    time.sleep(1) # wait 1 second
-    turn_off_led() # call and turn off
-    time.sleep(1)
+try
+    while True:
+        turn_on_led() # call and turn on
+        time.sleep(1) # wait 1 second
+        turn_off_led() # call and turn off
+        time.sleep(1)
+except KeyboardInterrupt:
+	board.exit()
