@@ -67,15 +67,16 @@ Ping support (pulseIn)
 
 If you want to use ultrasonic range sensors that use a pulse to measure distance (like the very cheap and common ``HC-SR04``
 - See `datasheet`,
-you will need to use a `pulseIn`_ compatible Firmata on your card.
+you will need to use a pulseIn_ compatible Firmata on your card.
 
-You can download it from the `pulseIn`_ branch of the Firmata repository:
+You can download it from the pulseIn_ branch of the Firmata repository:
 
 Simply connect the sensor's ``Trig`` and ``Echo`` pins to a digital pin on your board.
 
-.. pulseIn: https://github.com/jgautier/arduino-1/tree/pulseIn
-.. datasheet: https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf
-.. image:: Examples/Figures/ping.png
+.. _pulseIn: https://github.com/jgautier/arduino-1/tree/pulseIn
+.. _datasheet: https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf
+
+.. image:: ../../../blob/master/Examples/Figures/ping.png
 
 And then use the ping method on the pin:
 
@@ -94,26 +95,26 @@ the result of the ping (echo time) in distance:
 NOTE
 ====
 
-The codes will only work if you download and load the `pulseIn`_ code on the Arduino board! It has to be exactly the code quoted!
+The codes will only work if you download and load the `pulseIn`_:: code on the Arduino board! It has to be exactly the code quoted!
 
 .. pulseIn: https://github.com/jgautier/arduino-1/tree/pulseIn
 
 credits
 ========
 
-- `NeoPolus`_
-- `Tino`_
+- NeoPolus_:
+- Tino_:
 
-.. NeoPolus: https://github.com/NeoPolus/pyFirmata
-.. Tino: https://github.com/tino/pyFirmata
+.. _NeoPolus: https://github.com/NeoPolus/pyFirmata
+.. _Tino: https://github.com/tino/pyFirmata
 
 links
 =====
 
-- `Official Discord Server`_
+- Official Discord Server_:
 - **My Discord Username:** *Aril Ogai#5646*
 
-.. Official Discord Server: https://discord.gg/nPejnfC3Nu
+.. _Official Discord Server: https://discord.gg/nPejnfC3Nu
 
 Indices and tables
 ==================
