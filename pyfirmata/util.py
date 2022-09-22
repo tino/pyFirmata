@@ -158,6 +158,78 @@ def break_to_bytes(value):
     return (c, int(value / c))
 
 
+def read_signed_long(data):
+    """
+    Read a signed long from the board.
+    Signed long format is 31 bits for the number plus a sign bit.
+    Returns an integer.
+    """
+    long = data[0] | data[1] << 7 | data[2] << 14 | data[3] << 21
+    long |= ((data[4] << 28) & 0x07)
+    if data[-1] >> 3 == 1:
+        long = -long
+    return long
+
+
+def write_signed_long(number):
+    """
+    Converts a signed long into a bytearray.
+    Format is 31 bits for the number plus a sign bit.
+    Returns a bytearray
+    """
+    parsed_numbers = []
+    mask = 127
+    negative = False
+    if number > 0x7fffffff or number < -0x80000000:
+        return
+    if number < 0:
+        number *= -1
+        negative = True
+    for i in range(5):
+        byte = (number >> (i * 7)) & mask
+        parsed_numbers.append(byte)
+    if negative:
+        parsed_numbers[-1] |= 0x08
+    return bytearray(parsed_numbers)
+
+
+def write_float(number):
+    """
+    Converts a floating point number to the Firmata custom float format.
+    Returns None if number cannot be converted, otherwise returns bytearray.
+    """
+    args = []
+    mask = 0x7f
+    i = 0
+    sign = 0
+    if number < 0:
+        sign = 1
+        number *= -1
+    if number < 1:
+        while number < 1 or i > -12:
+            number *= 10
+            i -= 1
+            if number % 10 == 0 or number > 8388608:
+                number /= 10
+                i += 1
+                break
+    else:
+        while number > 8388607 or number % 10 == 0:
+            number /= 10
+            i += 1
+            if i > 3:
+                break
+    if number > 8388607 or number < 1:
+        return
+    number = int(number)
+    exponent = i + 11
+    args.extend([number & mask,
+                 (number >> 7) & mask,
+                 (number >> 14) & mask,
+                 (number >> 21) & 0x03 | (exponent & 0x0f) << 2 | (sign & 0x01) << 6])
+    return bytearray(args)
+
+
 def pin_list_to_board_dict(pinlist):
     """
     Capability Response codes:
