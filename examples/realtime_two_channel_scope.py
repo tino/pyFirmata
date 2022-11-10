@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 """
-Plots channel zero at 1kHz. Requires pyqtgraph.
+Plots channels zero and one at 100Hz. Requires pyqtgraph.
 
-Copyright (c) 2018-2021, Bernd Porr <mail@berndporr.me.uk>
+Copyright (c) 2018-2022, Bernd Porr <mail@berndporr.me.uk>
 see LICENSE file.
 
 """
@@ -22,7 +22,7 @@ samplingRate = 100
 
 app = pg.mkQApp()
 mw = QtWidgets.QMainWindow()
-mw.setWindowTitle('1kHz PlotWidget')
+mw.setWindowTitle('100Hz dual PlotWidget')
 mw.resize(800,800)
 cw = QtWidgets.QWidget()
 mw.setCentralWidget(cw)
