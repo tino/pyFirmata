@@ -29,9 +29,6 @@ mw.setCentralWidget(cw)
 l = QtWidgets.QVBoxLayout()
 cw.setLayout(l)
 
-# signals to all threads in endless loops that we'd like to run these
-running = True
-
 class QtPanningPlot:
 
     def __init__(self,title):

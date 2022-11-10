@@ -29,9 +29,6 @@ mw.setCentralWidget(cw)
 l = QtWidgets.QHBoxLayout()
 cw.setLayout(l)
 
-# signals to all threads in endless loops that we'd like to run these
-running = True
-
 class QtPanningPlot:
 
     def __init__(self,title):
@@ -68,11 +65,11 @@ def callBack1(data):
     # send the sample to the plotwindow
     qtPanningPlot1.addData(data)
 
-# called for every new sample at channel 0 which has arrived from the Arduino
+# called for every new sample at channel 1 which has arrived from the Arduino
 # "data" contains the new sample
 def callBack2(data):
-    # filter your channel 0 samples here:
-    # data = self.filter_of_channel0.dofilter(data)
+    # filter your channel 1 samples here:
+    # data = self.filter_of_channel1.dofilter(data)
     # send the sample to the plotwindow
     qtPanningPlot2.addData(data)
 
@@ -83,8 +80,6 @@ board = Arduino(PORT)
 board.samplingOn(1000 / samplingRate)
 
 # Register the callback which adds the data to the animated plot
-# The function "callback" (see above) is called when data has
-# arrived on channel 0.
 board.analog[0].register_callback(callBack1)
 board.analog[1].register_callback(callBack2)
 
