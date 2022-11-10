@@ -32,7 +32,10 @@ class: https://www.youtube.com/user/DSPcourse
 
 Install the Arduino IDE on your computer: https://www.arduino.cc/en/Main/Software
 
-Start the IDE and upload the standard firmata sketch into your Arduino with:
+ - Start the Arduino IDE
+ - Select the serial port under "Tools"
+ - Select your Arduino board under "Tools"
+ - Upload the standard firmata sketch to your Arduino with:
 ```  
     File -> Examples -> Firmata -> Standard Firmata
 ```
