@@ -55,6 +55,8 @@ cw.setLayout(l)
 
 # Let's create a plot window
 qtPanningPlot1 = QtPanningPlot(l,"Arduino 1st channel")
+label = QtWidgets.QLabel("This label show how to add another Widget to the layout.")
+l.addWidget(label)
 
 # called for every new sample at channel 0 which has arrived from the Arduino
 # "data" contains the new sample
