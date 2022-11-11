@@ -20,20 +20,11 @@ PORT = Arduino.AUTODETECT
 # sampling rate: 1kHz
 samplingRate = 1000
 
-app = pg.mkQApp()
-mw = QtWidgets.QMainWindow()
-mw.setWindowTitle('1kHz PlotWidget')
-mw.resize(800,800)
-cw = QtWidgets.QWidget()
-mw.setCentralWidget(cw)
-l = QtWidgets.QVBoxLayout()
-cw.setLayout(l)
-
 class QtPanningPlot:
 
-    def __init__(self,title):
+    def __init__(self,layout,title):
         self.pw = pg.PlotWidget()
-        l.addWidget(self.pw)
+        layout.addWidget(self.pw)
         self.pw.setYRange(-1,1)
         self.pw.setXRange(0,500/samplingRate)
         self.plt = self.pw.plot()
@@ -51,10 +42,19 @@ class QtPanningPlot:
     def addData(self,d):
         self.data.append(d)
 
-# Let's create a plot window
-qtPanningPlot1 = QtPanningPlot("Arduino 1st channel")
+app = pg.mkQApp()
+mw = QtWidgets.QMainWindow()
+mw.setWindowTitle('1kHz PlotWidget')
+mw.resize(800,800)
+cw = QtWidgets.QWidget()
+mw.setCentralWidget(cw)
 
-mw.show()
+# Vertical arrangement
+l = QtWidgets.QVBoxLayout()
+cw.setLayout(l)
+
+# Let's create a plot window
+qtPanningPlot1 = QtPanningPlot(l,"Arduino 1st channel")
 
 # called for every new sample at channel 0 which has arrived from the Arduino
 # "data" contains the new sample
@@ -77,6 +77,9 @@ board.analog[0].register_callback(callBack)
 
 # Enable the callback
 board.analog[0].enable_reporting()
+
+# Show the window
+mw.show()
 
 # showing all the windows
 pg.exec()

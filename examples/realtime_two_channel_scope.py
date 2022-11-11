@@ -20,20 +20,10 @@ PORT = Arduino.AUTODETECT
 # sampling rate: 100Hz
 samplingRate = 100
 
-app = pg.mkQApp()
-mw = QtWidgets.QMainWindow()
-mw.setWindowTitle('100Hz dual PlotWidget')
-mw.resize(800,800)
-cw = QtWidgets.QWidget()
-mw.setCentralWidget(cw)
-l = QtWidgets.QHBoxLayout()
-cw.setLayout(l)
-
 class QtPanningPlot:
 
     def __init__(self,title):
         self.pw = pg.PlotWidget()
-        l.addWidget(self.pw)
         self.pw.setYRange(-1,1)
         self.pw.setXRange(0,500/samplingRate)
         self.plt = self.pw.plot()
@@ -42,6 +32,9 @@ class QtPanningPlot:
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update)
         self.timer.start(100)
+
+    def getWidget(self):
+        return self.pw
         
     def update(self):
         self.data=self.data[-500:]
@@ -51,11 +44,23 @@ class QtPanningPlot:
     def addData(self,d):
         self.data.append(d)
 
+app = pg.mkQApp()
+mw = QtWidgets.QMainWindow()
+mw.setWindowTitle('100Hz dual PlotWidget')
+mw.resize(800,800)
+cw = QtWidgets.QWidget()
+mw.setCentralWidget(cw)
+
+# Let's arrange the two plots horizontally
+layout = QtWidgets.QHBoxLayout()
+cw.setLayout(layout)
+
 # Let's create two instances of plot windows
 qtPanningPlot1 = QtPanningPlot("Arduino 1st channel")
-qtPanningPlot2 = QtPanningPlot("Arduino 2nd channel")
+layout.addWidget(qtPanningPlot1.getWidget())
 
-mw.show()
+qtPanningPlot2 = QtPanningPlot("Arduino 2nd channel")
+layout.addWidget(qtPanningPlot2.getWidget())
 
 # called for every new sample at channel 0 which has arrived from the Arduino
 # "data" contains the new sample
@@ -87,7 +92,11 @@ board.analog[1].register_callback(callBack2)
 board.analog[0].enable_reporting()
 board.analog[1].enable_reporting()
 
-# showing all the windows
+# showing the plots
+mw.show()
+
+# Starting the QT GUI
+# This is a blocking call and only returns when the user closes the window.
 pg.exec()
 
 # needs to be called to close the serial port
