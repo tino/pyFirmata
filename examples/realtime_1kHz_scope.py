@@ -33,7 +33,7 @@ class QtPanningPlot:
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update)
         self.timer.start(100)
-        
+
     def update(self):
         self.data=self.data[-500:]
         if self.data:
@@ -67,7 +67,7 @@ def callBack(data):
     qtPanningPlot1.addData(data)
 
 # Get the Ardunio board.
-board = Arduino(PORT)
+board = Arduino(PORT,debug=True)
 
 # Set the sampling rate in the Arduino
 board.samplingOn(1000 / samplingRate)
