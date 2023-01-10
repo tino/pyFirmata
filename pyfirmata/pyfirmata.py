@@ -84,9 +84,26 @@ class Board(object):
     _command = None
     _stored_data = []
     _parsing_sysex = False
+    _boards_in_use = []
 
     def __init__(self, port, layout=None, baudrate=57600, name=None, timeout=None):
-        self.sp = serial.Serial(port, baudrate, timeout=timeout)
+        
+        # Check to see if port was previously opened. If not then connect to the port. 
+        sp = None 
+        for i in self._boards_in_use:
+            if i.port == port:
+                sp = i 
+                break 
+        if sp != None:
+            # Port already open. 
+            # TODO: Determine if we should return or continue rest of the steps in the _init__ sequence 
+            pass  
+        else:
+            # The requested port is asked to be opened for the first time 
+            self.sp = serial.Serial(port, baudrate, timeout=timeout)
+            # Keep track of all ports already created and in use 
+            self._boards_in_use.append(self.sp)
+
         # Allow 5 secs for Arduino's auto-reset to happen
         # Alas, Firmata blinks its version before printing it to serial
         # For 2.3, even 5 seconds might not be enough.
