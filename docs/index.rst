@@ -52,7 +52,7 @@ If you use a pin more often, it can be worth it to use the ``get_pin`` method of
 Board layout
 ============
 
-If you want to use a board with a different layout than the standard Arduino, or the Arduino Mega (for wich there exist the shortcut classes ``pyfirmata.Arduino`` and ``pyfirmata.ArduinoMega``), instantiate the Board class with a dictionary as the ``layout`` argument. This is the layout dict for the Mega for example::
+If you want to use a board with a different layout than the standard Arduino, or the Arduino Mega (for which there exist the shortcut classes ``pyfirmata.Arduino`` and ``pyfirmata.ArduinoMega``), instantiate the Board class with a dictionary as the ``layout`` argument. This is the layout dict for the Mega for example::
 
     >>> mega = {
     ...         'digital' : tuple(x for x in range(54)),
