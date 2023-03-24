@@ -4,6 +4,8 @@ import inspect
 import time
 
 import serial
+import socket
+import select
 
 from .util import pin_list_to_board_dict, to_two_bytes, two_byte_iter_to_str
 
@@ -75,6 +77,29 @@ class NoInputWarning(RuntimeWarning):
     pass
 
 
+class SocketSerial(socket.socket):
+    """SocketSerial -- provides the identical api to serial.Serial()
+    you can use it as a drop in replacement for serial.Serial, for pushing firmata stream over the
+    network."""
+    def __init__(self, host_port, name=None, timeout=None, **kw):
+        super().__init__()
+        (host, port) = host_port.split(':')
+        addr = socket.getaddrinfo(host, port)[0][-1]
+        self.connect(addr)
+        self.setblocking(False)
+        self.poll = select.poll()
+        self.poll.register(self, select.POLLIN)
+
+    def inWaiting(self):
+        return self.poll.poll(0)
+
+    def read(self):
+        return self.recv(1)
+
+    def write(self, buf):
+        self.send(buf)
+
+
 class Board(object):
     """The Base class for any board."""
     firmata_version = None
@@ -86,7 +111,10 @@ class Board(object):
     _parsing_sysex = False
 
     def __init__(self, port, layout=None, baudrate=57600, name=None, timeout=None):
-        self.sp = serial.Serial(port, baudrate, timeout=timeout)
+        if ':' in port:
+            self.sp = SocketSerial(port, name=name, timeout=timeout)
+        else:
+            self.sp = serial.Serial(port, baudrate, timeout=timeout)
         # Allow 5 secs for Arduino's auto-reset to happen
         # Alas, Firmata blinks its version before printing it to serial
         # For 2.3, even 5 seconds might not be enough.
