@@ -193,6 +193,40 @@ class Board(object):
         func = add_meta(func)
         self._command_handlers[cmd] = func
 
+    def release_pin(self, pin_def):
+        """
+        Releases an activated pin given by the pin definition.
+        May raise an ``InvalidPinDefError``.
+
+        :arg pin_def: Pin definition as described below,
+            but without the arduino name. So for example ``a:1:i``.
+
+        'a' analog pin     Pin number   'i' for input
+        'd' digital pin    Pin number   'o' for output
+                                        'p' for pwm (Pulse-width modulation)
+
+        All seperated by ``:``.
+        """
+        if type(pin_def) == list:
+            bits = pin_def
+        else:
+            bits = pin_def.split(':')
+        a_d = bits[0] == 'a' and 'analog' or 'digital'
+        part = getattr(self, a_d)
+        pin_nr = int(bits[1])
+        if pin_nr >= len(part):
+            raise InvalidPinDefError('Invalid pin definition: {0} at position 3 on {1}'
+                                     .format(pin_def, self.name))
+        if getattr(part[pin_nr], 'mode', None) == UNAVAILABLE:
+            raise InvalidPinDefError('Invalid pin definition: '
+                                     'UNAVAILABLE pin {0} at position on {1}'
+                                     .format(pin_def, self.name))
+        if self.taken[a_d][pin_nr] is False:
+            raise PinAlreadyTakenError('{0} pin {1} is not in use on {2}'
+                                       .format(a_d, bits[1], self.name))
+        # ok, should be available
+        self.taken[a_d][pin_nr] = False
+        
     def get_pin(self, pin_def):
         """
         Returns the activated pin given by the pin definition.
