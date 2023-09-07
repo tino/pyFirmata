@@ -59,3 +59,27 @@ class ArduinoNano(Board):
 
     def __str__(self):
         return "Arduino Nano {0.name} on {0.sp.port}".format(self)
+
+class ArduinoMicro(Board):
+    """
+    A board that will set itself up as an Arduino Due.
+    """
+    def __init__(self, *args, **kwargs):
+        args = list(args)
+        args.append(BOARDS['arduino_micro'])
+        super(ArduinoMicro, self).__init__(*args, **kwargs)
+
+    def __str__(self):
+        return "Arduino Micro {0.name} on {0.sp.port}".format(self)
+
+class ArduinoLeonardo(Board):
+    """
+    A board that will set itself up as an Arduino Due.
+    """
+    def __init__(self, *args, **kwargs):
+        args = list(args)
+        args.append(BOARDS['arduino_leonardo'])
+        super(ArduinoLeonardo, self).__init__(*args, **kwargs)
+
+    def __str__(self):
+        return "Arduino Leonardo {0.name} on {0.sp.port}".format(self)
