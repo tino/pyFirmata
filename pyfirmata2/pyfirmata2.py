@@ -230,7 +230,7 @@ class Board(object):
 
     def add_cmd_handler(self, cmd, func):
         """Adds a command handler for a command."""
-        len_args = len(inspect.getargspec(func)[0])
+        len_args = len(inspect.getfullargspec(func)[0])
 
         def add_meta(f):
             def decorator(*args, **kwargs):
