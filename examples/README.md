@@ -8,3 +8,5 @@
   - Flashing LED using a timer
   - PWM
   - Servo
+
+There is also a scanner for COM ports.

@@ -1,7 +1,7 @@
 import serial
 import serial.tools.list_ports
 
+print("Serial devices available:")
 l = serial.tools.list_ports.comports()
-print(l)
 for ll in l:
-    print(ll.description)
+    print(ll.device, ll.description)
