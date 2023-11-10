@@ -4,19 +4,16 @@
 
 PyFirmata2 turns your Arduino into an analogue to digital data acquistion
 card controlled by Python.
-
-Up to 1kHz precise sampling at the analogue ports for digital filtering.
-
 Just upload the default firmata sketch into your Arduino and you are all set.
 
 ## Inputs
- - All analogue inputs of the arduino measuring volt
- - All digital inputs reacting to digital transitions
+ - Analogue, measuring volt. Up to 1kHz precise sampling.
+ - Digital, reacting to digital state changes.
 
 ## Outputs
  - Digital out
  - PWM
- - Sero control
+ - Servo control
 
 No loops and "sleep" commands: pyFirmata2 is an updated version of
 pyFirmata which *replaces loops with callbacks*. Instead of unreliable
