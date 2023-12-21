@@ -106,6 +106,7 @@ interval is 1ms:
 ```
 board.samplingOn(samplinginterval in ms)
 ```
+Note that the sampling interval is an *integer* number.
 Calling `samplingOn()` without its argument sets the sampling interval
 to 19ms.
 
