@@ -386,8 +386,12 @@ class Board(object):
 
     def exit(self):
         """Call this to exit cleanly."""
-        # First detach all servo's, otherwise it somehow doesn't want to close...
+        for a in self.analog:
+            a.disable_reporting()
+        for d in self.digital:
+            d.disable_reporting()
         self.samplingOff()
+        # First detach all servo's, otherwise it somehow doesn't want to close...
         if hasattr(self, 'digital'):
             for pin in self.digital:
                 if pin.mode == SERVO:
@@ -472,6 +476,8 @@ class Port(object):
 
     def disable_reporting(self):
         """Disable the reporting of the port."""
+        if not self.reporting:
+            return
         self.reporting = False
         msg = bytearray([REPORT_DIGITAL + self.port_number, 0])
         self.board.sp.write(msg)
@@ -564,6 +570,8 @@ class Pin(object):
     def disable_reporting(self):
         """Disable the reporting of an input pin."""
         if self.type == ANALOG:
+            if not self.reporting:
+                return
             self.reporting = False
             msg = bytearray([REPORT_ANALOG + self.pin_number, 0])
             self.board.sp.write(msg)

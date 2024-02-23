@@ -33,7 +33,6 @@ class AnalogPrinter:
         self.timestamp += (1 / self.samplingRate)
 
     def stop(self):
-        self.board.samplingOff()
         self.board.exit()
 
 print("Let's print data from Arduino's analogue pins for 10secs.")
