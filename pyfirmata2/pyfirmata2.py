@@ -285,10 +285,12 @@ class Board(object):
                 pin.mode = SERVO
             elif bits[2] == 'u':
                 pin.mode = INPUT_PULLUP
-            elif bits[2] != 'o':
+            elif bits[2] == 'i':
                 pin.mode = INPUT
             elif bits[2] == 'o':
                 pin.mode = OUTPUT
+            else:
+                pin.mode = INPUT
         else:
             pin.enable_reporting()
         return pin
